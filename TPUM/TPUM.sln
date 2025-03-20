@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUM", "TPUM\TPUM.csproj", "{4A2475A6-FF8E-4FED-8811-FCD980046647}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUM.Tests", "TPUM.Tests\TPUM.Tests.csproj", "{DDB5260C-97FC-4440-825B-70E4AE70BBC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A2475A6-FF8E-4FED-8811-FCD980046647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A2475A6-FF8E-4FED-8811-FCD980046647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A2475A6-FF8E-4FED-8811-FCD980046647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A2475A6-FF8E-4FED-8811-FCD980046647}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDB5260C-97FC-4440-825B-70E4AE70BBC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDB5260C-97FC-4440-825B-70E4AE70BBC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDB5260C-97FC-4440-825B-70E4AE70BBC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDB5260C-97FC-4440-825B-70E4AE70BBC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9A1DAD2A-A301-4BCF-A33E-8149896DC65A}
+	EndGlobalSection
+EndGlobal
