@@ -1,4 +1,4 @@
-﻿namespace TPUM.Tests
+﻿namespace Data.Tests
 {
     [TestClass]
     public sealed class Test1

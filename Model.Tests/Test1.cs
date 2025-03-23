@@ -1,4 +1,4 @@
-﻿namespace TPUM.Tests
+﻿namespace Model.Tests
 {
     [TestClass]
     public sealed class Test1
