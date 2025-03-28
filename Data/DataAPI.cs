@@ -1,8 +1,9 @@
 ﻿namespace TPUM.Data
 {
-    public abstract class DataAPIBase {
-        public abstract Heater CreateHeater(Position position, float temperature);
-        public abstract HeatSensor CreateHeatSensor(Position position);
+    public abstract class DataAPIBase : IDisposable {
+        public abstract IHeater CreateHeater(Position position, float temperature);
+        public abstract IHeatSensor CreateHeatSensor(Position position);
+        public abstract void Dispose();
 
         public static DataAPIBase GetAPI()
         {
@@ -10,16 +11,21 @@
         }
     }
 
-    public class DataAPI : DataAPIBase
+    internal class DataAPI : DataAPIBase
     {
-        public override Heater CreateHeater(Position position, float temperature)
+        public override IHeater CreateHeater(Position position, float temperature)
         {
             return new Heater(position, temperature);
         }
 
-        public override HeatSensor CreateHeatSensor(Position position)
+        public override IHeatSensor CreateHeatSensor(Position position)
         {
             return new HeatSensor(position);
+        }
+
+        public override void Dispose()
+        {
+            GC.SuppressFinalize(this);
         }
     }
 }

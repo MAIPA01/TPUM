@@ -1,6 +1,6 @@
 ﻿namespace TPUM.Data
 {
-    public class Heater(Position position, float temperature) : IHeater
+    internal class Heater(Position position, float temperature) : IHeater
     {
         private readonly List<IObserver<IHeater>> _observers = [];
 
