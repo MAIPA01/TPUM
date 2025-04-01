@@ -1,29 +1,64 @@
 ﻿namespace TPUM.Data
 {
-    public class Position(float x, float y) : IDisposable
+    internal class Position(float x, float y) : IPosition
     {
-        public float X { get; set; } = x;
-        public float Y { get; set; } = y;
-
-        public static float Distance(Position pos1, Position pos2)
+        private float _x = x;
+        public float X
         {
-            return MathF.Sqrt(pos1.X * pos2.X + pos1.Y * pos2.Y);
+            get => _x; 
+            set 
+            {
+                if (_x == value) return;
+                lock (_xLock)
+                {
+                    Position lastPosition = new(_x, _y);
+                    _x = value;
+                    OnPositionChanged(this, lastPosition);
+                }
+            } 
         }
 
-        public static bool operator==(Position pos1, Position pos2)
+        private float _y = y;
+        public float Y
         {
-            return pos1.X == pos2.X && pos1.Y == pos2.Y;
+            get => _y;
+            set
+            {
+                
+                if (_y == value) return;
+                lock (_yLock)
+                {
+                    Position lastPosition = new(_x, _y);
+                    _y = value;
+                    OnPositionChanged(this, lastPosition);
+                }
+            }
         }
 
-        public static bool operator!=(Position pos1, Position pos2)
+        public event PositionChangedEventHandler? PositionChanged;
+
+        private readonly object _xLock = new();
+        private readonly object _yLock = new();
+
+        public static float Distance(IPosition pos1, IPosition pos2)
         {
-            return pos1.X != pos2.X || pos1.Y != pos2.Y;
+            return MathF.Sqrt((pos1.X - pos2.X) * (pos1.X - pos2.X) + (pos1.Y - pos2.Y) * (pos1.Y - pos2.Y));
+        }
+
+        public static bool operator==(Position pos1, IPosition pos2)
+        {
+            return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;
+        }
+
+        public static bool operator!=(Position pos1, IPosition pos2)
+        {
+            return Math.Abs(pos1.X - pos2.X) > 1e-10f || Math.Abs(pos1.Y - pos2.Y) > 1e-10f;
         }
 
         public override bool Equals(object? obj)
         {
-            if (obj is not Position) return false;
-            return this == (Position)obj;
+            if (obj is not IPosition position) return false;
+            return this == position;
         }
 
         public override int GetHashCode()
@@ -34,6 +69,11 @@
         public void Dispose() 
         {
             GC.SuppressFinalize(this);
+        }
+
+        private void OnPositionChanged(object source, Position lastPosition)
+        {
+            PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, this));
         }
     }
 }

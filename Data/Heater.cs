@@ -1,83 +1,104 @@
 ﻿namespace TPUM.Data
 {
-    internal class Heater(Position position, float temperature) : IHeater
+    internal class Heater : IHeater
     {
-        private readonly List<IObserver<IHeater>> _observers = [];
+        public long Id { get; }
 
         private bool _isOn = false;
-
-        private Position _position = position;
-        public Position Position {
-            get
+        public bool IsOn {
+            get => _isOn; 
+            private set
             {
-                return _position;
-            }
-            set
-            {
-                if (_position != value)
+                if (_isOn == value) return;
+                lock (_isOnLock)
                 {
-                    _position = value;
-                    Notify();
-                }
-            }
-        }
-        private float _temperature = temperature;
-        public float Temperature { 
-            get
-            {
-                return _isOn ? _temperature : 0f;
-            }
-            set
-            {
-                if (_temperature != value)
-                {
-                    _temperature = value;
-                    Notify();
+                    _isOn = value;
+                    OnEnableChange(this, !_isOn);
                 }
             }
         }
 
-        public bool IsOn()
+        public Position _position;
+        public Position Position
         {
-            return _isOn;
+            get => _position;
+            set
+            {
+                if (_position == value) return;
+                lock (_positionLock)
+                {
+                    Position lastPosition = _position;
+                    _position.PositionChanged -= GetPositionChanged;
+                    _position = value;
+                    _position.PositionChanged += GetPositionChanged;
+                }
+            }
+        }
+
+        private float _temperature;
+        public float Temperature
+        {
+            get => IsOn ? _temperature : 0f;
+            set
+            {
+                if (Math.Abs(_temperature - value) < 1e-10f) return;
+                lock (_temperatureLock)
+                {
+                    float lastTemperature = _temperature;
+                    _temperature = value;
+                    OnTemperatureChanged(this, lastTemperature);
+                }
+            }
+        }
+
+        public event EnableChangeEventHandler? EnableChange;
+        public event PositionChangedEventHandler? PositionChanged;
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+
+        private readonly object _isOnLock = new();
+        private readonly object _positionLock = new();
+        private readonly object _temperatureLock = new();
+
+        Position IHeater.Position { get => Position; set => throw new NotImplementedException(); }
+
+        public Heater(long id, float x, float y, float temperature)
+        {
+            Id = id;
+            _position = new(x, y);
+            _position.PositionChanged += GetPositionChanged;
+            _temperature = temperature;
+        }
+
+        private void GetPositionChanged(object source, PositionChangedEventArgs e)
+        {
+            PositionChanged?.Invoke(this, e);
         }
 
         public void TurnOff()
         {
-            _isOn = false;
-            Notify();
+            IsOn = false;
         }
 
         public void TurnOn()
         {
-            _isOn = true;
-            Notify();
-        }
-
-        public IDisposable Subscribe(IObserver<IHeater> observer)
-        {
-            if (!_observers.Contains(observer))
-            {
-                _observers.Add(observer);
-            }
-            return this;
-        }
-
-        private void Notify()
-        {
-            foreach (var observer in _observers)
-            {
-                observer.OnNext(this);
-            }
+            IsOn = true;
         }
 
         public void Dispose()
         {
-            foreach (var observer in _observers)
-            {
-                observer.OnCompleted();
-            }
-            Position.Dispose();
+            _position.PositionChanged -= GetPositionChanged;
+            _position.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void OnEnableChange(object source, bool lastEnable)
+        {
+            EnableChange?.Invoke(source, new EnableChangeEventArgs(lastEnable, _isOn));
+        }
+
+        private void OnTemperatureChanged(object source, float lastTemperature)
+        {
+            TemperatureChanged?.Invoke(source, new TemperatureChangedEventArgs(lastTemperature, _temperature));
         }
     }
 }

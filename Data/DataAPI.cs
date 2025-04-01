@@ -1,26 +1,26 @@
 ﻿namespace TPUM.Data
 {
-    public abstract class DataAPIBase : IDisposable {
-        public abstract IHeater CreateHeater(Position position, float temperature);
-        public abstract IHeatSensor CreateHeatSensor(Position position);
+    public abstract class DataApiBase : IDisposable {
+        public abstract IHeater CreateHeater(float x, float y, float temperature);
+        public abstract IHeatSensor CreateHeatSensor(float x, float y);
         public abstract void Dispose();
 
-        public static DataAPIBase GetAPI()
+        public static DataApiBase GetApi()
         {
-            return new DataAPI();
+            return new DataApi();
         }
     }
 
-    internal class DataAPI : DataAPIBase
+    internal class DataApi : DataApiBase
     {
-        public override IHeater CreateHeater(Position position, float temperature)
+        public override IHeater CreateHeater(float x, float y, float temperature)
         {
-            return new Heater(position, temperature);
+            return new Heater(new Random().NextInt64(), x, y, temperature);
         }
 
-        public override IHeatSensor CreateHeatSensor(Position position)
+        public override IHeatSensor CreateHeatSensor(float x, float y)
         {
-            return new HeatSensor(position);
+            return new HeatSensor(new Random().NextInt64(), x, y);
         }
 
         public override void Dispose()
