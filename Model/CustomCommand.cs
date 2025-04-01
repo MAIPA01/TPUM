@@ -1,30 +1,27 @@
-
+using System.ComponentModel;
 using System.Windows.Input;
 
-namespace Model
+namespace TPUM.Presentation.Model
 {
-    public class CustomCommand : ICommand
+    public class CustomCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
     {
         public event EventHandler? CanExecuteChanged;
 
-        private Action<object?> _Execute { get; set; }
-
-        private Predicate<object?> _CanExecute { get; set; }
-
-        public CustomCommand(Action<object?> execute, Predicate<object?> canExecute)
-        {
-            _Execute = execute;
-            _CanExecute = canExecute;
-        }
+        public CustomCommand(Action<object?> execute) : this(execute, _ => true) { }
 
         public bool CanExecute(object? parameter)
         {
-            return _CanExecute(parameter);
+            return canExecute(parameter);
         }
 
         public void Execute(object? parameter)
         {
-            _Execute(parameter);
+            execute(parameter);
+        }
+
+        public void OnCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
