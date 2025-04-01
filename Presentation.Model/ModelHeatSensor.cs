@@ -8,10 +8,10 @@ namespace TPUM.Presentation.Model
 {
     internal class ModelHeatSensor : IModelHeatSensor
     {
-        private IHeatSensor _sensor;
+        private readonly IHeatSensor _sensor;
 
         public long Id => _sensor.Id;
-        public Position Position
+        public IPosition Position
         {
             get => _sensor.Position;
             set => _sensor.Position = value;

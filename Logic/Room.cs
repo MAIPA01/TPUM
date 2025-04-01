@@ -57,18 +57,20 @@ namespace TPUM.Logic
 
         public float GetTemperatureAtPosition(float x, float y)
         {
-            if (x >= Width || x < 0f || y >= Height || y < 0f) return 0f;
+            if (x > Width || x < 0f || y > Height || y < 0f) return 0f;
 
-            var pos = new Position(x, y);
+            var pos = _data.CreatePosition(x, y);
             return HeatSensors.Count <= 0 ? 0f : 
                 HeatSensors.Average(sensor => sensor.Temperature / 
-                                              (Position.Distance(pos, sensor.Position) + 1));
+                                              (IPosition.Distance(pos, sensor.Position) + 1));
         }
 
         public IHeater AddHeater(float x, float y, float temperature)
         {
-            if (x >= Width || x < 0f || y >= Height || y < 0f) 
-                throw new ArgumentOutOfRangeException("position was out of Room Bounds");
+            if (x > Width || x < 0f) 
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (y > Height || y < 0f)
+                throw new ArgumentOutOfRangeException(nameof(y));
 
             var heater = _data.CreateHeater(x, y, temperature);
             heater.TemperatureChanged += GetTemperatureChanged;
@@ -101,8 +103,10 @@ namespace TPUM.Logic
 
         public IHeatSensor AddHeatSensor(float x, float y)
         {
-            if (x >= Width || x < 0f || y >= Height || y < 0f)
-                throw new ArgumentOutOfRangeException("position was out of Room Bounds");
+            if (x > Width || x < 0f)
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (y > Height || y < 0f)
+                throw new ArgumentOutOfRangeException(nameof(y));
 
             var sensor = _data.CreateHeatSensor(x, y);
             sensor.TemperatureChanged += GetTemperatureChanged;
@@ -165,7 +169,7 @@ namespace TPUM.Logic
                 foreach (var heatSensor in _heatSensors)
                 {
                     heatSensor.Temperature += temperatureDiff / 
-                                              Position.Distance(heatSensor.Position, heater.Position);
+                                              IPosition.Distance(heatSensor.Position, heater.Position);
                 }
             }
         }

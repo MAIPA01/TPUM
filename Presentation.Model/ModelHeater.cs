@@ -15,7 +15,7 @@ namespace TPUM.Presentation.Model
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public long Id => _heater.Id;
-        public Position Position
+        public IPosition Position
         {
             get => _heater.Position;
             set => _heater.Position = value;

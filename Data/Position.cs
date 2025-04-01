@@ -40,11 +40,6 @@
         private readonly object _xLock = new();
         private readonly object _yLock = new();
 
-        public static float Distance(IPosition pos1, IPosition pos2)
-        {
-            return MathF.Sqrt((pos1.X - pos2.X) * (pos1.X - pos2.X) + (pos1.Y - pos2.Y) * (pos1.Y - pos2.Y));
-        }
-
         public static bool operator==(Position pos1, IPosition pos2)
         {
             return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;

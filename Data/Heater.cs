@@ -18,16 +18,16 @@
             }
         }
 
-        public Position _position;
-        public Position Position
+        private IPosition _position;
+        public IPosition Position
         {
             get => _position;
             set
             {
-                if (_position == value) return;
+                if (Equals(_position, value)) return;
                 lock (_positionLock)
                 {
-                    Position lastPosition = _position;
+                    var lastPosition = _position;
                     _position.PositionChanged -= GetPositionChanged;
                     _position = value;
                     _position.PositionChanged += GetPositionChanged;
@@ -44,7 +44,7 @@
                 if (Math.Abs(_temperature - value) < 1e-10f) return;
                 lock (_temperatureLock)
                 {
-                    float lastTemperature = _temperature;
+                    var lastTemperature = _temperature;
                     _temperature = value;
                     OnTemperatureChanged(this, lastTemperature);
                 }
@@ -59,12 +59,10 @@
         private readonly object _positionLock = new();
         private readonly object _temperatureLock = new();
 
-        Position IHeater.Position { get => Position; set => throw new NotImplementedException(); }
-
         public Heater(long id, float x, float y, float temperature)
         {
             Id = id;
-            _position = new(x, y);
+            _position = new Position(x, y);
             _position.PositionChanged += GetPositionChanged;
             _temperature = temperature;
         }

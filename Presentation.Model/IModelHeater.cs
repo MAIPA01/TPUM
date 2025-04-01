@@ -7,7 +7,7 @@ namespace TPUM.Presentation.Model
     public interface IModelHeater : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, INotifyPropertyChanged, IDisposable
     {
         long Id { get; }
-        Position Position { get; set; }
+        IPosition Position { get; set; }
         float Temperature { get; set; }
         bool IsOn { get; }
 

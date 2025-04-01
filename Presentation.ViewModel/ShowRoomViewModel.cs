@@ -16,11 +16,11 @@ namespace TPUM.Presentation.ViewModel
     {
         public IModelRoom? CurrentRoom => ViewModelData.CurrentRoom;
 
-        public string RoomName => CurrentRoom != null ? CurrentRoom.Name : "";
+        public string RoomName => CurrentRoom?.Name ?? "";
 
-        public float RoomWidth => CurrentRoom != null ? CurrentRoom.Width : 0f;
+        public float RoomWidth => CurrentRoom?.Width ?? 0f;
 
-        public float RoomHeight => CurrentRoom != null ? CurrentRoom.Height : 0f;
+        public float RoomHeight => CurrentRoom?.Height ?? 0f;
 
         public int RoomTemp => CurrentRoom != null ? (int)CurrentRoom.AvgTemperature : 0;
 
@@ -61,15 +61,15 @@ namespace TPUM.Presentation.ViewModel
             OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private void GetEnableChange(object source,  EnableChangeEventArgs args)
+        private static void GetEnableChange(object source,  EnableChangeEventArgs args)
         {
         }
 
-        private void GetPositionChange(object source, PositionChangedEventArgs args)
+        private static void GetPositionChange(object source, PositionChangedEventArgs args)
         {
         }
 
-        private void NotImplemented(object? parameter)
+        private static void NotImplemented(object? parameter)
         {
             MessageBox.Show("Not Implemented");
         }
@@ -102,13 +102,13 @@ namespace TPUM.Presentation.ViewModel
             }
         }
 
-        private void AddHeater(object? parameter)
+        private static void AddHeater(object? parameter)
         {
             if (parameter == null) return;
             ViewModelData.OpenSubWindow((Type)parameter);
         }
 
-        private void AddHeatSensor(object? parameter)
+        private static void AddHeatSensor(object? parameter)
         {
             if (parameter == null) return;
             ViewModelData.OpenSubWindow((Type)parameter);

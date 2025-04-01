@@ -4,16 +4,16 @@
     {
         public long Id { get; }
 
-        private Position _position;
-        public Position Position
+        private IPosition _position;
+        public IPosition Position
         {
             get => _position;
             set
             {
-                if (_position == value) return;
+                if (Equals(_position, value)) return;
                 lock (_positionLock)
                 {
-                    Position lastPosition = _position;
+                    var lastPosition = _position;
                     _position.PositionChanged -= GetPositionChanged;
                     _position = value;
                     _position.PositionChanged += GetPositionChanged;
@@ -31,7 +31,7 @@
                 if (Math.Abs(_temperature - value) < 1e-10f) return;
                 lock (_temperatureLock)
                 {
-                    float lastTemperature = _temperature;
+                    var lastTemperature = _temperature;
                     _temperature = value;
                     OnTemperatureChanged(this, lastTemperature);
                 }
@@ -47,7 +47,7 @@
         public HeatSensor(long id, float x, float y)
         {
             Id = id;
-            _position = new(x, y);
+            _position = new Position(x, y);
             _position.PositionChanged += GetPositionChanged;
         }
 
@@ -68,7 +68,7 @@
             return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode(); 
         }
 
-        private void OnPositionChanged(object source, Position lastPosition)
+        private void OnPositionChanged(object source, IPosition lastPosition)
         {
             PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, _position));
         }

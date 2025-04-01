@@ -7,7 +7,7 @@ namespace TPUM.Presentation.Model
     public interface IModelHeatSensor : INotifyPositionChanged, INotifyTemperatureChanged, INotifyPropertyChanged, IDisposable
     {
         long Id { get; }
-        Position Position { get; set; }
+        IPosition Position { get; set; }
         float Temperature { get; }
     }
 }

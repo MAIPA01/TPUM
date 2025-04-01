@@ -30,10 +30,10 @@ namespace TPUM.Presentation.View.Controls
         }
 
         public static readonly DependencyProperty PositionProperty =
-            DependencyProperty.Register(nameof(Position), typeof(Position), typeof(HeaterInfo));
-        public Position Position
+            DependencyProperty.Register(nameof(Position), typeof(IPosition), typeof(HeaterInfo));
+        public IPosition Position
         {
-            get => (Position)GetValue(PositionProperty);
+            get => (IPosition)GetValue(PositionProperty);
             set => SetValue(PositionProperty, value);
         }
 
