@@ -4,7 +4,7 @@
     {
         long Id { get; }
         bool IsOn { get; }
-        Position Position { get; set; }
+        IPosition Position { get; set; }
         float Temperature { get; set; }
         void TurnOn();
         void TurnOff();

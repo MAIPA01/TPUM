@@ -1,136 +1,201 @@
-﻿using TPUM.Data;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using TPUM.Data;
+using ThreadState = System.Threading.ThreadState;
 
 namespace TPUM.Logic
 {
-    public class Room(float width, float height, DataAPIBase? data) : IRoom
+    internal class Room : IRoom
     {
-        private DataAPIBase _data = data ?? DataAPIBase.GetAPI();
-        public List<IObserver<IRoom>> _observers = [];
-        public List<IHeater> Heaters { get; private set; } = [];
-        public List<IHeatSensor> HeatSensors { get; private set; } = [];
+        private readonly DataApiBase _data;
 
-        public float Width { get; private set; } = width;
-        public float Height { get; private set; } = height;
+        private readonly List<IHeater> _heaters = [];
+        public ReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
 
-        public float GetAvgTemperature()
+        private readonly List<IHeatSensor> _heatSensors = [];
+        public ReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
+
+        public long Id { get; }
+        public float Width { get; }
+        public float Height { get; }
+        public float AvgTemperature => HeatSensors.Count == 0 ? 0f : HeatSensors.Average(heatSensor => heatSensor.Temperature);
+
+        private readonly Thread _thread;
+        private bool _endThread;
+
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+        public event EnableChangeEventHandler? EnableChange;
+        public event PositionChangedEventHandler? PositionChanged;
+
+        public Room(long id, float width, float height, DataApiBase? data)
         {
-            float avg = 0f;
-            if (HeatSensors.Count > 0)
+            Id = id;
+            _data = data ?? DataApiBase.GetApi();
+            Width = width;
+            Height = height;
+            _thread = new Thread(ThreadMethod)
             {
-                foreach (var heatSensor in HeatSensors)
+                IsBackground = true
+            };
+            _endThread = false;
+        }
+
+        private void GetTemperatureChanged(object source, TemperatureChangedEventArgs args)
+        {
+            TemperatureChanged?.Invoke(source, args);
+        }
+
+        private void GetPositionChanged(object source, PositionChangedEventArgs args)
+        {
+            PositionChanged?.Invoke(source, args);
+        }
+
+        private void GetEnableChanged(object source, EnableChangeEventArgs args)
+        {
+            EnableChange?.Invoke(source, args);
+        }
+
+        public float GetTemperatureAtPosition(float x, float y)
+        {
+            if (x >= Width || x < 0f || y >= Height || y < 0f) return 0f;
+
+            var pos = new Position(x, y);
+            return HeatSensors.Count <= 0 ? 0f : 
+                HeatSensors.Average(sensor => sensor.Temperature / 
+                                              (Position.Distance(pos, sensor.Position) + 1));
+        }
+
+        public IHeater AddHeater(float x, float y, float temperature)
+        {
+            if (x >= Width || x < 0f || y >= Height || y < 0f) 
+                throw new ArgumentOutOfRangeException("position was out of Room Bounds");
+
+            var heater = _data.CreateHeater(x, y, temperature);
+            heater.TemperatureChanged += GetTemperatureChanged;
+            heater.PositionChanged += GetPositionChanged;
+            heater.EnableChange += GetEnableChanged;
+            _heaters.Add(heater);
+            return heater;
+        }
+
+        public void RemoveHeater(long id)
+        {
+            var heater = _heaters.Find(heater => heater.Id == id);
+            if (heater == null) return;
+            heater.TemperatureChanged -= GetTemperatureChanged;
+            heater.PositionChanged -= GetPositionChanged;
+            heater.EnableChange -= GetEnableChanged;
+            _heaters.Remove(heater);
+        }
+
+        public void ClearHeaters()
+        {
+            foreach (var heater in _heaters)
+            {
+                heater.TemperatureChanged -= GetTemperatureChanged;
+                heater.PositionChanged -= GetPositionChanged;
+                heater.EnableChange -= GetEnableChanged;
+            }
+            _heaters.Clear();
+        }
+
+        public IHeatSensor AddHeatSensor(float x, float y)
+        {
+            if (x >= Width || x < 0f || y >= Height || y < 0f)
+                throw new ArgumentOutOfRangeException("position was out of Room Bounds");
+
+            var sensor = _data.CreateHeatSensor(x, y);
+            sensor.TemperatureChanged += GetTemperatureChanged;
+            sensor.PositionChanged += GetPositionChanged;
+            sensor.Temperature = GetTemperatureAtPosition(sensor.Position.X, sensor.Position.Y);
+            _heatSensors.Add(sensor);
+            return sensor;
+        }
+
+        public void RemoveHeatSensor(long id)
+        {
+            var sensor = _heatSensors.Find(sensor => sensor.Id == id);
+            if (sensor == null) return;
+            sensor.TemperatureChanged -= GetTemperatureChanged;
+            sensor.PositionChanged -= GetPositionChanged;
+            _heatSensors.Remove(sensor);
+        }
+
+        public void ClearHeatSensors()
+        {
+            foreach (var sensor in _heatSensors)
+            {
+                sensor.TemperatureChanged -= GetTemperatureChanged;
+                sensor.PositionChanged -= GetPositionChanged;
+            }
+            _heatSensors.Clear();
+        }
+
+        public void StartSimulation()
+        {
+            if ((_thread.ThreadState & ThreadState.Background) == ThreadState.Background &&
+                (_thread.ThreadState & ThreadState.Unstarted) == ThreadState.Unstarted)
+            {
+                _thread.Start();
+            }
+        }
+
+        private void ThreadMethod()
+        {
+            Stopwatch stopwatch = new();
+            stopwatch.Start();
+            while (!_endThread)
+            {
+                UpdateTemperature((float)stopwatch.Elapsed.TotalSeconds);
+                stopwatch.Restart();
+                Thread.Sleep(5);
+            }
+        }
+
+        private void UpdateTemperature(float deltaTime)
+        {
+            var avgTemperature = AvgTemperature;
+            foreach (var heater in _heaters)
+            {
+                if (!heater.IsOn) continue;
+
+                var temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
+                if (temperatureDiff <= 0f) continue;
+
+                foreach (var heatSensor in _heatSensors)
                 {
-                    avg += heatSensor.Temperature;
-                }
-                avg /= HeatSensors.Count;
-            }
-            return avg;
-        }
-
-        public float GetTemperatureAtPosition(Position pos)
-        {
-            float temp = 0f;
-
-            if (HeatSensors.Count > 0)
-            {
-                foreach (var sensor in HeatSensors)
-                {
-                    temp += sensor.Temperature / (Position.Distance(pos, sensor.Position) + 1);
-                }
-                temp /= HeatSensors.Count;
-            }
-
-            return temp;
-        }
-
-        public void AddHeater(Position pos, float temperature)
-        {
-            IHeater heater = _data.CreateHeater(pos, temperature);
-            Heaters.Add(heater);
-            heater.Subscribe(this);
-            Notify();
-        }
-
-        public void AddHeatSensor(Position pos)
-        {
-            IHeatSensor sensor = _data.CreateHeatSensor(pos);
-            HeatSensors.Add(sensor);
-            sensor.Temperature = GetTemperatureAtPosition(sensor.Position);
-            sensor.Subscribe(this);
-            Notify();
-        }
-
-        public void UpdateTemperature(float deltaTime)
-        {
-            float avgTemperature = GetAvgTemperature();
-            foreach (var heatSensor in HeatSensors)
-            {
-                foreach (var heater in Heaters)
-                {
-                    if (heater.IsOn())
-                    {
-                        float temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
-                        temperatureDiff = temperatureDiff < 0f ? 0f : temperatureDiff;
-
-                        heatSensor.Temperature += temperatureDiff / Position.Distance(heatSensor.Position, heater.Position);
-                    }
+                    heatSensor.Temperature += temperatureDiff / 
+                                              Position.Distance(heatSensor.Position, heater.Position);
                 }
             }
-
-            Notify();
         }
 
-        public IDisposable Subscribe(IObserver<IRoom> observer)
+        public void EndSimulation()
         {
-            _observers.Add(observer);
-            return this;
-        }
-
-        private void Notify()
-        {
-            foreach(var observer in _observers)
-            {
-                observer.OnNext(this);
-            }
+            if ((_thread.ThreadState & ThreadState.Background) != ThreadState.Background) return;
+            _endThread = true;
+            _thread.Join();
         }
 
         public void Dispose()
         {
-            foreach(var observer in _observers)
+            EndSimulation();
+            foreach (var heater in _heaters)
             {
-                observer.OnCompleted();
-            }
-            _observers.Clear();
-            foreach(var heater in Heaters)
-            {
+                heater.TemperatureChanged -= GetTemperatureChanged;
+                heater.PositionChanged -= GetPositionChanged;
+                heater.EnableChange -= GetEnableChanged;
                 heater.Dispose();
             }
-            Heaters.Clear();
-            foreach(var heatSensor in HeatSensors)
+            _heaters.Clear();
+            foreach (var heatSensor in _heatSensors)
             {
+                heatSensor.TemperatureChanged -= GetTemperatureChanged;
+                heatSensor.PositionChanged -= GetPositionChanged;
                 heatSensor.Dispose();
             }
-            HeatSensors.Clear();
+            _heatSensors.Clear();
             GC.SuppressFinalize(this);
-        }
-
-        public void OnCompleted() 
-        {
-            Notify();
-        }
-
-        public void OnError(Exception error)
-        {
-            throw error;
-        }
-
-        public void OnNext(IHeater value)
-        {
-            Notify();
-        }
-
-        public void OnNext(IHeatSensor value)
-        {
-            Notify();
         }
     }
 }

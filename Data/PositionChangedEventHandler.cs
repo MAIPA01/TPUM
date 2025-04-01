@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace TPUM.Data
 {
     public delegate void PositionChangedEventHandler(object source, PositionChangedEventArgs e); 
-    public class PositionChangedEventArgs(Position lastPosition, Position newPosition) : EventArgs
+    public class PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition) : EventArgs
     {
-        public Position LastPosition { get; private set; } = lastPosition;
-        public Position NewPosition { get; private set; } = newPosition;
+        public IPosition LastPosition { get; private set; } = lastPosition;
+        public IPosition NewPosition { get; private set; } = newPosition;
     }
 }

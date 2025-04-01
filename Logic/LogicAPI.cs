@@ -1,46 +1,57 @@
-﻿using TPUM.Data;
+﻿using System.Collections.ObjectModel;
+using TPUM.Data;
 
 namespace TPUM.Logic
 {
-    public abstract class LogicAPIBase : IDisposable
+    public abstract class LogicApiBase : IDisposable
     {
-        public abstract void AddRoom(float width, float height);
+        public abstract ReadOnlyCollection<IRoom> Rooms { get; }
 
-        public static LogicAPIBase GetAPI(DataAPIBase? data)
+        public abstract IRoom AddRoom(float width, float height);
+
+        public abstract void RemoveRoom(long id);
+
+        public static LogicApiBase GetApi(DataApiBase? data = null)
         {
-            return new LogicAPI(data ?? DataAPIBase.GetAPI());
+            return new LogicApi(data ?? DataApiBase.GetApi());
         }
 
         public abstract void Dispose();
     }
 
-    internal class LogicAPI(DataAPIBase? data) : LogicAPIBase
+    internal class LogicApi(DataApiBase data) : LogicApiBase
     {
-        private readonly DataAPIBase _data = data ?? DataAPIBase.GetAPI();
+        private readonly List<IRoom> _rooms = [];
+        public override ReadOnlyCollection<IRoom> Rooms => _rooms.AsReadOnly();
 
-        public List<IRoom> Rooms { get; private set; } = [];
-
-        public override void AddRoom(float width, float height)
+        public override IRoom AddRoom(float width, float height)
         {
-            Rooms.Add(new Room(width, height, _data));
+            var room = new Room(new Random().NextInt64(), width, height, data);
+            room.StartSimulation();
+            _rooms.Add(room);
+            return room;
         }
 
-        public void UpdateAllRoomsTemperature(float deltaTime)
+        public override void RemoveRoom(long id)
         {
-            foreach (var room in Rooms)
-            {
-                room.UpdateTemperature(deltaTime);
-            }
+            var room = _rooms.Find(room => room.Id == id);
+            if (room == null) return;
+            room.EndSimulation();
+            _rooms.Remove(room);
         }
 
         public override void Dispose()
         {
-            _data.Dispose();
-            foreach (var room in Rooms)
+            foreach (var room in _rooms)
+            {
+                room.EndSimulation();
+            }
+            data.Dispose();
+            foreach (var room in _rooms)
             {
                 room.Dispose();
             }
-            Rooms.Clear();
+            _rooms.Clear();
             GC.SuppressFinalize(this);
         }
     }

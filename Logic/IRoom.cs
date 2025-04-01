@@ -1,22 +1,34 @@
-﻿using TPUM.Data;
+﻿using System.Collections.ObjectModel;
+using TPUM.Data;
 
 namespace TPUM.Logic
 {
-    public interface IRoom : IObservable<IRoom>, IObserver<IHeater>, IObserver<IHeatSensor>, IDisposable
+    public interface IRoom : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
-        public List<IHeater> Heaters { get; }
-        public List<IHeatSensor> HeatSensors { get; }
-        public float Width { get; }
-        public float Height { get; }
+        long Id { get; }
+        ReadOnlyCollection<IHeater> Heaters { get; }
+        ReadOnlyCollection<IHeatSensor> HeatSensors { get; }
+        float Width { get; }
+        float Height { get; }
 
-        public float GetAvgTemperature();
+        float AvgTemperature { get; }
 
-        public float GetTemperatureAtPosition(Position pos);
+        float GetTemperatureAtPosition(float x, float y);
 
-        public void AddHeater(Position pos, float temperature);
+        IHeater AddHeater(float x, float y, float temperature);
 
-        public void AddHeatSensor(Position pos);
+        void RemoveHeater(long id);
 
-        public void UpdateTemperature(float deltaTime);
+        void ClearHeaters();
+
+        IHeatSensor AddHeatSensor(float x, float y);
+
+        void RemoveHeatSensor(long id);
+
+        void ClearHeatSensors();
+
+        void StartSimulation();
+
+        void EndSimulation();
     }
 }
