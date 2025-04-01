@@ -57,12 +57,20 @@ namespace TPUM.Logic
 
         public float GetTemperatureAtPosition(float x, float y)
         {
-            if (x > Width || x < 0f || y > Height || y < 0f) return 0f;
+            if (x > Width || x < 0f || y > Height || y < 0f || HeatSensors.Count == 0) return 0f;
 
             var pos = _data.CreatePosition(x, y);
-            return HeatSensors.Count <= 0 ? 0f : 
-                HeatSensors.Average(sensor => sensor.Temperature / 
-                                              (IPosition.Distance(pos, sensor.Position) + 1));
+
+            float tempSum = 0f;
+            float distSum = 0f;
+            foreach (var sensor in HeatSensors)
+            {
+                float dist = IPosition.Distance(pos, sensor.Position) + 1f;
+                tempSum += sensor.Temperature * dist;
+                distSum += dist;
+            }
+
+            return tempSum / distSum;
         }
 
         public IHeater AddHeater(float x, float y, float temperature)

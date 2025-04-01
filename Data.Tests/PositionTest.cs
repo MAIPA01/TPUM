@@ -1,106 +1,209 @@
-﻿namespace TPUM.Data.Tests
+﻿using System.Security.Cryptography;
+
+namespace TPUM.Data.Tests
 {
     [TestClass]
     public sealed class PositionTest
     {
-        [TestMethod]
-        public void TestGetX()
+        private Position _position;
+        private const float _x = 2f;
+        private const float _y = 2f;
+
+        [TestInitialize]
+        public void Setup()
         {
-            Position pos = new(2f, 2f);
-            Assert.AreEqual(2f, pos.X, 1e-10f);
+            _position = new(_x, _y);
         }
 
         [TestMethod]
-        public void TestSetX()
+        public void Position_ShouldInitialize_WithCorrectProperties()
         {
-            Position pos = new(2f, 2f);
-            pos.X = 3f;
-            Assert.AreEqual(3f, pos.X, 1e-10f);
+            Assert.AreEqual(_x, _position.X, 1e-10f);
+            Assert.AreEqual(_y, _position.Y, 1e-10f);
         }
 
         [TestMethod]
-        public void TestGetY()
+        public void XProperty_ShouldUpdateCorrectly()
         {
-            Position pos = new(2f, 2f);
-            Assert.AreEqual(2f, pos.Y, 1e-10f);
+            _position.X += 1f;
+            Assert.AreEqual(_x + 1f, _position.X, 1e-10f);
         }
 
         [TestMethod]
-        public void TestSetY()
+        public void YProperty_ShouldUpdateCorrectly()
         {
-            Position pos = new(2f, 2f);
-            pos.Y = 3f;
-            Assert.AreEqual(3f, pos.Y, 1e-10f);
+            _position.Y += 1f;
+            Assert.AreEqual(_y + 1f, _position.Y, 1e-10f);
         }
 
         [TestMethod]
-        public void TestDistance()
+        public void Distance_ShouldCalculateCorrectly()
         {
             Position pos1 = new(2f, 2f);
             Position pos2 = new(1f, 1f);
-            Assert.AreEqual(MathF.Sqrt(2f), Position.Distance(pos1, pos2), 1e-10f);
-            Assert.AreEqual(MathF.Sqrt(2f), Position.Distance(pos2, pos1), 1e-10f);
+            Assert.AreEqual(MathF.Sqrt(2f), IPosition.Distance(pos1, pos2), 1e-10f);
+            Assert.AreEqual(MathF.Sqrt(2f), IPosition.Distance(pos2, pos1), 1e-10f);
         }
 
         [TestMethod]
-        public void TestEqualOperator()
+        public void EqualOperator_ShouldReturnFalseForTwoPositionsWithDiffrentX()
         {
             Position pos1 = new(2f, 2f);
             Position pos2 = new(1f, 2f);
             Assert.IsFalse(pos1 == pos2);
             Assert.IsFalse(pos2 == pos1);
-
-            Position pos3 = new(2f, 1f);
-            Assert.IsFalse(pos1 == pos3);
-            Assert.IsFalse(pos3 == pos1);
-
-            Position pos4 = new(2f, 2f);
-            Assert.IsTrue(pos1 == pos4);
-            Assert.IsTrue(pos4 == pos1);
         }
 
         [TestMethod]
-        public void TestNotEqualOperator()
+        public void EqualOperator_ShouldReturnFalseForTwoPositionsWithDiffrentY()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 1f);
+            Assert.IsFalse(pos1 == pos2);
+            Assert.IsFalse(pos2 == pos1);
+        }
+
+        [TestMethod]
+        public void EqualOperator_ShouldReturnFalseForTwoDiffrentPositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(1f, 1f);
+            Assert.IsFalse(pos1 == pos2);
+            Assert.IsFalse(pos2 == pos1);
+        }
+
+        [TestMethod]
+        public void EqualOperator_ShouldReturnTrueForTwoSamePositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 2f);
+            Assert.IsTrue(pos1 == pos2);
+            Assert.IsTrue(pos2 == pos1);
+        }
+
+        [TestMethod]
+        public void EqualOperator_ShouldReturnTrueForTheSamePosition()
+        {
+            Assert.AreSame(_position, _position);
+            Assert.IsTrue(_position == _position);
+        }
+
+        [TestMethod]
+        public void NotEqualOperator_ShouldReturnTrueForTwoPositionsWithDiffrentX()
         {
             Position pos1 = new(2f, 2f);
             Position pos2 = new(1f, 2f);
             Assert.IsTrue(pos1 != pos2);
             Assert.IsTrue(pos2 != pos1);
-
-            Position pos3 = new(2f, 1f);
-            Assert.IsTrue(pos1 != pos3);
-            Assert.IsTrue(pos3 != pos1);
-
-            Position pos4 = new(2f, 2f);
-            Assert.IsFalse(pos1 != pos4);
-            Assert.IsFalse(pos4 != pos1);
         }
 
         [TestMethod]
-        public void TestEquals()
+        public void NotEqualOperator_ShouldReturnTrueForTwoPositionsWithDiffrentY()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 1f);
+            Assert.IsTrue(pos1 != pos2);
+            Assert.IsTrue(pos2 != pos1);
+        }
+
+        [TestMethod]
+        public void NotEqualOperator_ShouldReturnTrueForTwoDiffrentPositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(1f, 1f);
+            Assert.IsTrue(pos1 != pos2);
+            Assert.IsTrue(pos2 != pos1);
+        }
+
+        [TestMethod]
+        public void NotEqualOperator_ShouldReturnFalseForTwoSamePositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 2f);
+            Assert.IsFalse(pos1 != pos2);
+            Assert.IsFalse(pos2 != pos1);
+        }
+
+        [TestMethod]
+        public void NotEqualOperator_ShouldReturnFalseForTheSamePosition()
+        {
+            Assert.AreSame(_position, _position);
+            Assert.IsFalse(_position != _position);
+        }
+
+        [TestMethod]
+        public void EqualsMethod_ShouldReturnFalseForTwoPositionsWithDiffrentX()
         {
             Position pos1 = new(2f, 2f);
             Position pos2 = new(1f, 2f);
             Assert.IsFalse(pos1.Equals(pos2));
             Assert.IsFalse(pos2.Equals(pos1));
-
-            Position pos3 = new(2f, 1f);
-            Assert.IsFalse(pos1.Equals(pos3));
-            Assert.IsFalse(pos3.Equals(pos1));
-
-            Position pos4 = new(2f, 2f);
-            Assert.IsTrue(pos1.Equals(pos4));
-            Assert.IsTrue(pos4.Equals(pos1));
-
-            Assert.IsFalse(pos1.Equals(new object()));
         }
 
         [TestMethod]
-        public void TestGetHashCode()
+        public void EqualsMethod_ShouldReturnFalseForTwoPositionsWithDiffrentY()
         {
-            Position pos = new(2f, 2f);
-            var hash = 3 * pos.X.GetHashCode() + 5 * pos.Y.GetHashCode();
-            Assert.AreEqual(hash, pos.GetHashCode(), 1);
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 1f);
+            Assert.IsFalse(pos1.Equals(pos2));
+            Assert.IsFalse(pos2.Equals(pos1));
+        }
+
+        [TestMethod]
+        public void EqualsMethod_ShouldReturnFalseForTwoDiffrentPositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(1f, 1f);
+            Assert.IsFalse(pos1.Equals(pos2));
+            Assert.IsFalse(pos2.Equals(pos1));
+        }
+
+        [TestMethod]
+        public void EqualsMethod_ShouldReturnTrueForTwoSamePositions()
+        {
+            Position pos1 = new(2f, 2f);
+            Position pos2 = new(2f, 2f);
+            Assert.IsTrue(pos1.Equals(pos2));
+            Assert.IsTrue(pos2.Equals(pos1));
+        }
+
+        [TestMethod]
+        public void EqualsMethod_ShouldReturnTrueForTheSamePosition()
+        {
+            Assert.AreSame(_position, _position);
+            Assert.IsTrue(_position.Equals(_position));
+        }
+
+        [TestMethod]
+        public void EqualsMethod_ShouldReturnFalseForPositionAndNewObject()
+        {
+            Assert.IsFalse(_position.Equals(new object()));
+        }
+
+        [TestMethod]
+        public void GetHashCode_ShouldReturnConsistentValue()
+        {
+            var hash = 3 * _position.X.GetHashCode() + 5 * _position.Y.GetHashCode();
+            Assert.AreEqual(hash, _position.GetHashCode(), 1);
+        }
+
+        [TestMethod]
+        public void OnPositionChanged_ShouldTriggerEvent()
+        {
+            bool eventTriggered = false;
+
+            _position.PositionChanged += (sender, args) =>
+            {
+                eventTriggered = true;
+                Assert.AreEqual(_x, args.LastPosition.X, 1e-10f);
+                Assert.AreEqual(_y, args.LastPosition.Y, 1e-10f);
+                Assert.AreEqual(3f, args.NewPosition.X, 1e-10f);
+                Assert.AreEqual(_y, args.NewPosition.Y, 1e-10f);
+            };
+
+            _position.X = 3f;
+
+            Assert.IsTrue(eventTriggered, "PositionChanged event was not triggered.");
         }
     }
 }

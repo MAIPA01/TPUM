@@ -1,81 +1,91 @@
-﻿namespace TPUM.Data.Tests
+﻿using System.Security.Cryptography;
+
+namespace TPUM.Data.Tests
 {
     [TestClass]
     public sealed class HeatSensorTest
     {
-        [TestMethod]
-        public void TestGetPosition()
+        private HeatSensor _sensor;
+        private const long _id = 10;
+        private const float _x = 2f;
+        private const float _y = 2f;
+
+        [TestInitialize]
+        public void Setup()
         {
-            HeatSensor sensor = new(2f, 2f);
-            Position pos = new(2f, 2f);
-            Assert.IsTrue(sensor.Position == pos);
+            _sensor = new(_id, _x, _y);
         }
 
         [TestMethod]
-        public void TestSetPosition()
+        public void Constructor_ShouldInitializeProperties()
         {
-            HeatSensor sensor = new(2f, 2f);
-            sensor.Position.X = 0f;
-            Position pos = new(0f, 2f);
-            Assert.IsTrue(sensor.Position == pos);
+            Assert.AreEqual(_id, _sensor.Id);
+            Assert.AreEqual(_x, _sensor.Position.X);
+            Assert.AreEqual(_y, _sensor.Position.Y);
+            Assert.AreEqual(0.0f, _sensor.Temperature, 1e-10f);
         }
 
         [TestMethod]
-        public void TestGetTemperature()
+        public void Temperature_SetNewValue_ShouldTriggerEvent()
         {
-            HeatSensor sensor = new(2f, 2f);
-            Assert.AreEqual(0f, sensor.Temperature, 1e-10f);
-        }
-
-        [TestMethod]
-        public void TestSetTemperature()
-        {
-            HeatSensor sensor = new(2f, 2f);
-            sensor.Temperature = 2f;
-            Assert.AreEqual(2f, sensor.Temperature, 1e-10f);
-        }
-
-        private class TestSubscriber : IObserver<IHeatSensor>
-        {
-            public bool Good { get; private set; } = false;
-            public void OnCompleted()
+            bool eventTriggered = false;
+            _sensor.TemperatureChanged += (sender, args) =>
             {
-                throw new NotImplementedException();
-            }
+                eventTriggered = true;
+                Assert.AreEqual(0f, args.LastTemperature, 1e-10f);
+                Assert.AreEqual(100.0f, args.NewTemperature, 1e-10f);
+            };
 
-            public void OnError(Exception error)
-            {
-                throw new NotImplementedException();
-            }
+            _sensor.Temperature = 100.0f;
 
-            public void OnNext(IHeatSensor value)
-            {
-                Good = true;
-            }
+            Assert.IsTrue(eventTriggered, "TemperatureChange event was not triggered.");
         }
 
         [TestMethod]
-        public void TestSubscribe()
+        public void Temperature_SetSameValue_ShouldNotTriggerEvent()
         {
-            TestSubscriber subscriber = new();
-            HeatSensor sensor = new(2f, 2f);
-            sensor.Subscribe(subscriber);
+            bool eventTriggered = false;
+            _sensor.TemperatureChanged += (s, e) => eventTriggered = true;
 
-            sensor.Temperature = 0f;
-            Assert.AreEqual(0f, sensor.Temperature, 1e-10f);
-            Assert.IsFalse(subscriber.Good);
+            _sensor.Temperature = 0.0f;
 
-            sensor.Temperature = 10f;
-            Assert.AreEqual(10f, sensor.Temperature, 1e-10f);
-            Assert.IsTrue(subscriber.Good);
+            Assert.IsFalse(eventTriggered);
         }
 
         [TestMethod]
-        public void TestGetHashCode()
+        public void Position_SetNewValue_ShouldTriggerEvent()
         {
-            HeatSensor sensor = new(2f, 2f);
-            var hash = 3 * sensor.Position.GetHashCode() + 5 * sensor.Temperature.GetHashCode();
-            Assert.AreEqual(hash, sensor.GetHashCode(), 1);
+            bool eventTriggered = false;
+            _sensor.PositionChanged += (sender, args) =>
+            {
+                eventTriggered = true;
+                Assert.AreEqual(_x, args.LastPosition.X, 1e-10f);
+                Assert.AreEqual(_y, args.LastPosition.Y, 1e-10f);
+                Assert.AreEqual(5f, args.NewPosition.X, 1e-10f);
+                Assert.AreEqual(5f, args.NewPosition.Y, 1e-10f);
+            };
+
+            _sensor.Position = new Position(5.0f, 5.0f);
+
+            Assert.IsTrue(eventTriggered, "TemperatureChange event was not triggered.");
+        }
+
+        [TestMethod]
+        public void Position_SetSameValue_ShouldNotTriggerEvent()
+        {
+            bool eventTriggered = false;
+            _sensor.PositionChanged += (s, e) => eventTriggered = true;
+
+            _sensor.Position = new Position(_x, _y);
+
+            Assert.IsFalse(eventTriggered);
+        }
+
+        [TestMethod]
+        public void HashCode_ShouldReturnConsistentValue()
+        {
+            var hash = 3 * _sensor.Position.GetHashCode() + 5 * _sensor.Temperature.GetHashCode();
+            Assert.AreEqual(hash, _sensor.GetHashCode(), 1);
         }
     }
 }

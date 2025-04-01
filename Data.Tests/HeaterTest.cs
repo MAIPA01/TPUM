@@ -3,84 +3,131 @@
     [TestClass]
     public sealed class HeaterTest
     {
-        [TestMethod]
-        public void TestGetPosition()
+        private Heater _heater;
+        private const long _id = 10;
+        private const float _x = 2f;
+        private const float _y = 2f;
+        private const float _temp = 21f;
+
+        [TestInitialize]
+        public void Setup()
         {
-            Heater heater = new(2f, 2f, 21f);
-            Position pos = new(2f, 2f);
-            Assert.IsTrue(heater.Position == pos);
+            _heater = new(_id, _x, _y, _temp);
         }
 
         [TestMethod]
-        public void TestSetPosition()
+        public void Heater_ShouldInitialize_WithCorrectProperties()
         {
-            Heater heater = new(2f, 2f, 21f);
-            Position pos = new(3f, 2f);
-            Assert.IsTrue(heater.Position != pos);
-            heater.Position.X = 3f;
-            Assert.IsTrue(heater.Position == pos);
+            Assert.AreEqual(_id, _heater.Id);
+            Assert.AreEqual(new Position(_x, _y), _heater.Position);
+            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
+            Assert.IsFalse(_heater.IsOn);
         }
 
         [TestMethod]
-        public void TestIsOn()
+        public void SetPosition_ShouldUpdatePositionCorrectly()
         {
-            Heater heater = new(2f, 2f, 21f);
-            Assert.IsFalse(heater.IsOn());
-
-            heater.TurnOn();
-            Assert.IsTrue(heater.IsOn());
-
-            heater.TurnOff();
-            Assert.IsFalse(heater.IsOn());
+            Assert.AreEqual(new Position(_x, _y), _heater.Position);
+            _heater.Position.X += 1f;
+            Assert.AreEqual(new Position(_x + 1f, _y), _heater.Position);
         }
 
         [TestMethod]
-        public void TestGetTemperature()
+        public void IsOn_ShouldReturnCorrectState_WhenTurnedOnAndOff()
         {
-            Heater heater = new(2f, 2f, 21f);
-            Assert.AreEqual(0f, heater.Temperature, 1e-10f);
+            Assert.IsFalse(_heater.IsOn);
 
-            heater.TurnOn();
-            Assert.AreEqual(21f, heater.Temperature, 1e-10f);
+            _heater.TurnOn();
+            Assert.IsTrue(_heater.IsOn);
+
+            _heater.TurnOff();
+            Assert.IsFalse(_heater.IsOn);
         }
 
         [TestMethod]
-        public void TestSetTemperature()
+        public void IsOn_ShouldNotChangeIfTurnedOnTwice()
         {
-            Heater heater = new(2f, 2f, 21f);
-            heater.TurnOn();
-            heater.Temperature = 22f;
-            Assert.AreEqual(22f, heater.Temperature, 1e-10f);
+            Assert.IsFalse(_heater.IsOn);
+
+            _heater.TurnOn();
+            Assert.IsTrue(_heater.IsOn);
+
+            _heater.TurnOn();
+            Assert.IsTrue(_heater.IsOn);
         }
 
-        private class TestSubscriber : IObserver<IHeater>
+        [TestMethod]
+        public void Temperature_ShouldReturnZero_WhenHeaterIsOff()
         {
-            public bool Good { get; private set; } = false;
-            public void OnCompleted()
+            _heater.TurnOff();
+            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
+        }
+
+        [TestMethod]
+        public void Temperature_ShouldReturnCorrectValue_WhenHeaterIsOn()
+        {
+            _heater.TurnOff();
+            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
+
+            _heater.TurnOn();
+            Assert.AreEqual(_temp, _heater.Temperature, 1e-10f);
+        }
+
+        [TestMethod]
+        public void SetTemperature_ShouldUpdateTemperatureCorrectly()
+        {
+            _heater.TurnOn();
+            _heater.Temperature = _temp + 1f;
+            Assert.AreEqual(_temp + 1f, _heater.Temperature, 1e-10f);
+        }
+
+        [TestMethod]
+        public void TemperatureChangedEvent_ShouldBeTriggered_WhenTemperatureChanges()
+        {
+            bool eventTriggered = false;
+            _heater.TemperatureChanged += (sender, args) =>
             {
-                throw new NotImplementedException();
-            }
+                eventTriggered = true;
+                Assert.AreEqual(_temp, args.LastTemperature, 1e-10f);
+                Assert.AreEqual(30.0f, args.NewTemperature, 1e-10f);
+            };
 
-            public void OnError(Exception error)
-            {
-                throw new NotImplementedException();
-            }
+            _heater.Temperature = 30.0f;
 
-            public void OnNext(IHeater value)
-            {
-                Good = true;
-            }
+            Assert.IsTrue(eventTriggered, "TemperatureChanged event was not triggered.");
         }
 
         [TestMethod]
-        public void TestSubscribe()
+        public void EnableChangedEvent_ShouldBeTriggered_WhenHeaterIsTurnedOn()
         {
-            TestSubscriber subscriber = new();
-            Heater heater = new(2f, 2f, 21f);
-            heater.Subscribe(subscriber);
-            heater.Temperature = 2f;
+            bool eventTriggered = false;
+            _heater.EnableChange += (sender, args) =>
+            {
+                eventTriggered = true;
+                Assert.IsFalse(args.LastEnable);
+                Assert.IsTrue(args.NewEnable);
+            };
 
-            Assert.IsTrue(subscriber.Good);
+            _heater.TurnOn();
+
+            Assert.IsTrue(eventTriggered, "EnableChange event was not triggered.");
+        }
+
+        [TestMethod]
+        public void EnableChangedEvent_ShouldBeTriggered_WhenHeaterIsTurnedOff()
+        {
+            _heater.TurnOn();
+            bool eventTriggered = false;
+            _heater.EnableChange += (sender, args) =>
+            {
+                eventTriggered = true;
+                Assert.IsTrue(args.LastEnable);
+                Assert.IsFalse(args.NewEnable);
+            };
+
+            _heater.TurnOff();
+
+            Assert.IsTrue(eventTriggered, "EnableChange event was not triggered.");
         }
     }
 }
