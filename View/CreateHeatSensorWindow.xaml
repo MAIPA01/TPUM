@@ -1,0 +1,52 @@
+﻿<Window x:Class="TPUM.Presentation.View.CreateHeatSensorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TPUM.Presentation.View"
+        xmlns:vm="clr-namespace:TPUM.Presentation.ViewModel;assembly=Presentation.ViewModel"
+        xmlns:rules="clr-namespace:TPUM.Presentation.ViewModel.Rules;assembly=Presentation.ViewModel"
+        mc:Ignorable="d"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize"
+        Title="CreateHeatSensorWindow" Height="302" Width="337">
+    <Window.DataContext>
+        <vm:CreateHeatSensorViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="46,29,0,0" 
+           TextWrapping="Wrap" VerticalAlignment="Top" Height="22">
+            <Run Language="pl-pl" Text="X"/>
+        </TextBlock>
+        <TextBox HorizontalAlignment="Center" Height="56" Margin="0,50,0,0" 
+         TextWrapping="Wrap" VerticalAlignment="Top" Width="246">
+            <TextBox.Text>
+                <Binding Path="X" UpdateSourceTrigger="PropertyChanged"
+                 Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <rules:FloatRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBlock HorizontalAlignment="Left" Margin="46,119,0,0" 
+           TextWrapping="Wrap" VerticalAlignment="Top" Height="22">
+            <Run Language="pl-pl" Text="Y"/>
+        </TextBlock>
+        <TextBox HorizontalAlignment="Center" Height="56" Margin="0,141,0,0" 
+         TextWrapping="Wrap" VerticalAlignment="Top" Width="246">
+            <TextBox.Text>
+                <Binding Path="Y" UpdateSourceTrigger="PropertyChanged"
+                 Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <rules:FloatRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <Button Content="Create" HorizontalAlignment="Center" Margin="0,217,0,0" 
+        VerticalAlignment="Top" Width="246" Command="{Binding AddHeatSensorCommand, 
+        UpdateSourceTrigger=PropertyChanged}"/>
+    </Grid>
+</Window>

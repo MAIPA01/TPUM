@@ -1,5 +1,4 @@
-
-using Model;
+using TPUM.Presentation.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -7,43 +6,27 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace ModelView
+namespace TPUM.Presentation.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public static ReadOnlyObservableCollection<IModelRoom> Rooms => ViewModelData.Rooms;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private string _textValue = "T";
-        public string TextValue {
-            get
-            {
-                return _textValue;
-            }
+        public object? CurrentView
+        {
+            get => ViewModelData.CurrentView;
             set
             {
-                _textValue = value;
-                OnPropertyChanged(nameof(TextValue));
+                if (value == null) return;
+                ViewModelData.SetView((Type)value);
             }
         }
-
-        public ICommand ChangeTextCommand { get; set; }
-
-        public int Counter { get; set; } = 0;
 
         public MainViewModel()
         {
-            ChangeTextCommand = new CustomCommand(ExecuteChangeText, CanExecuteChangeText);
-        }
-
-        private void ExecuteChangeText(object? parameter)
-        {
-            Counter += 1;
-            TextValue = "Clicked " + Counter + " Times";
-        }
-
-        private bool CanExecuteChangeText(object? parameter)
-        {
-            return true;
+            ViewModelData.Instance.PropertyChanged += (sender, args) => PropertyChanged?.Invoke(this, args);
         }
 
         protected void OnPropertyChanged(string value)

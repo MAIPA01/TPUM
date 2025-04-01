@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="TPUM.Presentation.View.Controls.HeatSensorInfo"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TPUM.Presentation.View.Controls"
+             mc:Ignorable="d"
+             d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
+             x:Name="HeatSensorInfoUserControl" Width="306" Height="226">
+    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="10" Padding="10" Margin="5" Background="LightGray">
+        <StackPanel>
+            <TextBlock>
+                <Run Text="Id: " FontWeight="Bold"/>
+                <Run Text="{Binding HeatSensorId, ElementName=HeatSensorInfoUserControl}"/>
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Pos: " FontWeight="Bold"/>
+                <Run Text="x: "/>
+                <Run Text="{Binding Position.X, ElementName=HeatSensorInfoUserControl}"/>
+                <Run Text="y: "/>
+                <Run Text="{Binding Position.Y, ElementName=HeatSensorInfoUserControl}"/>
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Temp: " FontWeight="Bold"/>
+                <Run Text="{Binding Temperature, ElementName=HeatSensorInfoUserControl}"/>
+                <Run Text="°C"/>
+            </TextBlock>
+            <Button Content="Move" Height="39" Margin="5"
+                    Command="{Binding MoveCommand, ElementName=HeatSensorInfoUserControl}"
+                    CommandParameter="{Binding HeatSensorId, ElementName=HeatSensorInfoUserControl}"/>
+            <Button Content="Remove" Height="39" Margin="5"
+                Command="{Binding RemoveCommand, ElementName=HeatSensorInfoUserControl}"
+                CommandParameter="{Binding HeatSensorId, ElementName=HeatSensorInfoUserControl}"/>
+        </StackPanel>
+    </Border>
+</UserControl>
