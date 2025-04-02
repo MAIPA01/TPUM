@@ -45,17 +45,17 @@ namespace TPUM.Presentation.Model
             TurnOffCommand = new CustomCommand(TurnOff);
         }
 
-        private void GetPositionChanged(object source, Logic.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Logic.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
         }
 
-        private void GetTemperatureChanged(object source, Logic.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Logic.TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
         }
 
-        private void GetEnableChanged(object source, Logic.EnableChangedEventArgs args)
+        private void GetEnableChanged(object? source, Logic.EnableChangedEventArgs args)
         {
             EnableChanged?.Invoke(this, new EnableChangedEventArgs(args.LastEnable, args.NewEnable));
         }

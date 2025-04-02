@@ -52,17 +52,17 @@ namespace TPUM.Presentation.Model
             ClearHeatersCommand = new CustomCommand(ClearHeaters, _ => true);
         }
 
-        private void GetTemperatureChanged(object source, TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(source, args);
         }
 
-        private void GetPositionChanged(object source, PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(source, args);
         }
 
-        private void GetEnabledChanged(object source, EnableChangedEventArgs args)
+        private void GetEnabledChanged(object? source, EnableChangedEventArgs args)
         {
             EnableChanged?.Invoke(source, args);
         }
@@ -92,6 +92,7 @@ namespace TPUM.Presentation.Model
             if (sensor == null) return;
             UnsubscribeToHeatSensor(sensor);
             _heatSensors.Remove(sensor);
+            _room.RemoveHeatSensor(id);
         }
 
         private void ClearHeatSensors(object? obj)
@@ -131,6 +132,7 @@ namespace TPUM.Presentation.Model
             if (heater == null) return;
             UnsubscribeToHeater(heater);
             _heaters.Remove(heater);
+            _room.RemoveHeater(id);
         }
 
         private void ClearHeaters(object? obj)

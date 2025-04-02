@@ -29,7 +29,7 @@ namespace TPUM.Presentation.Model
             _position.PositionChanged += GetPositionChanged;
         }
 
-        private void GetPositionChanged(object source, Logic.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Logic.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
         }

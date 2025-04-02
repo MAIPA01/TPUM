@@ -31,12 +31,12 @@ namespace TPUM.Presentation.Model
             _sensor.TemperatureChanged += GetTemperatureChanged;
         }
 
-        private void GetPositionChanged(object source, Logic.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Logic.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
         }
 
-        private void GetTemperatureChanged(object source, Logic.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Logic.TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
         }

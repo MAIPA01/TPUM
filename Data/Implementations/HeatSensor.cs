@@ -51,7 +51,7 @@
             _position.PositionChanged += GetPositionChanged;
         }
 
-        private void GetPositionChanged(object source, PositionChangedEventArgs e)
+        private void GetPositionChanged(object? source, PositionChangedEventArgs e)
         {
             PositionChanged?.Invoke(this, e);
         }
@@ -68,12 +68,12 @@
             return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode(); 
         }
 
-        private void OnPositionChanged(object source, IPosition lastPosition)
+        private void OnPositionChanged(object? source, IPosition lastPosition)
         {
             PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, _position));
         }
 
-        private void OnTemperatureChanged(object source, float lastTemperature)
+        private void OnTemperatureChanged(object? source, float lastTemperature)
         {
             TemperatureChanged?.Invoke(source, new TemperatureChangedEventArgs(lastTemperature, _temperature));
         }

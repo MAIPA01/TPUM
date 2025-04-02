@@ -66,7 +66,7 @@
             GC.SuppressFinalize(this);
         }
 
-        private void OnPositionChanged(object source, Position lastPosition)
+        private void OnPositionChanged(object? source, Position lastPosition)
         {
             PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, this));
         }
