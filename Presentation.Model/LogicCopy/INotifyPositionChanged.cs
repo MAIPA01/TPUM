@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TPUM.Data
+namespace TPUM.Presentation.Model
 {
     public delegate void PositionChangedEventHandler(object? source, PositionChangedEventArgs e);
     public class PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition) : EventArgs

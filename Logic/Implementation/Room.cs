@@ -9,10 +9,10 @@ namespace TPUM.Logic
         private readonly Data.DataApiBase _data;
 
         private readonly List<IHeater> _heaters = [];
-        public ReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
+        public IReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
 
         private readonly List<IHeatSensor> _heatSensors = [];
-        public ReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
+        public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
 
         public long Id { get; }
         public float Width { get; }
@@ -56,12 +56,34 @@ namespace TPUM.Logic
 
         public float GetTemperatureAtPosition(float x, float y)
         {
-            if (x > Width || x < 0f || y > Height || y < 0f) return 0f;
+            if (x > Width || x < 0f || y > Height || y < 0f || HeatSensors.Count == 0) return 0f;
 
-            var pos = new Position(_data.CreatePosition(x, y));
-            return HeatSensors.Count <= 0 ? 0f : 
-                HeatSensors.Average(sensor => sensor.Temperature / 
-                                              (IPosition.Distance(pos, sensor.Position) + 1));
+            var pos = _data.CreatePosition(x, y);
+
+            float tempSum = 0f;
+            float distSum = 0f;
+            foreach (var sensor in HeatSensors)
+            {
+                float dist = IPosition.Distance(new Position(pos), sensor.Position) + 1f;
+                tempSum += sensor.Temperature * dist;
+                distSum += dist;
+            }
+
+            return tempSum / distSum;
+        }
+
+        private void SubscribeToHeater(IHeater heater)
+        {
+            heater.PositionChanged += GetPositionChanged;
+            heater.TemperatureChanged += GetTemperatureChanged;
+            heater.EnableChange += GetEnableChanged;
+        }
+
+        private void UnsubscribeFromHeater(IHeater heater)
+        {
+            heater.PositionChanged -= GetPositionChanged;
+            heater.TemperatureChanged -= GetTemperatureChanged;
+            heater.EnableChange -= GetEnableChanged;
         }
 
         public IHeater AddHeater(float x, float y, float temperature)
@@ -72,9 +94,7 @@ namespace TPUM.Logic
                 throw new ArgumentOutOfRangeException(nameof(y));
 
             var heater = new Heater(_data.CreateHeater(x, y, temperature));
-            heater.TemperatureChanged += GetTemperatureChanged;
-            heater.PositionChanged += GetPositionChanged;
-            heater.EnableChange += GetEnableChanged;
+            SubscribeToHeater(heater);
             _heaters.Add(heater);
             return heater;
         }
@@ -83,9 +103,7 @@ namespace TPUM.Logic
         {
             var heater = _heaters.Find(heater => heater.Id == id);
             if (heater == null) return;
-            heater.TemperatureChanged -= GetTemperatureChanged;
-            heater.PositionChanged -= GetPositionChanged;
-            heater.EnableChange -= GetEnableChanged;
+            UnsubscribeFromHeater(heater);
             _heaters.Remove(heater);
         }
 
@@ -93,11 +111,21 @@ namespace TPUM.Logic
         {
             foreach (var heater in _heaters)
             {
-                heater.TemperatureChanged -= GetTemperatureChanged;
-                heater.PositionChanged -= GetPositionChanged;
-                heater.EnableChange -= GetEnableChanged;
+                UnsubscribeFromHeater(heater);
             }
             _heaters.Clear();
+        }
+
+        private void SubscribeToHeatSensor(IHeatSensor sensor)
+        {
+            sensor.PositionChanged += GetPositionChanged;
+            sensor.TemperatureChanged += GetTemperatureChanged;
+        }
+
+        private void UnsubscribeFromHeatSensor(IHeatSensor sensor)
+        {
+            sensor.PositionChanged -= GetPositionChanged;
+            sensor.TemperatureChanged -= GetTemperatureChanged;
         }
 
         public IHeatSensor AddHeatSensor(float x, float y)
@@ -108,8 +136,7 @@ namespace TPUM.Logic
                 throw new ArgumentOutOfRangeException(nameof(y));
 
             var sensor = new HeatSensor(_data.CreateHeatSensor(x, y));
-            sensor.TemperatureChanged += GetTemperatureChanged;
-            sensor.PositionChanged += GetPositionChanged;
+            SubscribeToHeatSensor(sensor);
             sensor.SetTemperature(GetTemperatureAtPosition(sensor.Position.X, sensor.Position.Y));
             _heatSensors.Add(sensor);
             return sensor;
@@ -119,8 +146,7 @@ namespace TPUM.Logic
         {
             var sensor = _heatSensors.Find(sensor => sensor.Id == id);
             if (sensor == null) return;
-            sensor.TemperatureChanged -= GetTemperatureChanged;
-            sensor.PositionChanged -= GetPositionChanged;
+            UnsubscribeFromHeatSensor(sensor);
             _heatSensors.Remove(sensor);
         }
 
@@ -128,8 +154,7 @@ namespace TPUM.Logic
         {
             foreach (var sensor in _heatSensors)
             {
-                sensor.TemperatureChanged -= GetTemperatureChanged;
-                sensor.PositionChanged -= GetPositionChanged;
+                UnsubscribeFromHeatSensor(sensor);
             }
             _heatSensors.Clear();
         }
@@ -175,6 +200,7 @@ namespace TPUM.Logic
 
         public void EndSimulation()
         {
+            // TODO: Błąd gdy nie ma threada
             if ((_thread.ThreadState & ThreadState.Background) != ThreadState.Background) return;
             _endThread = true;
             _thread.Join();
@@ -185,16 +211,13 @@ namespace TPUM.Logic
             EndSimulation();
             foreach (var heater in _heaters)
             {
-                heater.TemperatureChanged -= GetTemperatureChanged;
-                heater.PositionChanged -= GetPositionChanged;
-                heater.EnableChange -= GetEnableChanged;
+                UnsubscribeFromHeater(heater);
                 heater.Dispose();
             }
             _heaters.Clear();
             foreach (var heatSensor in _heatSensors)
             {
-                heatSensor.TemperatureChanged -= GetTemperatureChanged;
-                heatSensor.PositionChanged -= GetPositionChanged;
+                UnsubscribeFromHeatSensor(heatSensor);
                 heatSensor.Dispose();
             }
             _heatSensors.Clear();

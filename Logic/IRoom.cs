@@ -5,8 +5,8 @@ namespace TPUM.Logic
     public interface IRoom : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
         long Id { get; }
-        ReadOnlyCollection<IHeater> Heaters { get; }
-        ReadOnlyCollection<IHeatSensor> HeatSensors { get; }
+        IReadOnlyCollection<IHeater> Heaters { get; }
+        IReadOnlyCollection<IHeatSensor> HeatSensors { get; }
         float Width { get; }
         float Height { get; }
 

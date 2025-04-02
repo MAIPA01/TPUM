@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TPUM.Logic
+namespace TPUM.Presentation.ViewModel
 {
-    public delegate void EnableChangedEventHandler(object? source, EnableChangedEventArgs e);
-    public class EnableChangedEventArgs(bool lastEnable, bool newEnable) : EventArgs
+    public delegate void EnableChangeEventHandler(object source, EnableChangeEventArgs e);
+    public class EnableChangeEventArgs(bool lastEnable, bool newEnable) : EventArgs
     {
         public bool LastEnable { get; private set; } = lastEnable;
         public bool NewEnable { get; private set; } = newEnable;
@@ -15,6 +15,6 @@ namespace TPUM.Logic
 
     public interface INotifyEnableChanged
     {
-        event EnableChangedEventHandler? EnableChanged;
+        event EnableChangeEventHandler? EnableChange;
     }
 }

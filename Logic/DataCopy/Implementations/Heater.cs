@@ -71,7 +71,6 @@ namespace TPUM.Logic
             _heater.PositionChanged -= GetPositionChanged;
             _heater.TemperatureChanged -= GetTemperatureChanged;
             _heater.EnableChange -= GetEnableChanged;
-            _heater.Dispose();
             GC.SuppressFinalize(this);
         }
     }

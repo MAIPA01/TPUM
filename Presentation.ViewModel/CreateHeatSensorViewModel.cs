@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Presentation.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TPUM.Presentation.Model;
 
 namespace TPUM.Presentation.ViewModel
 {
@@ -41,20 +41,21 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateHeatSensorViewModel()
         {
-            AddHeatSensorCommand = new CustomCommand(AddHeatSensor, CanAddHeatSensor);
-            PropertyChanged += (_, _) => ((CustomCommand)AddHeatSensorCommand).OnCanExecuteChanged();
+            AddHeatSensorCommand = ViewModelApi.Instance.CreateCommand(AddHeatSensor, CanAddHeatSensor);
+            PropertyChanged += (_, _) => AddHeatSensorCommand.OnCanExecuteChanged();
         }
 
         private void AddHeatSensor(object? parameter)
         {
-            ViewModelData.CurrentRoom?.AddHeatSensor(_x, _y);
-            ViewModelData.CloseSubWindow();
+            ViewModelApi.Instance.CurrentRoom?.AddHeatSensor(_x, _y);
+            WindowManager.CloseLastSubWindow();
         }
 
         private bool CanAddHeatSensor(object? parameter)
         {
-            if (ViewModelData.CurrentRoom == null) return true;
-            return _x <= ViewModelData.CurrentRoom.Width && _x >= 0 && _y <= ViewModelData.CurrentRoom.Height && _y >= 0;
+            var room = ViewModelApi.Instance.CurrentRoom;
+            if (room == null) return true;
+            return _x <= room.Width && _x >= 0 && _y <= room.Height && _y >= 0;
         }
 
         protected void OnPropertyChanged(string value)

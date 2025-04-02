@@ -1,4 +1,3 @@
-using TPUM.Presentation.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -10,26 +9,34 @@ namespace TPUM.Presentation.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public static ReadOnlyObservableCollection<IModelRoom> Rooms => ViewModelData.Rooms;
+        public static MainViewModel? Instance { get; private set; }
 
+        // TODO: Observable wystarczy ¿e bêdzie w ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        private object? _currentView = null;
         public object? CurrentView
         {
-            get => ViewModelData.CurrentView;
+            get => _currentView;
             set
             {
                 if (value == null) return;
-                ViewModelData.SetView((Type)value);
+                SetView((Type)value);
             }
         }
 
         public MainViewModel()
         {
-            ViewModelData.Instance.PropertyChanged += (sender, args) => PropertyChanged?.Invoke(this, args);
+            Instance = this;
         }
 
-        protected void OnPropertyChanged(string value)
+        public void SetView(Type viewType)
+        {
+            _currentView = Activator.CreateInstance(viewType);
+            OnPropertyChanged(nameof(CurrentView));
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string? value = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(value));
         }

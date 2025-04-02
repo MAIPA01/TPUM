@@ -7,37 +7,36 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
-using TPUM.Presentation.Model;
 
 namespace TPUM.Presentation.ViewModel
 {
     public class RoomsListViewModel : INotifyPropertyChanged
     {
-        public static ReadOnlyObservableCollection<IModelRoom> Rooms => ViewModelData.Rooms;
+        public static ReadOnlyObservableCollection<IRoom>? Rooms => MainViewModel.GetRooms();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICommand AddRoomWindowCommand { get; } = new CustomCommand(OpenAddRoomWindow, _ => true);
-        public ICommand RemoveRoomCommand { get; } = new CustomCommand(RemoveRoom, _ => true);
-        public ICommand ShowRoomCommand { get; } = new CustomCommand(ShowRoom, _ => true);
+        public ICommand? AddRoomWindowCommand { get; } = MainViewModel.CreateCommand(OpenAddRoomWindow);
+        public ICommand? RemoveRoomCommand { get; } = MainViewModel.CreateCommand(RemoveRoom);
+        public ICommand? ShowRoomCommand { get; } = MainViewModel.CreateCommand(ShowRoom);
 
         private static void OpenAddRoomWindow(object? obj)
         {
             if (obj == null) return;
-            ViewModelData.OpenSubWindow((Type)obj);
+            MainViewModel.OpenSubWindow((Type)obj);
         }
 
         private static void RemoveRoom(object? parameter)
         {
             if (parameter == null) return;
-            ViewModelData.RemoveRoom((long)parameter);
+            MainViewModel.RemoveRoom((long)parameter);
         }
 
         private static void ShowRoom(object? parameter)
         {
             if (parameter is not object[] { Length: 2 } parameters) return;
-            ViewModelData.SetCurrentRoom((long)parameters[1]);
-            ViewModelData.SetView((Type)parameters[0]);
+            MainViewModel.SetCurrentRoom((long)parameters[1]);
+            MainViewModel.SetView((Type)parameters[0]);
         }
     }
 }

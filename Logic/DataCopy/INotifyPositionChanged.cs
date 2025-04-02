@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TPUM.Logic
 {
-    public delegate void PositionChangedEventHandler(object source, PositionChangedEventArgs e);
+    public delegate void PositionChangedEventHandler(object? source, PositionChangedEventArgs e);
     public class PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition) : EventArgs
     {
         public IPosition LastPosition { get; private set; } = lastPosition;

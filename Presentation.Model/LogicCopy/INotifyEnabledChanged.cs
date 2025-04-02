@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TPUM.Logic
+namespace TPUM.Presentation.Model
 {
     public delegate void EnableChangedEventHandler(object? source, EnableChangedEventArgs e);
     public class EnableChangedEventArgs(bool lastEnable, bool newEnable) : EventArgs

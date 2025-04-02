@@ -6,11 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TPUM.Logic;
 
-namespace TPUM.Presentation.Model
+namespace TPUM.Presentation.ViewModel
 {
-    public interface IModelRoom : INotifyTemperatureChanged, INotifyPositionChanged, INotifyEnableChanged, INotifyPropertyChanged, IDisposable
+    public interface IRoom : INotifyTemperatureChanged, INotifyPositionChanged, INotifyEnableChanged, INotifyPropertyChanged, IDisposable
     {
         long Id { get; }
         string Name { get; set; }
@@ -18,15 +17,15 @@ namespace TPUM.Presentation.Model
         float Height { get; }
         float AvgTemperature { get; }
 
-        ReadOnlyObservableCollection<IModelHeater> Heaters { get; }
-        ReadOnlyObservableCollection<IModelHeatSensor> HeatSensors { get; }
+        ReadOnlyObservableCollection<IHeater> Heaters { get; }
+        ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
 
         ICommand ClearHeatSensorsCommand { get; }
         ICommand ClearHeatersCommand { get; }
 
-        void AddHeater(float x, float y, float temperature);
+        IHeater AddHeater(float x, float y, float temperature);
         void RemoveHeater(long id);
-        void AddHeatSensor(float x, float y);
+        IHeatSensor AddHeatSensor(float x, float y);
         void RemoveHeatSensor(long id);
     }
 }

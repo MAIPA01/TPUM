@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TPUM.Logic
+namespace TPUM.Presentation.ViewModel
 {
-    public delegate void TemperatureChangedEventHandler(object? source, TemperatureChangedEventArgs e);
+    public delegate void TemperatureChangedEventHandler(object source, TemperatureChangedEventArgs e);
 
     public class TemperatureChangedEventArgs(float lastTemperature, float newTemperature) : EventArgs
     {

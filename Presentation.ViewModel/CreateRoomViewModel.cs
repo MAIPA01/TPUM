@@ -62,8 +62,8 @@ namespace TPUM.Presentation.ViewModel
 
         private void AddRoom(object? parameter)
         {
-            ViewModelData.AddRoom(_roomName, _roomWidth, _roomHeight);
-            ViewModelData.CloseSubWindow();
+            MainViewModel.AddRoom(_roomName, _roomWidth, _roomHeight);
+            MainViewModel.CloseSubWindow();
         }
 
         private bool CanAddRoom(object? parameter)

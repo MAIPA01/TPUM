@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Presentation.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -54,24 +55,22 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateHeaterViewModel()
         {
-            AddHeaterCommand = new CustomCommand(AddHeater, CanAddHeater);
-            PropertyChanged += (_, _) => ((CustomCommand)AddHeaterCommand).OnCanExecuteChanged();
+            AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater, CanAddHeater);
+            PropertyChanged += (_, _) => AddHeaterCommand.OnCanExecuteChanged();
         }
 
         private void AddHeater(object? parameter)
         {
-            ViewModelData.CurrentRoom?.AddHeater(_x, _y, _temperature);
-            ViewModelData.CloseSubWindow();
+            ViewModelApi.Instance.CurrentRoom?.AddHeater(_x, _y, _temperature);
+            WindowManager.CloseLastSubWindow();
         }
 
         private bool CanAddHeater(object? parameter)
         {
-            bool inRoom = true;
-            if (ViewModelData.CurrentRoom != null) 
-            {
-                inRoom = _x <= ViewModelData.CurrentRoom.Width && _x >= 0 && _y <= ViewModelData.CurrentRoom.Height && _y >= 0;
-            }
-            return inRoom && _temperature >= 0f;
+            bool temp = _temperature >= 0f;
+            var room = ViewModelApi.Instance.CurrentRoom;
+            if (room == null) return temp;
+            return temp && _x <= room.Width && _x >= 0 && _y <= room.Height && _y >= 0;
         }
 
         protected void OnPropertyChanged(string value)

@@ -1,9 +1,8 @@
 using System.ComponentModel;
-using System.Windows.Input;
 
 namespace TPUM.Presentation.Model
 {
-    public class CustomCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
+    internal class CustomCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
     {
         public event EventHandler? CanExecuteChanged;
 
@@ -21,7 +20,7 @@ namespace TPUM.Presentation.Model
 
         public void OnCanExecuteChanged()
         {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            CanExecuteChanged?.Invoke(this, new EventArgs());
         }
     }
 
