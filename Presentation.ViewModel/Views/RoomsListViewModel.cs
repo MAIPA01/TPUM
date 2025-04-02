@@ -22,6 +22,10 @@ namespace TPUM.Presentation.ViewModel
         private static void RemoveRoom(object? parameter)
         {
             if (parameter == null) return;
+            if (!WindowManager.MakeYesNoWindow(
+                    "Are you sure you want to remove Room of id: '" + (long)parameter + "'?",
+                    "Room Removal")
+               ) return;
             ViewModelApi.Instance.RemoveRoom((long)parameter);
         }
 

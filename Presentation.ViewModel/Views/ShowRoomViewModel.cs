@@ -6,7 +6,12 @@ namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
-        // TODO: Ask if are you sure you want to remove...
+        // TODO: Fix Temperature Simulation
+        // TODO: Add Move Functionality
+        // TODO: Add Clear Functionality
+        // TODO: Add Room View
+        // TODO: Add Heaters View
+        // TODO: Add HeatSensors View
         public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
 
         public string RoomName => CurrentRoom?.Name ?? "";
@@ -88,7 +93,13 @@ namespace TPUM.Presentation.ViewModel
         private void RemoveHeater(object? parameter)
         {
             if (parameter == null) return;
-            CurrentRoom?.RemoveHeater((long)parameter);
+            if (WindowManager.MakeYesNoWindow(
+                    "Are you sure you want to remove Heater of id: '" + (long)parameter + "'?",
+                    "Heater Removal")
+                )
+            {
+                CurrentRoom?.RemoveHeater((long)parameter);
+            }
         }
 
         private void AddHeatSensor(object? parameter)
@@ -101,6 +112,10 @@ namespace TPUM.Presentation.ViewModel
         private void RemoveHeatSensor(object? parameter)
         {
             if (parameter == null) return;
+            if (!WindowManager.MakeYesNoWindow(
+                    "Are you sure you want to remove Heat Sensor of id: '" + (long)parameter + "'?",
+                    "Heat Sensor Removal")
+               ) return;
             CurrentRoom?.RemoveHeatSensor((long)parameter);
             OnPropertyChanged(nameof(RoomTemp));
         }
