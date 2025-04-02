@@ -44,10 +44,7 @@ namespace TPUM.Presentation.ViewModel
                 _instance ??= GetApi();
                 return _instance;
             } 
-            private set
-            {
-                _instance = value;
-            }
+            private set => _instance = value;
         }
 
         private readonly ModelApiBase _model;
@@ -80,24 +77,23 @@ namespace TPUM.Presentation.ViewModel
         public override void RemoveRoom(long id)
         {
             var room = _rooms.First(room => room.Id == id);
-            if (room != null) _rooms.Remove(room);
+            _rooms.Remove(room);
             _model.RemoveRoom(id);
         }
 
         public override ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute)
         {
-            return _model.CreateCommand(execute, canExecute);
+            return new CustomCommand(_model.CreateCommand(execute, canExecute));
         }
 
         public override ICommand CreateCommand(Action<object?> execute)
         {
-            return _model.CreateCommand(execute);
+            return new CustomCommand(_model.CreateCommand(execute));
         }
 
         public override void SetCurrentRoom(long roomId)
         {
             var room = _rooms.First(room => room.Id == roomId);
-            if (room == null) return;
             _currentRoom = room;
         }
 

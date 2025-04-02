@@ -19,7 +19,7 @@
         </TextBlock>
         <TextBox HorizontalAlignment="Center" Height="56" Margin="0,50,0,0" 
                  TextWrapping="Wrap" Text="{Binding RoomName, 
-            UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                    UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
                  VerticalAlignment="Top" Width="246"/>
 
         <TextBlock HorizontalAlignment="Left" Margin="46,119,0,0" 
@@ -56,6 +56,6 @@
 
         <Button Content="Create" HorizontalAlignment="Center" Margin="0,355,0,0" 
                 VerticalAlignment="Top" Width="246" Command="{Binding AddRoomCommand, 
-            UpdateSourceTrigger=PropertyChanged}"/>
+                    UpdateSourceTrigger=PropertyChanged}"/>
     </Grid>
 </Window>

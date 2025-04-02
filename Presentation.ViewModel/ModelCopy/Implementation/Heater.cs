@@ -15,7 +15,7 @@ namespace TPUM.Presentation.ViewModel
 
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
-        public event EnableChangeEventHandler? EnableChange;
+        public event EnableChangeEventHandler? EnableChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public long Id => _heater.Id;
@@ -25,39 +25,30 @@ namespace TPUM.Presentation.ViewModel
             get => new Position(_heater.Position);
             set
             {
-                if (_heater.Position != value)
-                {
-                    _heater.Position.X = value.X;
-                    _heater.Position.Y = value.Y;
-                    OnPropertyChange(nameof(Position));
-                }
+                _heater.Position.X = value.X;
+                _heater.Position.Y = value.Y;
             }
         }
         public float Temperature 
         { 
             get => _heater.Temperature;
-            set
-            {
-                if (_heater.Temperature != value)
-                {
-                    _heater.Temperature = value;
-                    OnPropertyChange(nameof(Temperature));
-                }
-            }
+            set => _heater.Temperature = value;
         }
 
         public bool IsOn => _heater.IsOn;
 
-        public ICommand TurnOffCommand => _heater.TurnOffCommand;
+        public string TurnText => IsOn ? "Turn Off" : "Turn On";
 
-        public ICommand TurnOnCommand => _heater.TurnOnCommand;
+        public ICommand TurnCommand => IsOn ? TurnOffCommand : TurnOnCommand;
+        private ICommand TurnOffCommand => new CustomCommand(_heater.TurnOffCommand);
+        private ICommand TurnOnCommand => new CustomCommand(_heater.TurnOnCommand);
 
         public Heater(Model.IHeater heater)
         {
             _heater = heater;
             _heater.PositionChanged += GetPositionChanged;
             _heater.TemperatureChanged += GetTemperatureChanged;
-            _heater.EnableChange += GetEnableChanged;
+            _heater.EnableChanged += GetEnableChanged;
         }
 
         private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
@@ -72,20 +63,20 @@ namespace TPUM.Presentation.ViewModel
             OnPropertyChange(nameof(Temperature));
         }
 
-        private void GetEnableChanged(object? source, Model.EnableChangeEventArgs args)
+        private void GetEnableChanged(object? source, Model.EnableChangedEventArgs args)
         {
-            // TODO: change to enableChanged
-            EnableChange?.Invoke(this, new EnableChangeEventArgs(args.LastEnable, args.NewEnable));
+            EnableChanged?.Invoke(this, new EnableChangeEventArgs(args.LastEnable, args.NewEnable));
             OnPropertyChange(nameof(IsOn));
             OnPropertyChange(nameof(Temperature));
+            OnPropertyChange(nameof(TurnText));
+            OnPropertyChange(nameof(TurnCommand));
         }
 
         public void Dispose()
         {
             _heater.PositionChanged -= GetPositionChanged;
             _heater.TemperatureChanged -= GetTemperatureChanged;
-            _heater.EnableChange -= GetEnableChanged;
-            _heater.Dispose();
+            _heater.EnableChanged -= GetEnableChanged;
             GC.SuppressFinalize(this);
         }
 

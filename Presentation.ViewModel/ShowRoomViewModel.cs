@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Presentation.ViewModel;
 
 namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
-        public IRoom? CurrentRoom => MainViewModel.CurrentRoom;
+        public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
 
         public string RoomName => CurrentRoom?.Name ?? "";
 
@@ -28,43 +29,43 @@ namespace TPUM.Presentation.ViewModel
         public ReadOnlyObservableCollection<IHeatSensor> HeatSensors =>
             CurrentRoom != null ? CurrentRoom.HeatSensors : new ReadOnlyObservableCollection<IHeatSensor>([]);
 
-        public ICommand? BackCommand { get; }
-        //public ICommand? TurnHeaterCommand { get; }
-        public ICommand? MoveHeaterCommand { get; }
-        public ICommand? RemoveHeaterCommand { get; }
-        public ICommand? AddHeaterCommand { get; }
-        public ICommand? MoveHeatSensorCommand { get; }
-        public ICommand? RemoveHeatSensorCommand { get; }
-        public ICommand? AddHeatSensorCommand { get; }
+        public ICommand BackCommand { get; }
+        //public ICommand TurnHeaterCommand { get; }
+        public ICommand MoveHeaterCommand { get; }
+        public ICommand RemoveHeaterCommand { get; }
+        public ICommand AddHeaterCommand { get; }
+        public ICommand MoveHeatSensorCommand { get; }
+        public ICommand RemoveHeatSensorCommand { get; }
+        public ICommand AddHeatSensorCommand { get; }
 
         // TODO: dla każdego api nie base zrobić instance które jest widoczne dla internal
         public ShowRoomViewModel()
         {
-            BackCommand = MainViewModel.CreateCommand(Back);
-            //TurnHeaterCommand = MainViewModel.CreateCommand(TurnHeater);
-            MoveHeaterCommand = MainViewModel.CreateCommand(NotImplemented);
-            RemoveHeaterCommand = MainViewModel.CreateCommand(NotImplemented);
-            AddHeaterCommand = MainViewModel.CreateCommand(AddHeater);
-            MoveHeatSensorCommand = MainViewModel.CreateCommand(NotImplemented);
-            RemoveHeatSensorCommand = MainViewModel.CreateCommand(NotImplemented);
-            AddHeatSensorCommand = MainViewModel.CreateCommand(AddHeatSensor);
+            BackCommand = ViewModelApi.Instance.CreateCommand(Back);
+            //TurnHeaterCommand = ViewModelApi.Instance.CreateCommand(TurnHeater);
+            MoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            RemoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater);
+            MoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            RemoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            AddHeatSensorCommand = ViewModelApi.Instance.CreateCommand(AddHeatSensor);
 
             if (CurrentRoom == null) return;
             CurrentRoom.TemperatureChanged += GetTemperatureChange;
-            CurrentRoom.EnableChange += GetEnableChange;
+            CurrentRoom.EnableChanged += GetEnableChange;
             CurrentRoom.PositionChanged += GetPositionChange;
         }
 
-        private void GetTemperatureChange(object source, TemperatureChangedEventArgs args)
+        private void GetTemperatureChange(object? source, TemperatureChangedEventArgs args)
         {
             OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private static void GetEnableChange(object source,  EnableChangeEventArgs args)
+        private static void GetEnableChange(object? source,  EnableChangeEventArgs args)
         {
         }
 
-        private static void GetPositionChange(object source, PositionChangedEventArgs args)
+        private static void GetPositionChange(object? source, PositionChangedEventArgs args)
         {
         }
 
@@ -79,10 +80,10 @@ namespace TPUM.Presentation.ViewModel
             if (CurrentRoom != null)
             {
                 CurrentRoom.TemperatureChanged -= GetTemperatureChange;
-                CurrentRoom.EnableChange -= GetEnableChange;
+                CurrentRoom.EnableChanged -= GetEnableChange;
                 CurrentRoom.PositionChanged -= GetPositionChange;
             }
-            MainViewModel.SetView((Type)parameter);
+            MainViewModel.Instance?.SetView((Type)parameter);
         }
 
         //private void TurnHeater(object? parameter)
@@ -104,13 +105,13 @@ namespace TPUM.Presentation.ViewModel
         private static void AddHeater(object? parameter)
         {
             if (parameter == null) return;
-            MainViewModel.OpenSubWindow((Type)parameter);
+            WindowManager.OpenSubWindow((Type)parameter);
         }
 
         private static void AddHeatSensor(object? parameter)
         {
             if (parameter == null) return;
-            MainViewModel.OpenSubWindow((Type)parameter);
+            WindowManager.OpenSubWindow((Type)parameter);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

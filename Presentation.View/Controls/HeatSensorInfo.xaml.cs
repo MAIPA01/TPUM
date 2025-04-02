@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TPUM.Data;
+using TPUM.Presentation.ViewModel;
 
 namespace TPUM.Presentation.View.Controls
 {
@@ -46,18 +46,18 @@ namespace TPUM.Presentation.View.Controls
         }
 
         public static readonly DependencyProperty MoveCommandProperty =
-            DependencyProperty.Register(nameof(MoveCommand), typeof(ICommand), typeof(HeatSensorInfo));
-        public ICommand MoveCommand
+            DependencyProperty.Register(nameof(MoveCommand), typeof(ViewModel.ICommand), typeof(HeatSensorInfo));
+        public ViewModel.ICommand MoveCommand
         {
-            get => (ICommand)GetValue(MoveCommandProperty);
+            get => (ViewModel.ICommand)GetValue(MoveCommandProperty);
             set => SetValue(MoveCommandProperty, value);
         }
 
         public static readonly DependencyProperty RemoveCommandProperty =
-            DependencyProperty.Register(nameof(RemoveCommand), typeof(ICommand), typeof(HeatSensorInfo));
-        public ICommand RemoveCommand
+            DependencyProperty.Register(nameof(RemoveCommand), typeof(ViewModel.ICommand), typeof(HeatSensorInfo));
+        public ViewModel.ICommand RemoveCommand
         {
-            get => (ICommand)GetValue(RemoveCommandProperty);
+            get => (ViewModel.ICommand)GetValue(RemoveCommandProperty);
             set => SetValue(RemoveCommandProperty, value);
         }
 

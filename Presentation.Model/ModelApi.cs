@@ -10,7 +10,7 @@ namespace TPUM.Presentation.Model
 {
     public abstract class ModelApiBase : IDisposable
     {
-        public abstract ReadOnlyObservableCollection<IRoom> Rooms { get; }
+        public abstract IReadOnlyCollection<IRoom> Rooms { get; }
         public abstract IRoom AddRoom(string name, float width, float height);
         public abstract void RemoveRoom(long id);
         public abstract ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute);
@@ -26,13 +26,12 @@ namespace TPUM.Presentation.Model
     internal class ModelApi : ModelApiBase
     {
         private readonly LogicApiBase _logic;
-        private readonly ObservableCollection<IRoom> _rooms = [];
-        public override ReadOnlyObservableCollection<IRoom> Rooms { get; }
+        private readonly List<IRoom> _rooms = [];
+        public override IReadOnlyCollection<IRoom> Rooms => _rooms.AsReadOnly();
 
         public ModelApi(LogicApiBase logic)
         {
             _logic = logic;
-            Rooms = new ReadOnlyObservableCollection<IRoom>(_rooms);
             foreach (var room in _logic.Rooms)
             {
                 _rooms.Add(new Room("", room));
@@ -49,7 +48,7 @@ namespace TPUM.Presentation.Model
         public override void RemoveRoom(long id)
         {
             var room = _rooms.First(room => room.Id == id);
-            if (room != null) _rooms.Remove(room);
+            _rooms.Remove(room);
             _logic.RemoveRoom(id);
         }
 

@@ -23,13 +23,8 @@ namespace TPUM.Presentation.ViewModel
             get => new Position(_sensor.Position); 
             set
             {
-                // TODO: Check All Positions (porównania) i set jeśli są różne
-                if (_sensor.Position != value)
-                {
-                    _sensor.Position.X = value.X;
-                    _sensor.Position.Y = value.Y;
-                    OnPropertyChange(nameof(Position));
-                }
+                _sensor.Position.X = value.X;
+                _sensor.Position.Y = value.Y;
             }
         }
 
@@ -58,7 +53,7 @@ namespace TPUM.Presentation.ViewModel
         {
             _sensor.PositionChanged -= GetPositionChanged;
             _sensor.TemperatureChanged -= GetTemperatureChanged;
-            _sensor.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         protected void OnPropertyChange([CallerMemberName] string? name = "")

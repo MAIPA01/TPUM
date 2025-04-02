@@ -15,10 +15,7 @@ namespace TPUM.Presentation.ViewModel
         float Temperature { get; set; }
         bool IsOn { get; }
 
-        ICommand TurnOffCommand { get; }
-        ICommand TurnOnCommand { get; }
-
-        //void TurnOn();
-        //void TurnOff();
+        string TurnText { get; }
+        ICommand TurnCommand { get; }
     }
 }

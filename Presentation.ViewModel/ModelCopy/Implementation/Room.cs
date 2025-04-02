@@ -16,7 +16,7 @@ namespace TPUM.Presentation.ViewModel
 
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PositionChangedEventHandler? PositionChanged;
-        public event EnableChangeEventHandler? EnableChange;
+        public event EnableChangeEventHandler? EnableChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public long Id => _room.Id;
@@ -26,11 +26,9 @@ namespace TPUM.Presentation.ViewModel
             get => _room.Name;
             set
             {
-                if (_room.Name != value)
-                {
-                    _room.Name = value;
-                    OnPropertyChange(nameof(Name));
-                }
+                if (_room.Name == value) return;
+                _room.Name = value;
+                OnPropertyChange(nameof(Name));
             }
         }
 
@@ -46,9 +44,9 @@ namespace TPUM.Presentation.ViewModel
         private readonly ObservableCollection<IHeatSensor> _heatSensors = [];
         public ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
 
-        public ICommand ClearHeatSensorsCommand => _room.ClearHeatSensorsCommand;
+        public ICommand ClearHeatSensorsCommand => new CustomCommand(_room.ClearHeatSensorsCommand);
 
-        public ICommand ClearHeatersCommand => _room.ClearHeatersCommand;
+        public ICommand ClearHeatersCommand => new CustomCommand(_room.ClearHeatersCommand);
 
         public Room(Model.IRoom room)
         {
@@ -71,14 +69,14 @@ namespace TPUM.Presentation.ViewModel
             }
         }
 
-        private void GetPositionChanged(object source, PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(source, args);
             OnPropertyChange(nameof(Heaters));
             OnPropertyChange(nameof(HeatSensors));
         }
 
-        private void GetTemperatureChanged(object source, TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(source, args);
             OnPropertyChange(nameof(Heaters));
@@ -86,9 +84,9 @@ namespace TPUM.Presentation.ViewModel
             OnPropertyChange(nameof(AvgTemperature));
         }
 
-        private void GetEnabledChanged(object source, EnableChangeEventArgs args)
+        private void GetEnabledChanged(object? source, EnableChangeEventArgs args)
         {
-            EnableChange?.Invoke(source, args);
+            EnableChanged?.Invoke(source, args);
             OnPropertyChange(nameof(Heaters));
         }
 
@@ -96,14 +94,14 @@ namespace TPUM.Presentation.ViewModel
         {
             heater.PositionChanged += GetPositionChanged;
             heater.TemperatureChanged += GetTemperatureChanged;
-            heater.EnableChange += GetEnabledChanged;
+            heater.EnableChanged += GetEnabledChanged;
         }
 
         private void UnsubscribeFromHeater(IHeater heater)
         {
             heater.PositionChanged -= GetPositionChanged;
             heater.TemperatureChanged -= GetTemperatureChanged;
-            heater.EnableChange -= GetEnabledChanged;
+            heater.EnableChanged -= GetEnabledChanged;
         }
 
         public IHeater AddHeater(float x, float y, float temperature)
@@ -118,11 +116,8 @@ namespace TPUM.Presentation.ViewModel
         {
             // TODO: sprawdzić to czy jest poprawnie niżej
             var heater = _heaters.First(h => h.Id == id);
-            if (heater != null)
-            {
-                UnsubscribeFromHeater(heater);
-                _heaters.Remove(heater);
-            }
+            UnsubscribeFromHeater(heater);
+            _heaters.Remove(heater);
             _room.RemoveHeater(id);
         }
 
@@ -149,11 +144,8 @@ namespace TPUM.Presentation.ViewModel
         public void RemoveHeatSensor(long id)
         {
             var sensor = _heatSensors.First(sensor => sensor.Id == id);
-            if (sensor != null)
-            {
-                UnsubscribeFromHeatSensor(sensor);
-                _heatSensors.Remove(sensor);
-            }
+            UnsubscribeFromHeatSensor(sensor);
+            _heatSensors.Remove(sensor);
             _room.RemoveHeatSensor(id);
         }
 
@@ -172,8 +164,6 @@ namespace TPUM.Presentation.ViewModel
                 sensor.Dispose();
             }
             _heatSensors.Clear();
-
-            _room.Dispose();
             GC.SuppressFinalize(this);
         }
 

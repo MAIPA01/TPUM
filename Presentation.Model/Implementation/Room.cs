@@ -18,11 +18,11 @@ namespace TPUM.Presentation.Model
         public float Height => _room.Height;
         public float AvgTemperature => _room.AvgTemperature;
 
-        private readonly ObservableCollection<IHeater> _heaters = [];
-        public ReadOnlyObservableCollection<IHeater> Heaters { get; }
+        private readonly List<IHeater> _heaters = [];
+        public IReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
 
-        private readonly ObservableCollection<IHeatSensor> _heatSensors = [];
-        public ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
+        private readonly List<IHeatSensor> _heatSensors = [];
+        public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
 
         public ICommand ClearHeatSensorsCommand { get; }
         public ICommand ClearHeatersCommand { get; }
@@ -32,7 +32,6 @@ namespace TPUM.Presentation.Model
             _room = room;
             Name = name;
 
-            Heaters = new ReadOnlyObservableCollection<IHeater>(_heaters);
             foreach (var heater in room.Heaters)
             {
                 var modelHeater = new Heater(heater);
@@ -40,7 +39,6 @@ namespace TPUM.Presentation.Model
                 _heaters.Add(modelHeater);
             }
 
-            HeatSensors = new ReadOnlyObservableCollection<IHeatSensor>(_heatSensors);
             foreach (var sensor in room.HeatSensors)
             {
                 var modelSensor = new HeatSensor(sensor);
@@ -79,19 +77,22 @@ namespace TPUM.Presentation.Model
             sensor.PositionChanged -= GetPositionChanged;
         }
 
-        public void AddHeatSensor(float x, float y)
+        public IHeatSensor AddHeatSensor(float x, float y)
         {
             var modelSensor = new HeatSensor(_room.AddHeatSensor(x, y));
             SubscribeToHeatSensor(modelSensor);
             _heatSensors.Add(modelSensor);
+            return modelSensor;
         }
 
         public void RemoveHeatSensor(long id)
         {
-            var sensor = _heatSensors.ToList().Find(sensor => sensor.Id == id);
-            if (sensor == null) return;
-            UnsubscribeToHeatSensor(sensor);
-            _heatSensors.Remove(sensor);
+            var sensor = _heatSensors.Find(sensor => sensor.Id == id);
+            if (sensor != null)
+            {
+                UnsubscribeToHeatSensor(sensor);
+                _heatSensors.Remove(sensor);
+            }
             _room.RemoveHeatSensor(id);
         }
 
@@ -119,19 +120,22 @@ namespace TPUM.Presentation.Model
             heater.EnableChanged -= GetEnabledChanged;
         }
 
-        public void AddHeater(float x, float y, float temperature)
+        public IHeater AddHeater(float x, float y, float temperature)
         {
             var modelHeater = new Heater(_room.AddHeater(x, y, temperature));
             SubscribeToHeater(modelHeater);
             _heaters.Add(modelHeater);
+            return modelHeater;
         }
 
         public void RemoveHeater(long id)
         {
-            var heater = _heaters.ToList().Find(heater => heater.Id == id);
-            if (heater == null) return;
-            UnsubscribeToHeater(heater);
-            _heaters.Remove(heater);
+            var heater = _heaters.Find(heater => heater.Id == id);
+            if (heater != null)
+            {
+                UnsubscribeToHeater(heater);
+                _heaters.Remove(heater);
+            }
             _room.RemoveHeater(id);
         }
 
@@ -147,7 +151,6 @@ namespace TPUM.Presentation.Model
 
         public void Dispose()
         {
-            _room.Dispose();
             foreach (var heater in _heaters)
             {
                 UnsubscribeToHeater(heater);

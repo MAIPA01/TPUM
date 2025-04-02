@@ -40,7 +40,7 @@ namespace TPUM.Presentation.ViewModel
             _position.PositionChanged += GetPositionChanged;
         }
 
-        private void GetPositionChanged(object source, Model.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
         }
@@ -48,7 +48,6 @@ namespace TPUM.Presentation.ViewModel
         public void Dispose()
         {
             _position.PositionChanged -= GetPositionChanged;
-            _position.Dispose();
             GC.SuppressFinalize(this);
         }
 

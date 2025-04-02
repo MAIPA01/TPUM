@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TPUM.Presentation.ViewModel
 {
-    public delegate void EnableChangeEventHandler(object source, EnableChangeEventArgs e);
+    public delegate void EnableChangeEventHandler(object? source, EnableChangeEventArgs e);
     public class EnableChangeEventArgs(bool lastEnable, bool newEnable) : EventArgs
     {
         public bool LastEnable { get; private set; } = lastEnable;
@@ -15,6 +15,6 @@ namespace TPUM.Presentation.ViewModel
 
     public interface INotifyEnableChanged
     {
-        event EnableChangeEventHandler? EnableChange;
+        event EnableChangeEventHandler? EnableChanged;
     }
 }

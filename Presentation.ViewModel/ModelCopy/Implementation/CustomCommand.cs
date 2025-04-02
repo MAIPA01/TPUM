@@ -18,7 +18,7 @@ namespace TPUM.Presentation.ViewModel
             _command.CanExecuteChanged += GetCanExecuteChanged;
         }
 
-        void GetCanExecuteChanged(object? sender, EventArgs args)
+        private void GetCanExecuteChanged(object? sender, EventArgs args)
         {
             CanExecuteChanged?.Invoke(this, args);
         }

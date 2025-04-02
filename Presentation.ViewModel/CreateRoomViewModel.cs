@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Presentation.ViewModel;
 using TPUM.Presentation.Model;
 
 namespace TPUM.Presentation.ViewModel
@@ -33,7 +34,7 @@ namespace TPUM.Presentation.ViewModel
             get => _roomWidth;
             set
             {
-                if (_roomWidth == value) return;
+                if (Math.Abs(_roomWidth - value) < 1e-10f) return;
                 _roomWidth = value;
                 OnPropertyChanged(nameof(RoomWidth));
             }
@@ -46,7 +47,7 @@ namespace TPUM.Presentation.ViewModel
             get => _roomHeight;
             set
             {
-                if (_roomHeight == value) return;
+                if (Math.Abs(_roomHeight - value) < 1e-10f) return;
                 _roomHeight = value;
                 OnPropertyChanged(nameof(RoomHeight));
             }
@@ -56,14 +57,14 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateRoomViewModel()
         {
-            AddRoomCommand = new CustomCommand(AddRoom, CanAddRoom);
-            PropertyChanged += (_, _) => ((CustomCommand)AddRoomCommand).OnCanExecuteChanged();
+            AddRoomCommand = ViewModelApi.Instance.CreateCommand(AddRoom, CanAddRoom);
+            PropertyChanged += (_, _) => AddRoomCommand.OnCanExecuteChanged();
         }
 
         private void AddRoom(object? parameter)
         {
-            MainViewModel.AddRoom(_roomName, _roomWidth, _roomHeight);
-            MainViewModel.CloseSubWindow();
+            ViewModelApi.Instance.AddRoom(_roomName, _roomWidth, _roomHeight);
+            WindowManager.CloseLastSubWindow();
         }
 
         private bool CanAddRoom(object? parameter)

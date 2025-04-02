@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TPUM.Presentation.View.Controls"
              mc:Ignorable="d"
              d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
-             x:Name="HeaterInfoUserControl" Width="314" Height="308">
+             x:Name="HeaterInfoUserControl" Width="250" Height="308">
     <Border BorderBrush="Black" BorderThickness="1" CornerRadius="10" Padding="10" Margin="5" Background="LightGray">
         <StackPanel>
             <TextBlock>
@@ -30,11 +30,10 @@
                 <Run Text="°C"/>
             </TextBlock>
             <Button Content="{Binding TurnText, ElementName=HeaterInfoUserControl}" 
-                    Height="39" Margin="5" Command="{Binding TurnCommand, ElementName=HeaterInfoUserControl}"
-                    CommandParameter="{Binding HeaterId, ElementName=HeaterInfoUserControl}"/>
-            <Button Content="Move" Height="39" Margin="5"
+                    Height="39" Margin="5" Command="{Binding TurnCommand, ElementName=HeaterInfoUserControl}"/>
+            <!--<Button Content="Move" Height="39" Margin="5"
                     Command="{Binding MoveCommand, ElementName=HeaterInfoUserControl}"
-                    CommandParameter="{Binding HeaterId, ElementName=HeaterInfoUserControl}"/>
+                    CommandParameter="{Binding HeaterId, ElementName=HeaterInfoUserControl}"/>-->
             <Button Content="Remove" Height="39" Margin="5"
                     Command="{Binding RemoveCommand, ElementName=HeaterInfoUserControl}"
                     CommandParameter="{Binding HeaterId, ElementName=HeaterInfoUserControl}"/>
