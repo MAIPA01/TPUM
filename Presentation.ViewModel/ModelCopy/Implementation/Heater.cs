@@ -33,9 +33,9 @@ namespace TPUM.Presentation.ViewModel
 
         public string TurnText => IsOn ? "Turn Off" : "Turn On";
 
-        public ICommand TurnCommand => IsOn ? TurnOffCommand : TurnOnCommand;
-        private ICommand TurnOffCommand => new CustomCommand(_heater.TurnOffCommand);
-        private ICommand TurnOnCommand => new CustomCommand(_heater.TurnOnCommand);
+        public ICommand TurnCommand => IsOn ? _turnOffCommand : _turnOnCommand;
+        private readonly ICommand _turnOffCommand;
+        private readonly ICommand _turnOnCommand;
 
         public Heater(Model.IHeater heater)
         {
@@ -43,6 +43,9 @@ namespace TPUM.Presentation.ViewModel
             _heater.PositionChanged += GetPositionChanged;
             _heater.TemperatureChanged += GetTemperatureChanged;
             _heater.EnableChanged += GetEnableChanged;
+
+            _turnOffCommand = new CustomCommand(_ => _heater.TurnOff());
+            _turnOnCommand = new CustomCommand(_ => _heater.TurnOn());
         }
 
         private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)

@@ -34,7 +34,7 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateHeatSensorViewModel()
         {
-            AddHeatSensorCommand = ViewModelApi.Instance.CreateCommand(AddHeatSensor, CanAddHeatSensor);
+            AddHeatSensorCommand = new CustomCommand(AddHeatSensor, CanAddHeatSensor);
             PropertyChanged += (_, _) => AddHeatSensorCommand.OnCanExecuteChanged();
         }
 

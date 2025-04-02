@@ -33,13 +33,13 @@ namespace TPUM.Presentation.ViewModel
 
         public ShowRoomViewModel()
         {
-            BackCommand = ViewModelApi.Instance.CreateCommand(Back);
-            MoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
-            RemoveHeaterCommand = ViewModelApi.Instance.CreateCommand(RemoveHeater);
-            AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater);
-            MoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
-            RemoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(RemoveHeatSensor);
-            AddHeatSensorCommand = ViewModelApi.Instance.CreateCommand(AddHeatSensor);
+            BackCommand = new CustomCommand(Back);
+            MoveHeaterCommand = new CustomCommand(NotImplemented);
+            RemoveHeaterCommand = new CustomCommand(RemoveHeater);
+            AddHeaterCommand = new CustomCommand(AddHeater);
+            MoveHeatSensorCommand = new CustomCommand(NotImplemented);
+            RemoveHeatSensorCommand = new CustomCommand(RemoveHeatSensor);
+            AddHeatSensorCommand = new CustomCommand(AddHeatSensor);
 
             if (CurrentRoom == null) return;
             CurrentRoom.TemperatureChanged += GetTemperatureChange;
@@ -52,12 +52,14 @@ namespace TPUM.Presentation.ViewModel
             OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private static void GetEnableChange(object? source, EnableChangeEventArgs args)
+        private void GetEnableChange(object? source, EnableChangeEventArgs args)
         {
+            OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private static void GetPositionChange(object? source, PositionChangedEventArgs args)
+        private void GetPositionChange(object? source, PositionChangedEventArgs args)
         {
+            OnPropertyChanged(nameof(RoomTemp));
         }
 
         private static void NotImplemented(object? parameter)
@@ -89,16 +91,18 @@ namespace TPUM.Presentation.ViewModel
             CurrentRoom?.RemoveHeater((long)parameter);
         }
 
-        private static void AddHeatSensor(object? parameter)
+        private void AddHeatSensor(object? parameter)
         {
             if (parameter == null) return;
             WindowManager.OpenSubWindow((Type)parameter);
+            OnPropertyChanged(nameof(RoomTemp));
         }
 
         private void RemoveHeatSensor(object? parameter)
         {
             if (parameter == null) return;
             CurrentRoom?.RemoveHeatSensor((long)parameter);
+            OnPropertyChanged(nameof(RoomTemp));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

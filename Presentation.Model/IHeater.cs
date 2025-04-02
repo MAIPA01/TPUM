@@ -7,10 +7,7 @@
         float Temperature { get; set; }
         bool IsOn { get; }
 
-        ICommand TurnOffCommand { get; }
-        ICommand TurnOnCommand { get; }
-
-        //void TurnOn();
-        //void TurnOff();
+        void TurnOn();
+        void TurnOff();
     }
 }

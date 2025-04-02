@@ -27,18 +27,12 @@
 
         public bool IsOn => _heater.IsOn;
 
-        public ICommand TurnOnCommand { get; }
-        public ICommand TurnOffCommand { get; }
-
         public Heater(Logic.IHeater heater)
         {
             _heater = heater;
             _heater.TemperatureChanged += GetTemperatureChanged;
             _heater.PositionChanged += GetPositionChanged;
             _heater.EnableChanged += GetEnableChanged;
-
-            TurnOnCommand = new CustomCommand(TurnOn);
-            TurnOffCommand = new CustomCommand(TurnOff);
         }
 
         private void GetPositionChanged(object? source, Logic.PositionChangedEventArgs args)
@@ -56,12 +50,12 @@
             EnableChanged?.Invoke(this, new EnableChangedEventArgs(args.LastEnable, args.NewEnable));
         }
 
-        private void TurnOn(object? param)
+        public void TurnOn()
         {
             _heater.TurnOn();
         }
 
-        private void TurnOff(object? param)
+        public void TurnOff()
         {
             _heater.TurnOff();
         }

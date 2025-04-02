@@ -9,9 +9,9 @@ namespace TPUM.Presentation.ViewModel
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICommand? AddRoomWindowCommand { get; } = ViewModelApi.Instance.CreateCommand(OpenAddRoomWindow);
-        public ICommand? RemoveRoomCommand { get; } = ViewModelApi.Instance.CreateCommand(RemoveRoom);
-        public ICommand? ShowRoomCommand { get; } = ViewModelApi.Instance.CreateCommand(ShowRoom);
+        public ICommand AddRoomWindowCommand { get; } = new CustomCommand(OpenAddRoomWindow);
+        public ICommand RemoveRoomCommand { get; } = new CustomCommand(RemoveRoom);
+        public ICommand ShowRoomCommand { get; } = new CustomCommand(ShowRoom);
 
         private static void OpenAddRoomWindow(object? obj)
         {

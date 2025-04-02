@@ -7,8 +7,6 @@ namespace TPUM.Presentation.Model
         public abstract IReadOnlyCollection<IRoom> Rooms { get; }
         public abstract IRoom AddRoom(string name, float width, float height);
         public abstract void RemoveRoom(long id);
-        public abstract ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute);
-        public abstract ICommand CreateCommand(Action<object?> execute);
         public abstract void Dispose();
 
         public static ModelApiBase GetApi(LogicApiBase? logic = null)
@@ -44,16 +42,6 @@ namespace TPUM.Presentation.Model
             var room = _rooms.First(room => room.Id == id);
             _rooms.Remove(room);
             _logic.RemoveRoom(id);
-        }
-
-        public override ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute)
-        {
-            return new CustomCommand(execute, canExecute);
-        }
-
-        public override ICommand CreateCommand(Action<object?> execute)
-        {
-            return new CustomCommand(execute);
         }
 
         public override void Dispose()

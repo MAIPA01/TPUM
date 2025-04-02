@@ -8,15 +8,45 @@ namespace TPUM.Logic
         private readonly Data.DataApiBase _data;
 
         private readonly List<IHeater> _heaters = [];
-        public IReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
+
+        public IReadOnlyCollection<IHeater> Heaters
+        {
+            get
+            {
+                lock (_heatersLock)
+                {
+                    return _heaters.AsReadOnly();
+                }
+            }
+        }
 
         private readonly List<IHeatSensor> _heatSensors = [];
-        public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
+
+        public IReadOnlyCollection<IHeatSensor> HeatSensors
+        {
+            get
+            {
+                lock (_heatSensorsLock)
+                {
+                    return _heatSensors.AsReadOnly();
+                }
+            }
+        }
 
         public long Id { get; }
         public float Width { get; }
         public float Height { get; }
-        public float AvgTemperature => HeatSensors.Count == 0 ? 0f : HeatSensors.Average(heatSensor => heatSensor.Temperature);
+
+        public float AvgTemperature
+        {
+            get
+            {
+                lock (_heatSensorsLock)
+                {
+                    return _heatSensors.Count == 0 ? 0f : _heatSensors.Average(heatSensor => heatSensor.Temperature);
+                }
+            }
+        } 
 
         private readonly Thread _thread;
         private bool _endThread;
@@ -24,6 +54,9 @@ namespace TPUM.Logic
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
+
+        private readonly object _heatersLock = new();
+        private readonly object _heatSensorsLock = new();
 
         public Room(long id, float width, float height, Data.DataApiBase data)
         {
@@ -59,13 +92,16 @@ namespace TPUM.Logic
 
             var pos = _data.CreatePosition(x, y);
 
-            float tempSum = 0f;
-            float distSum = 0f;
-            foreach (var sensor in HeatSensors)
+            var tempSum = 0f;
+            var distSum = 0f;
+            lock (_heatSensorsLock)
             {
-                float dist = IPosition.Distance(new Position(pos), sensor.Position) + 1f;
-                tempSum += sensor.Temperature * dist;
-                distSum += dist;
+                foreach (var sensor in HeatSensors)
+                {
+                    var dist = IPosition.Distance(new Position(pos), sensor.Position) + 1f;
+                    tempSum += sensor.Temperature * dist;
+                    distSum += dist;
+                }
             }
 
             return tempSum / distSum;
@@ -94,7 +130,11 @@ namespace TPUM.Logic
 
             var heater = new Heater(_data.CreateHeater(x, y, temperature));
             SubscribeToHeater(heater);
-            _heaters.Add(heater);
+            lock (_heatersLock)
+            {
+                _heaters.Add(heater);
+            }
+
             return heater;
         }
 
@@ -102,17 +142,23 @@ namespace TPUM.Logic
         {
             var heater = _heaters.Find(heater => heater.Id == id);
             if (heater == null) return;
-            UnsubscribeFromHeater(heater);
-            _heaters.Remove(heater);
+            lock (_heatersLock)
+            {
+                UnsubscribeFromHeater(heater);
+                _heaters.Remove(heater);
+            }
         }
 
         public void ClearHeaters()
         {
-            foreach (var heater in _heaters)
+            lock (_heatersLock)
             {
-                UnsubscribeFromHeater(heater);
+                foreach (var heater in _heaters)
+                {
+                    UnsubscribeFromHeater(heater);
+                }
+                _heaters.Clear();
             }
-            _heaters.Clear();
         }
 
         private void SubscribeToHeatSensor(IHeatSensor sensor)
@@ -137,7 +183,10 @@ namespace TPUM.Logic
             var sensor = new HeatSensor(_data.CreateHeatSensor(x, y));
             SubscribeToHeatSensor(sensor);
             sensor.SetTemperature(GetTemperatureAtPosition(sensor.Position.X, sensor.Position.Y));
-            _heatSensors.Add(sensor);
+            lock (_heatSensors)
+            {
+                _heatSensors.Add(sensor);
+            }
             return sensor;
         }
 
@@ -145,17 +194,23 @@ namespace TPUM.Logic
         {
             var sensor = _heatSensors.Find(sensor => sensor.Id == id);
             if (sensor == null) return;
-            UnsubscribeFromHeatSensor(sensor);
-            _heatSensors.Remove(sensor);
+            lock (_heatSensorsLock)
+            {
+                UnsubscribeFromHeatSensor(sensor);
+                _heatSensors.Remove(sensor);
+            }
         }
 
         public void ClearHeatSensors()
         {
-            foreach (var sensor in _heatSensors)
+            lock (_heatSensorsLock)
             {
-                UnsubscribeFromHeatSensor(sensor);
+                foreach (var sensor in _heatSensors)
+                {
+                    UnsubscribeFromHeatSensor(sensor);
+                }
+                _heatSensors.Clear();
             }
-            _heatSensors.Clear();
         }
 
         public void StartSimulation()
@@ -183,20 +238,26 @@ namespace TPUM.Logic
         {
             //var avgTemperature = AvgTemperature;
             //var maxHeaterTemperature = _heaters.Max(heater => heater.Temperature);
-            foreach (var heater in _heaters)
+            lock (_heatersLock)
             {
-                if (!heater.IsOn) continue;
-
-                //var temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
-                //if (temperatureDiff <= 0f) continue;
-
-                foreach (var heatSensor in _heatSensors)
+                lock (_heatSensorsLock)
                 {
-                    var temperatureDiff = (heater.Temperature - heatSensor.Temperature) * deltaTime;
-                    if (temperatureDiff <= 0f) continue;
+                    foreach (var heater in _heaters)
+                    {
+                        if (!heater.IsOn) continue;
 
-                    (heatSensor as HeatSensor)?.SetTemperature(heatSensor.Temperature + temperatureDiff /
-                                              IPosition.Distance(heatSensor.Position, heater.Position));
+                        //var temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
+                        //if (temperatureDiff <= 0f) continue;
+
+                        foreach (var heatSensor in _heatSensors)
+                        {
+                            var temperatureDiff = (heater.Temperature - heatSensor.Temperature) * deltaTime;
+                            if (temperatureDiff <= 0f) continue;
+
+                            (heatSensor as HeatSensor)?.SetTemperature(heatSensor.Temperature + temperatureDiff /
+                                IPosition.Distance(heatSensor.Position, heater.Position));
+                        }
+                    }
                 }
             }
         }

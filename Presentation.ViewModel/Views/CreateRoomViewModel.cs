@@ -49,7 +49,7 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateRoomViewModel()
         {
-            AddRoomCommand = ViewModelApi.Instance.CreateCommand(AddRoom, CanAddRoom);
+            AddRoomCommand = new CustomCommand(AddRoom, CanAddRoom);
             PropertyChanged += (_, _) => AddRoomCommand.OnCanExecuteChanged();
         }
 

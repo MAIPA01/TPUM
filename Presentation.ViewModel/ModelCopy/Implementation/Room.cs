@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
 namespace TPUM.Presentation.ViewModel
@@ -38,9 +39,9 @@ namespace TPUM.Presentation.ViewModel
         private readonly ObservableCollection<IHeatSensor> _heatSensors = [];
         public ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
 
-        public ICommand ClearHeatSensorsCommand => new CustomCommand(_room.ClearHeatSensorsCommand);
+        public ICommand ClearHeatSensorsCommand { get; }
 
-        public ICommand ClearHeatersCommand => new CustomCommand(_room.ClearHeatersCommand);
+        public ICommand ClearHeatersCommand { get; }
 
         public Room(Model.IRoom room)
         {
@@ -61,6 +62,9 @@ namespace TPUM.Presentation.ViewModel
                 SubscribeToHeatSensor(roomSensor);
                 _heatSensors.Add(roomSensor);
             }
+
+            ClearHeatSensorsCommand = new CustomCommand(ClearHeatSensors);
+            ClearHeatersCommand = new CustomCommand(ClearHeaters);
         }
 
         private void GetPositionChanged(object? source, PositionChangedEventArgs args)
@@ -114,6 +118,16 @@ namespace TPUM.Presentation.ViewModel
             _room.RemoveHeater(id);
         }
 
+        private void ClearHeaters(object? param)
+        {
+            foreach (var heater in _heaters)
+            {
+                UnsubscribeFromHeater(heater);
+            }
+            _heaters.Clear();
+            _room.ClearHeaters();
+        }
+
         private void SubscribeToHeatSensor(IHeatSensor sensor)
         {
             sensor.PositionChanged += GetPositionChanged;
@@ -140,6 +154,16 @@ namespace TPUM.Presentation.ViewModel
             UnsubscribeFromHeatSensor(sensor);
             _heatSensors.Remove(sensor);
             _room.RemoveHeatSensor(id);
+        }
+
+        private void ClearHeatSensors(object? param)
+        {
+            foreach (var sensor in _heatSensors)
+            {
+                UnsubscribeFromHeatSensor(sensor);
+            }
+            _heatSensors.Clear();
+            _room.ClearHeatSensors();
         }
 
         public void Dispose()

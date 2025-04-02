@@ -19,9 +19,6 @@
         private readonly List<IHeatSensor> _heatSensors = [];
         public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
 
-        public ICommand ClearHeatSensorsCommand { get; }
-        public ICommand ClearHeatersCommand { get; }
-
         public Room(string name, Logic.IRoom room)
         {
             _room = room;
@@ -40,9 +37,6 @@
                 SubscribeToHeatSensor(modelSensor);
                 _heatSensors.Add(modelSensor);
             }
-
-            ClearHeatSensorsCommand = new CustomCommand(ClearHeatSensors, _ => true);
-            ClearHeatersCommand = new CustomCommand(ClearHeaters, _ => true);
         }
 
         private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
@@ -91,7 +85,7 @@
             _room.RemoveHeatSensor(id);
         }
 
-        private void ClearHeatSensors(object? obj)
+        public void ClearHeatSensors()
         {
             foreach (var sensor in _heatSensors)
             {
@@ -134,7 +128,7 @@
             _room.RemoveHeater(id);
         }
 
-        private void ClearHeaters(object? obj)
+        public void ClearHeaters()
         {
             foreach (var heater in _heaters)
             {

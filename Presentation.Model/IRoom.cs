@@ -11,12 +11,11 @@
         IReadOnlyCollection<IHeater> Heaters { get; }
         IReadOnlyCollection<IHeatSensor> HeatSensors { get; }
 
-        ICommand ClearHeatSensorsCommand { get; }
-        ICommand ClearHeatersCommand { get; }
-
         IHeater AddHeater(float x, float y, float temperature);
         void RemoveHeater(long id);
+        void ClearHeaters();
         IHeatSensor AddHeatSensor(float x, float y);
         void RemoveHeatSensor(long id);
+        void ClearHeatSensors();
     }
 }

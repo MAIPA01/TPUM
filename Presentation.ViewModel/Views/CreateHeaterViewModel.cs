@@ -46,7 +46,7 @@ namespace TPUM.Presentation.ViewModel
 
         public CreateHeaterViewModel()
         {
-            AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater, CanAddHeater);
+            AddHeaterCommand = new CustomCommand(AddHeater, CanAddHeater);
             PropertyChanged += (_, _) => AddHeaterCommand.OnCanExecuteChanged();
         }
 

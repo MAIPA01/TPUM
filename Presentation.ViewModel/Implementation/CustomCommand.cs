@@ -1,10 +1,10 @@
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.ViewModel
 {
     internal class CustomCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
     {
         public event EventHandler? CanExecuteChanged;
 
-        public CustomCommand(Action<object?> execute) : this(execute, _ => true) { }
+        public CustomCommand(Action<object?> execute) : this(execute, _ => true) {}
 
         public bool CanExecute(object? parameter)
         {
@@ -18,7 +18,7 @@ namespace TPUM.Presentation.Model
 
         public void OnCanExecuteChanged()
         {
-            CanExecuteChanged?.Invoke(this, new EventArgs());
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

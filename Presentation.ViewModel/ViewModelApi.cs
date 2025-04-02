@@ -13,10 +13,6 @@ namespace TPUM.Presentation.ViewModel
 
         public abstract void RemoveRoom(long id);
 
-        public abstract ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute);
-
-        public abstract ICommand CreateCommand(Action<object?> execute);
-
         public abstract void SetCurrentRoom(long roomId);
 
         public abstract void Dispose();
@@ -72,16 +68,6 @@ namespace TPUM.Presentation.ViewModel
             var room = _rooms.First(room => room.Id == id);
             _rooms.Remove(room);
             _model.RemoveRoom(id);
-        }
-
-        public override ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute)
-        {
-            return new CustomCommand(_model.CreateCommand(execute, canExecute));
-        }
-
-        public override ICommand CreateCommand(Action<object?> execute)
-        {
-            return new CustomCommand(_model.CreateCommand(execute));
         }
 
         public override void SetCurrentRoom(long roomId)
