@@ -13,20 +13,12 @@ namespace TPUM.Presentation.ViewModel
         public float X
         {
             get => _position.X;
-            set
-            {
-                _position.X = value;
-                OnPropertyChange(nameof(X));
-            }
+            set => _position.X = value;
         }
         public float Y
         {
             get => _position.Y;
-            set
-            {
-                _position.Y = value;
-                OnPropertyChange(nameof(Y));
-            }
+            set => _position.Y = value;
         }
 
         public Position(Model.IPosition position)
@@ -38,6 +30,8 @@ namespace TPUM.Presentation.ViewModel
         private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
+            OnPropertyChange(nameof(X));
+            OnPropertyChange(nameof(Y));
         }
 
         public void Dispose()

@@ -181,16 +181,20 @@ namespace TPUM.Logic
 
         private void UpdateTemperature(float deltaTime)
         {
-            var avgTemperature = AvgTemperature;
+            //var avgTemperature = AvgTemperature;
+            //var maxHeaterTemperature = _heaters.Max(heater => heater.Temperature);
             foreach (var heater in _heaters)
             {
                 if (!heater.IsOn) continue;
 
-                var temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
-                if (temperatureDiff <= 0f) continue;
+                //var temperatureDiff = (heater.Temperature - avgTemperature) * deltaTime;
+                //if (temperatureDiff <= 0f) continue;
 
                 foreach (var heatSensor in _heatSensors)
                 {
+                    var temperatureDiff = (heater.Temperature - heatSensor.Temperature) * deltaTime;
+                    if (temperatureDiff <= 0f) continue;
+
                     (heatSensor as HeatSensor)?.SetTemperature(heatSensor.Temperature + temperatureDiff /
                                               IPosition.Distance(heatSensor.Position, heater.Position));
                 }

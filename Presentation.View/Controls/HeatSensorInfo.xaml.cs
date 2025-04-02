@@ -34,18 +34,18 @@ namespace TPUM.Presentation.View.Controls
         }
 
         public static readonly DependencyProperty MoveCommandProperty =
-            DependencyProperty.Register(nameof(MoveCommand), typeof(ViewModel.ICommand), typeof(HeatSensorInfo));
-        public ViewModel.ICommand MoveCommand
+            DependencyProperty.Register(nameof(MoveCommand), typeof(ICommand), typeof(HeatSensorInfo));
+        public ICommand MoveCommand
         {
-            get => (ViewModel.ICommand)GetValue(MoveCommandProperty);
+            get => (ICommand)GetValue(MoveCommandProperty);
             set => SetValue(MoveCommandProperty, value);
         }
 
         public static readonly DependencyProperty RemoveCommandProperty =
-            DependencyProperty.Register(nameof(RemoveCommand), typeof(ViewModel.ICommand), typeof(HeatSensorInfo));
-        public ViewModel.ICommand RemoveCommand
+            DependencyProperty.Register(nameof(RemoveCommand), typeof(ICommand), typeof(HeatSensorInfo));
+        public ICommand RemoveCommand
         {
-            get => (ViewModel.ICommand)GetValue(RemoveCommandProperty);
+            get => (ICommand)GetValue(RemoveCommandProperty);
             set => SetValue(RemoveCommandProperty, value);
         }
 

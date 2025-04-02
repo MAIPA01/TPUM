@@ -1,5 +1,4 @@
-﻿using Presentation.ViewModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 
@@ -7,8 +6,6 @@ namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
-        // TODO: Remove Heater and Sensor
-        // TODO: Max Sensor temp is max Heater temp not Avg Room temp
         // TODO: Check ViewModel i View
         // TODO: Ask if are you sure you want to remove...
         public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
@@ -28,7 +25,6 @@ namespace TPUM.Presentation.ViewModel
             CurrentRoom != null ? CurrentRoom.HeatSensors : new ReadOnlyObservableCollection<IHeatSensor>([]);
 
         public ICommand BackCommand { get; }
-        //public ICommand TurnHeaterCommand { get; }
         public ICommand MoveHeaterCommand { get; }
         public ICommand RemoveHeaterCommand { get; }
         public ICommand AddHeaterCommand { get; }
@@ -39,7 +35,6 @@ namespace TPUM.Presentation.ViewModel
         public ShowRoomViewModel()
         {
             BackCommand = ViewModelApi.Instance.CreateCommand(Back);
-            //TurnHeaterCommand = ViewModelApi.Instance.CreateCommand(TurnHeater);
             MoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
             RemoveHeaterCommand = ViewModelApi.Instance.CreateCommand(RemoveHeater);
             AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater);

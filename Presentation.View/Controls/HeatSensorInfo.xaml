@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TPUM.Presentation.View.Controls"
              mc:Ignorable="d"
              d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
-             x:Name="HeatSensorInfoUserControl" Width="250" Height="226">
+             x:Name="HeatSensorInfoUserControl" Width="280" Height="226">
     <Border BorderBrush="Black" BorderThickness="1" CornerRadius="10" Padding="10" Margin="5" Background="LightGray">
         <StackPanel>
             <TextBlock>

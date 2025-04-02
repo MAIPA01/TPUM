@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Presentation.ViewModel
+namespace TPUM.Presentation.ViewModel
 {
     internal static class WindowManager
     {

@@ -1,4 +1,3 @@
-﻿using Presentation.ViewModel;
 using System.ComponentModel;
 
 namespace TPUM.Presentation.ViewModel
@@ -13,7 +12,7 @@ namespace TPUM.Presentation.ViewModel
             get => _x;
             set
             {
-                if (_x == value) return;
+                if (Math.Abs(_x - value) < 1e-10f) return;
                 _x = value;
                 OnPropertyChanged(nameof(X));
             }
@@ -25,7 +24,7 @@ namespace TPUM.Presentation.ViewModel
             get => _y;
             set
             {
-                if (_y == value) return;
+                if (Math.Abs(_y - value) < 1e-10f) return;
                 _y = value;
                 OnPropertyChanged(nameof(Y));
             }

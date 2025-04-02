@@ -1,4 +1,3 @@
-﻿using Presentation.ViewModel;
 using System.ComponentModel;
 
 namespace TPUM.Presentation.ViewModel
@@ -13,7 +12,7 @@ namespace TPUM.Presentation.ViewModel
             get => _x;
             set
             {
-                if (_x == value) return;
+                if (Math.Abs(_x - value) < 1e-10f) return;
                 _x = value;
                 OnPropertyChanged(nameof(X));
             }
@@ -25,7 +24,7 @@ namespace TPUM.Presentation.ViewModel
             get => _y;
             set
             {
-                if (_y == value) return;
+                if (Math.Abs(_y - value) < 1e-10f) return;
                 _y = value;
                 OnPropertyChanged(nameof(Y));
             }
@@ -37,7 +36,7 @@ namespace TPUM.Presentation.ViewModel
             get => _temperature;
             set
             {
-                if (_temperature == value) return;
+                if (Math.Abs(_temperature - value) < 1e-10f) return;
                 _temperature = value;
                 OnPropertyChanged(nameof(Temperature));
             }
@@ -59,7 +58,7 @@ namespace TPUM.Presentation.ViewModel
 
         private bool CanAddHeater(object? parameter)
         {
-            bool temp = _temperature >= 0f;
+            var temp = _temperature >= 0f;
             var room = ViewModelApi.Instance.CurrentRoom;
             if (room == null) return temp;
             return temp && _x <= room.Width && _x >= 0 && _y <= room.Height && _y >= 0;

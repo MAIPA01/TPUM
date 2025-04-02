@@ -51,29 +51,27 @@ namespace TPUM.Presentation.View.Controls
         }
 
         public static readonly DependencyProperty TurnCommandProperty =
-            DependencyProperty.Register(nameof(TurnCommand), typeof(ViewModel.ICommand), typeof(HeaterInfo));
-        public ViewModel.ICommand TurnCommand
+            DependencyProperty.Register(nameof(TurnCommand), typeof(ICommand), typeof(HeaterInfo));
+        public ICommand TurnCommand
         {
-            get => (ViewModel.ICommand)GetValue(TurnCommandProperty);
+            get => (ICommand)GetValue(TurnCommandProperty);
             set => SetValue(TurnCommandProperty, value);
         }
 
         public static readonly DependencyProperty MoveCommandProperty =
-            DependencyProperty.Register(nameof(MoveCommand), typeof(ViewModel.ICommand), typeof(HeaterInfo));
-        public ViewModel.ICommand MoveCommand
+            DependencyProperty.Register(nameof(MoveCommand), typeof(ICommand), typeof(HeaterInfo));
+        public ICommand MoveCommand
         {
-            get => (ViewModel.ICommand)GetValue(MoveCommandProperty);
+            get => (ICommand)GetValue(MoveCommandProperty);
             set => SetValue(MoveCommandProperty, value);
         }
 
         public static readonly DependencyProperty RemoveCommandProperty =
-            DependencyProperty.Register(nameof(RemoveCommand), typeof(ViewModel.ICommand), typeof(HeaterInfo));
+            DependencyProperty.Register(nameof(RemoveCommand), typeof(ICommand), typeof(HeaterInfo));
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public ViewModel.ICommand RemoveCommand
+        public ICommand RemoveCommand
         {
-            get => (ViewModel.ICommand)GetValue(RemoveCommandProperty);
+            get => (ICommand)GetValue(RemoveCommandProperty);
             set => SetValue(RemoveCommandProperty, value);
         }
 
