@@ -6,7 +6,6 @@ namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
-        // TODO: Check ViewModel i View
         // TODO: Ask if are you sure you want to remove...
         public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
 
