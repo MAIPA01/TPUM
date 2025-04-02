@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.Model
 {
     internal class Heater : IHeater
     {
@@ -16,8 +12,8 @@ namespace TPUM.Presentation.Model
         public IPosition Position
         {
             get => new Position(_heater.Position);
-            set 
-            { 
+            set
+            {
                 _heater.Position.X = value.X;
                 _heater.Position.Y = value.Y;
             }

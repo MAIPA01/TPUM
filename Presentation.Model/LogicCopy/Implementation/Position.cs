@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.Model
 {
     internal class Position : IPosition
     {
@@ -12,15 +6,15 @@ namespace TPUM.Presentation.Model
 
         private readonly Logic.IPosition _position;
 
-        public float X 
-        { 
-            get => _position.X; 
+        public float X
+        {
+            get => _position.X;
             set => _position.X = value;
         }
-        public float Y 
-        { 
+        public float Y
+        {
             get => _position.Y;
-            set => _position.Y = value; 
+            set => _position.Y = value;
         }
 
         public Position(Logic.IPosition position)

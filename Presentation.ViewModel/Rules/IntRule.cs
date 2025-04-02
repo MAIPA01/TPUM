@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using System.Windows.Controls;
 
 namespace TPUM.Presentation.ViewModel.Rules
@@ -14,7 +9,7 @@ namespace TPUM.Presentation.ViewModel.Rules
         {
             if (value == null) return ValidationResult.ValidResult;
 
-            return int.TryParse(value.ToString(), out _) ? ValidationResult.ValidResult 
+            return int.TryParse(value.ToString(), out _) ? ValidationResult.ValidResult
                 : new ValidationResult(false, "Value was not any integer");
         }
     }

@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
 
 namespace TPUM.Presentation.View
 {
@@ -10,5 +8,4 @@ namespace TPUM.Presentation.View
     public partial class App : Application
     {
     }
-
 }

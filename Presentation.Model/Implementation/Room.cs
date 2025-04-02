@@ -1,9 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.Model
 {
     internal class Room : IRoom
     {

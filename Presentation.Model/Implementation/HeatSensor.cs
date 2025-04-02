@@ -1,9 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.Model
 {
     internal class HeatSensor : IHeatSensor
     {

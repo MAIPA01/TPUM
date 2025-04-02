@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TPUM.Presentation.ViewModel
 {
@@ -18,9 +13,9 @@ namespace TPUM.Presentation.ViewModel
 
         public long Id => _sensor.Id;
 
-        public IPosition Position 
+        public IPosition Position
         {
-            get => new Position(_sensor.Position); 
+            get => new Position(_sensor.Position);
             set
             {
                 _sensor.Position.X = value.X;

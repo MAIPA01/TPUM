@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace TPUM.Presentation.ViewModel
 {
@@ -21,7 +15,7 @@ namespace TPUM.Presentation.ViewModel
 
         public long Id => _room.Id;
 
-        public string Name 
+        public string Name
         {
             get => _room.Name;
             set
@@ -51,7 +45,7 @@ namespace TPUM.Presentation.ViewModel
         public Room(Model.IRoom room)
         {
             _room = room;
-            
+
             Heaters = new ReadOnlyObservableCollection<IHeater>(_heaters);
             foreach (var heater in _room.Heaters)
             {

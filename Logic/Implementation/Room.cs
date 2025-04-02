@@ -199,8 +199,8 @@ namespace TPUM.Logic
 
         public void EndSimulation()
         {
-            // TODO: Błąd gdy nie ma threada
-            if ((_thread.ThreadState & ThreadState.Background) != ThreadState.Background) return;
+            if ((_thread.ThreadState & ThreadState.Unstarted) == ThreadState.Unstarted || 
+                (_thread.ThreadState & ThreadState.Background) != ThreadState.Background) return;
             _endThread = true;
             _thread.Join();
         }

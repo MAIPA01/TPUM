@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Presentation.ViewModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Presentation.ViewModel;
-using TPUM.Presentation.Model;
 
 namespace TPUM.Presentation.ViewModel
 {

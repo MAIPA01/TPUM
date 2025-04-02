@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace TPUM.Presentation.Model
 {
     internal class CustomCommand(Action<object?> execute, Predicate<object?> canExecute) : ICommand
@@ -23,5 +21,4 @@ namespace TPUM.Presentation.Model
             CanExecuteChanged?.Invoke(this, new EventArgs());
         }
     }
-
 }

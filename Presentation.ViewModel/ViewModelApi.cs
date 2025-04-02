@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.ObjectModel;
 using TPUM.Presentation.Model;
 
 namespace TPUM.Presentation.ViewModel
@@ -37,13 +30,13 @@ namespace TPUM.Presentation.ViewModel
     internal class ViewModelApi : ViewModelApiBase
     {
         private static ViewModelApiBase? _instance = null;
-        internal static ViewModelApiBase Instance 
-        { 
+        internal static ViewModelApiBase Instance
+        {
             get
             {
                 _instance ??= GetApi();
                 return _instance;
-            } 
+            }
             private set => _instance = value;
         }
 

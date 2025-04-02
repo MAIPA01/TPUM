@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows.Input;
-
-namespace TPUM.Presentation.Model
+﻿namespace TPUM.Presentation.Model
 {
     public interface IHeater : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
     {

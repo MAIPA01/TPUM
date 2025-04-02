@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TPUM.Presentation.ViewModel
 {
@@ -15,7 +10,7 @@ namespace TPUM.Presentation.ViewModel
         public event PositionChangedEventHandler? PositionChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public float X 
+        public float X
         {
             get => _position.X;
             set
@@ -24,7 +19,7 @@ namespace TPUM.Presentation.ViewModel
                 OnPropertyChange(nameof(X));
             }
         }
-        public float Y 
+        public float Y
         {
             get => _position.Y;
             set

@@ -183,8 +183,6 @@ namespace TPUM.Logic.Tests
             _room.AddHeater(5f, 5f, 100f);
             Assert.AreEqual(1, _room.Heaters.Count);
 
-            _room.StartSimulation();
-
             _room.Dispose();
 
             Assert.AreEqual(0, _room.HeatSensors.Count);
