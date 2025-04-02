@@ -114,7 +114,6 @@ namespace TPUM.Presentation.ViewModel
 
         public void RemoveHeater(long id)
         {
-            // TODO: sprawdzić to czy jest poprawnie niżej
             var heater = _heaters.First(h => h.Id == id);
             UnsubscribeFromHeater(heater);
             _heaters.Remove(heater);

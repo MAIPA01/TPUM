@@ -11,7 +11,6 @@ namespace TPUM.Presentation.ViewModel
     {
         public static MainViewModel? Instance { get; private set; }
 
-        // TODO: Observable wystarczy ¿e bêdzie w ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private object? _currentView = null;

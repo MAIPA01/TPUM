@@ -13,6 +13,10 @@ namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
+        // TODO: Remove Heater and Sensor
+        // TODO: Max Sensor temp is max Heater temp not Avg Room temp
+        // TODO: Check ViewModel i View
+        // TODO: Ask if are you sure you want to remove...
         public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
 
         public string RoomName => CurrentRoom?.Name ?? "";
@@ -38,16 +42,15 @@ namespace TPUM.Presentation.ViewModel
         public ICommand RemoveHeatSensorCommand { get; }
         public ICommand AddHeatSensorCommand { get; }
 
-        // TODO: dla każdego api nie base zrobić instance które jest widoczne dla internal
         public ShowRoomViewModel()
         {
             BackCommand = ViewModelApi.Instance.CreateCommand(Back);
             //TurnHeaterCommand = ViewModelApi.Instance.CreateCommand(TurnHeater);
             MoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
-            RemoveHeaterCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            RemoveHeaterCommand = ViewModelApi.Instance.CreateCommand(RemoveHeater);
             AddHeaterCommand = ViewModelApi.Instance.CreateCommand(AddHeater);
             MoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
-            RemoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(NotImplemented);
+            RemoveHeatSensorCommand = ViewModelApi.Instance.CreateCommand(RemoveHeatSensor);
             AddHeatSensorCommand = ViewModelApi.Instance.CreateCommand(AddHeatSensor);
 
             if (CurrentRoom == null) return;
@@ -86,32 +89,28 @@ namespace TPUM.Presentation.ViewModel
             MainViewModel.Instance?.SetView((Type)parameter);
         }
 
-        //private void TurnHeater(object? parameter)
-        //{
-        //    if (parameter == null) return;
-        //    var heater = Heaters.ToList().Find(heater => heater.Id == (long)parameter);
-        //    if (heater == null) return;
-
-        //    if (heater.IsOn)
-        //    {
-        //        heater.TurnOff();
-        //    }
-        //    else
-        //    {
-        //        heater.TurnOn();
-        //    }
-        //}
-
         private static void AddHeater(object? parameter)
         {
             if (parameter == null) return;
             WindowManager.OpenSubWindow((Type)parameter);
         }
 
+        private void RemoveHeater(object? parameter)
+        {
+            if (parameter == null) return;
+            CurrentRoom?.RemoveHeater((long)parameter);
+        }
+
         private static void AddHeatSensor(object? parameter)
         {
             if (parameter == null) return;
             WindowManager.OpenSubWindow((Type)parameter);
+        }
+
+        private void RemoveHeatSensor(object? parameter)
+        {
+            if (parameter == null) return;
+            CurrentRoom?.RemoveHeatSensor((long)parameter);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
