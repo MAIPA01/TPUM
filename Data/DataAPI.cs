@@ -1,6 +1,7 @@
 ﻿namespace TPUM.Data
 {
-    public abstract class DataApiBase : IDisposable {
+    public abstract class DataApiBase : IDisposable
+    {
         public abstract IHeater CreateHeater(float x, float y, float temperature);
         public abstract IHeatSensor CreateHeatSensor(float x, float y);
 

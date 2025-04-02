@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ThreadState = System.Threading.ThreadState;
 
 namespace TPUM.Logic
@@ -88,7 +87,7 @@ namespace TPUM.Logic
 
         public IHeater AddHeater(float x, float y, float temperature)
         {
-            if (x > Width || x < 0f) 
+            if (x > Width || x < 0f)
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (y > Height || y < 0f)
                 throw new ArgumentOutOfRangeException(nameof(y));
@@ -192,7 +191,7 @@ namespace TPUM.Logic
 
                 foreach (var heatSensor in _heatSensors)
                 {
-                    (heatSensor as HeatSensor)?.SetTemperature(heatSensor.Temperature + temperatureDiff / 
+                    (heatSensor as HeatSensor)?.SetTemperature(heatSensor.Temperature + temperatureDiff /
                                               IPosition.Distance(heatSensor.Position, heater.Position));
                 }
             }

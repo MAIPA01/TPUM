@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace TPUM.Logic
+﻿namespace TPUM.Logic
 {
     public interface IRoom : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {

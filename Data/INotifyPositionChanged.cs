@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TPUM.Data
+﻿namespace TPUM.Data
 {
     public delegate void PositionChangedEventHandler(object? source, PositionChangedEventArgs e);
     public class PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition) : EventArgs

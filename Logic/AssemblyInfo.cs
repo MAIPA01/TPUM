@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly:InternalsVisibleTo("Logic.Tests")]
+[assembly: InternalsVisibleTo("Logic.Tests")]

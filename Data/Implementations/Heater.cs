@@ -5,8 +5,9 @@
         public long Id { get; }
 
         private bool _isOn = false;
-        public bool IsOn {
-            get => _isOn; 
+        public bool IsOn
+        {
+            get => _isOn;
             private set
             {
                 if (_isOn == value) return;

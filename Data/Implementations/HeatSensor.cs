@@ -65,7 +65,7 @@
 
         public override int GetHashCode()
         {
-            return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode(); 
+            return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode();
         }
 
         private void OnPositionChanged(object? source, IPosition lastPosition)

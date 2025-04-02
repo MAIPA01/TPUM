@@ -5,8 +5,8 @@
         private float _x = x;
         public float X
         {
-            get => _x; 
-            set 
+            get => _x;
+            set
             {
                 if (_x == value) return;
                 lock (_xLock)
@@ -15,7 +15,7 @@
                     _x = value;
                     OnPositionChanged(this, lastPosition);
                 }
-            } 
+            }
         }
 
         private float _y = y;
@@ -24,7 +24,7 @@
             get => _y;
             set
             {
-                
+
                 if (_y == value) return;
                 lock (_yLock)
                 {
@@ -40,12 +40,12 @@
         private readonly object _xLock = new();
         private readonly object _yLock = new();
 
-        public static bool operator==(Position pos1, IPosition pos2)
+        public static bool operator ==(Position pos1, IPosition pos2)
         {
             return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;
         }
 
-        public static bool operator!=(Position pos1, IPosition pos2)
+        public static bool operator !=(Position pos1, IPosition pos2)
         {
             return Math.Abs(pos1.X - pos2.X) > 1e-10f || Math.Abs(pos1.Y - pos2.Y) > 1e-10f;
         }
@@ -61,7 +61,7 @@
             return 3 * X.GetHashCode() + 5 * Y.GetHashCode();
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             GC.SuppressFinalize(this);
         }

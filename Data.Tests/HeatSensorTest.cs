@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace TPUM.Data.Tests
+﻿namespace TPUM.Data.Tests
 {
     [TestClass]
     public sealed class HeatSensorTest

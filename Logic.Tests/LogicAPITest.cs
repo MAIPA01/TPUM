@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using TPUM.Data;
+﻿using TPUM.Data;
 
 namespace TPUM.Logic.Tests
 {

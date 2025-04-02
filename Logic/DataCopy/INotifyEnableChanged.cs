@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TPUM.Logic
+﻿namespace TPUM.Logic
 {
     public delegate void EnableChangedEventHandler(object? source, EnableChangedEventArgs e);
     public class EnableChangedEventArgs(bool lastEnable, bool newEnable) : EventArgs
