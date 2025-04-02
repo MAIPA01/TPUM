@@ -13,7 +13,7 @@
                 lock (_isOnLock)
                 {
                     _isOn = value;
-                    OnEnableChange(this, !_isOn);
+                    OnEnableChanged(this, !_isOn);
                 }
             }
         }
@@ -51,7 +51,7 @@
             }
         }
 
-        public event EnableChangeEventHandler? EnableChange;
+        public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
@@ -67,7 +67,7 @@
             _temperature = temperature;
         }
 
-        private void GetPositionChanged(object source, PositionChangedEventArgs e)
+        private void GetPositionChanged(object? source, PositionChangedEventArgs e)
         {
             PositionChanged?.Invoke(this, e);
         }
@@ -89,12 +89,12 @@
             GC.SuppressFinalize(this);
         }
 
-        private void OnEnableChange(object source, bool lastEnable)
+        private void OnEnableChanged(object? source, bool lastEnable)
         {
-            EnableChange?.Invoke(source, new EnableChangeEventArgs(lastEnable, _isOn));
+            EnableChanged?.Invoke(source, new EnableChangedEventArgs(lastEnable, _isOn));
         }
 
-        private void OnTemperatureChanged(object source, float lastTemperature)
+        private void OnTemperatureChanged(object? source, float lastTemperature)
         {
             TemperatureChanged?.Invoke(source, new TemperatureChangedEventArgs(lastTemperature, _temperature));
         }

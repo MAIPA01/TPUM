@@ -23,7 +23,7 @@ namespace TPUM.Logic
         private bool _endThread;
 
         public event TemperatureChangedEventHandler? TemperatureChanged;
-        public event EnableChangeEventHandler? EnableChange;
+        public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
 
         public Room(long id, float width, float height, Data.DataApiBase data)
@@ -39,19 +39,19 @@ namespace TPUM.Logic
             _endThread = false;
         }
 
-        private void GetTemperatureChanged(object source, TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(source, args);
         }
 
-        private void GetPositionChanged(object source, PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(source, args);
         }
 
-        private void GetEnableChanged(object source, EnableChangeEventArgs args)
+        private void GetEnableChanged(object? source, EnableChangedEventArgs args)
         {
-            EnableChange?.Invoke(source, args);
+            EnableChanged?.Invoke(source, args);
         }
 
         public float GetTemperatureAtPosition(float x, float y)
@@ -76,14 +76,14 @@ namespace TPUM.Logic
         {
             heater.PositionChanged += GetPositionChanged;
             heater.TemperatureChanged += GetTemperatureChanged;
-            heater.EnableChange += GetEnableChanged;
+            heater.EnableChanged += GetEnableChanged;
         }
 
         private void UnsubscribeFromHeater(IHeater heater)
         {
             heater.PositionChanged -= GetPositionChanged;
             heater.TemperatureChanged -= GetTemperatureChanged;
-            heater.EnableChange -= GetEnableChanged;
+            heater.EnableChanged -= GetEnableChanged;
         }
 
         public IHeater AddHeater(float x, float y, float temperature)

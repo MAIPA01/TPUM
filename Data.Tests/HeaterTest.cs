@@ -101,7 +101,7 @@
         public void EnableChangedEvent_ShouldBeTriggered_WhenHeaterIsTurnedOn()
         {
             bool eventTriggered = false;
-            _heater.EnableChange += (sender, args) =>
+            _heater.EnableChanged += (sender, args) =>
             {
                 eventTriggered = true;
                 Assert.IsFalse(args.LastEnable);
@@ -118,7 +118,7 @@
         {
             _heater.TurnOn();
             bool eventTriggered = false;
-            _heater.EnableChange += (sender, args) =>
+            _heater.EnableChanged += (sender, args) =>
             {
                 eventTriggered = true;
                 Assert.IsTrue(args.LastEnable);

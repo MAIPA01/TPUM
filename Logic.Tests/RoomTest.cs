@@ -1,4 +1,6 @@
-﻿namespace TPUM.Logic.Tests
+﻿using TPUM.Data;
+
+namespace TPUM.Logic.Tests
 {
     [TestClass]
     public sealed class RoomTest
@@ -11,7 +13,7 @@
         [TestInitialize]
         public void Setup()
         {
-            _room = new Room(_id, _width, _height, null);
+            _room = new Room(_id, _width, _height, DataApiBase.GetApi());
         }
 
         [TestMethod]
@@ -83,7 +85,7 @@
         public void GetTemperatureAtPosition_ShouldReturnCorrectTemperature()
         {
             var sensor = _room.AddHeatSensor(5f, 5f);
-            sensor.Temperature = 25f;
+            ((HeatSensor)sensor).SetTemperature(25f);
 
             float temp = _room.GetTemperatureAtPosition(5f, 5f);
             Assert.AreEqual(25f, temp);
@@ -93,10 +95,10 @@
         public void GetTemperatureAtPosition_ShouldReturnCorrectTemperature_WithMultipleSensors()
         {
             var sensor1 = _room.AddHeatSensor(5f, 5f);
-            sensor1.Temperature = 25f;
+            ((HeatSensor)sensor1).SetTemperature(25f);
 
             var sensor2 = _room.AddHeatSensor(5f, 5f);
-            sensor2.Temperature = 35f;
+            ((HeatSensor)sensor2).SetTemperature(35f);
 
             float temp = _room.GetTemperatureAtPosition(5f, 5f);
             Assert.AreEqual(30f, temp);
@@ -106,10 +108,10 @@
         public void GetTemperatureAtPosition_ShouldWeightTemperatureByDistance()
         {
             var sensor1 = _room.AddHeatSensor(2f, 2f);
-            sensor1.Temperature = 40f;
+            ((HeatSensor)sensor1).SetTemperature(40f);
 
             var sensor2 = _room.AddHeatSensor(8f, 8f);
-            sensor2.Temperature = 20f;
+            ((HeatSensor)sensor2).SetTemperature(20f);
 
             float temp = _room.GetTemperatureAtPosition(6f, 6f);
 
@@ -146,9 +148,9 @@
         public void AvgTemperature_ShouldCalculateCorrectly()
         {
             var sensor1 = _room.AddHeatSensor(3f, 3f);
-            sensor1.Temperature = 20f;
+            ((HeatSensor)sensor1).SetTemperature(20f);
             var sensor2 = _room.AddHeatSensor(7f, 7f);
-            sensor2.Temperature = 30f;
+            ((HeatSensor)sensor2).SetTemperature(30f);
 
             Assert.AreEqual(25f, _room.AvgTemperature);
         }
@@ -196,9 +198,9 @@
             heater.TurnOn();
 
             var sensor1 = _room.AddHeatSensor(3f, 3f);
-            sensor1.Temperature = 20f;
+            ((HeatSensor)sensor1).SetTemperature(20f);
             var sensor2 = _room.AddHeatSensor(7f, 7f);
-            sensor2.Temperature = 20f;
+            ((HeatSensor)sensor2).SetTemperature(20f);
 
             _room.StartSimulation();
 

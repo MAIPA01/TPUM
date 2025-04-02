@@ -10,7 +10,7 @@ namespace TPUM.Logic
     {
         private readonly Data.IHeater _heater;
 
-        public event EnableChangeEventHandler? EnableChange;
+        public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
@@ -38,22 +38,22 @@ namespace TPUM.Logic
             _heater = heater;
             _heater.PositionChanged += GetPositionChanged;
             _heater.TemperatureChanged += GetTemperatureChanged;
-            _heater.EnableChange += GetEnableChanged;
+            _heater.EnableChanged += GetEnableChanged;
         }
 
-        private void GetPositionChanged(object source, Data.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Data.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
         }
 
-        private void GetTemperatureChanged(object source, Data.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Data.TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
         }
 
-        private void GetEnableChanged(object source, Data.EnableChangeEventArgs args)
+        private void GetEnableChanged(object? source, Data.EnableChangedEventArgs args)
         {
-            EnableChange?.Invoke(this, new EnableChangeEventArgs(args.LastEnable, args.NewEnable));
+            EnableChanged?.Invoke(this, new EnableChangedEventArgs(args.LastEnable, args.NewEnable));
         }
 
         public void TurnOn()
@@ -70,7 +70,7 @@ namespace TPUM.Logic
         {
             _heater.PositionChanged -= GetPositionChanged;
             _heater.TemperatureChanged -= GetTemperatureChanged;
-            _heater.EnableChange -= GetEnableChanged;
+            _heater.EnableChanged -= GetEnableChanged;
             GC.SuppressFinalize(this);
         }
     }
