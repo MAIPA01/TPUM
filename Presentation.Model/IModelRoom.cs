@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TPUM.Data;
+using TPUM.Logic;
 
 namespace TPUM.Presentation.Model
 {

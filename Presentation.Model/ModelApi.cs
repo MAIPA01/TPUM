@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using TPUM.Logic;
 
 namespace TPUM.Presentation.Model
@@ -13,6 +14,8 @@ namespace TPUM.Presentation.Model
         public abstract ReadOnlyObservableCollection<IModelRoom> Rooms { get; }
         public abstract IModelRoom AddRoom(string name, float width, float height);
         public abstract void RemoveRoom(long id);
+        public abstract ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute);
+        public abstract ICommand CreateCommand(Action<object?> execute);
         public abstract void Dispose();
 
         public static ModelApiBase GetApi(LogicApiBase? logic = null)
@@ -44,6 +47,16 @@ namespace TPUM.Presentation.Model
         {
             var room = _rooms.ToList().Find(room => room.Id == id);
             if (room != null) _rooms.Remove(room);
+        }
+
+        public override ICommand CreateCommand(Action<object?> execute, Predicate<object?> canExecute)
+        {
+            return new CustomCommand(execute, canExecute);
+        }
+
+        public override ICommand CreateCommand(Action<object?> execute)
+        {
+            return new CustomCommand(execute);
         }
 
         public override void Dispose()

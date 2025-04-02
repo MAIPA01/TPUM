@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TPUM.Data
+namespace TPUM.Logic
 {
     public delegate void TemperatureChangedEventHandler(object source, TemperatureChangedEventArgs e);
 
@@ -12,5 +12,10 @@ namespace TPUM.Data
     {
         public float LastTemperature { get; private set; } = lastTemperature;
         public float NewTemperature { get; private set; } = newTemperature;
+    }
+
+    public interface INotifyTemperatureChanged
+    {
+        event TemperatureChangedEventHandler? TemperatureChanged;
     }
 }
