@@ -2,10 +2,14 @@
 {
     public abstract class DataApiBase : IDisposable
     {
-        public abstract IHeater CreateHeater(float x, float y, float temperature);
-        public abstract IHeatSensor CreateHeatSensor(float x, float y);
+        public abstract IReadOnlyCollection<IRoom> Rooms { get; }
 
-        public abstract IPosition CreatePosition(float x, float y);
+        public abstract IRoom AddRoom(float width, float height);
+
+        public abstract void RemoveRoom(long id);
+
+        public abstract void ClearRooms();
+
         public abstract void Dispose();
 
         public static DataApiBase GetApi()
@@ -16,23 +20,53 @@
 
     internal class DataApi : DataApiBase
     {
-        public override IHeater CreateHeater(float x, float y, float temperature)
+        private readonly object _roomsLock = new();
+        private readonly List<IRoom> _rooms = [];
+        public override IReadOnlyCollection<IRoom> Rooms
         {
-            return new Heater(new Random().NextInt64(), x, y, temperature);
+            get
+            {
+                lock (_roomsLock)
+                {
+                    return _rooms.AsReadOnly();
+                }
+            }
         }
 
-        public override IHeatSensor CreateHeatSensor(float x, float y)
+        public override IRoom AddRoom(float width, float height)
         {
-            return new HeatSensor(new Random().NextInt64(), x, y);
+            var room = new Room(new Random().NextInt64(), width, height);
+            lock (_roomsLock)
+            {
+                _rooms.Add(room);
+            }
+            return room;
         }
 
-        public override IPosition CreatePosition(float x, float y)
+        public override void RemoveRoom(long id)
         {
-            return new Position(x, y);
+            lock (_roomsLock)
+            {
+                var room = _rooms.Find(room => room.Id == id);
+                if (room != null) _rooms.Remove(room);
+            }
+        }
+
+        public override void ClearRooms()
+        {
+            lock (_roomsLock)
+            {
+                _rooms.Clear();
+            }
         }
 
         public override void Dispose()
         {
+            foreach (var room in _rooms)
+            {
+                room.Dispose();
+            }
+            _rooms.Clear();
             GC.SuppressFinalize(this);
         }
     }

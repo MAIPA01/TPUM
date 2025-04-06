@@ -1,4 +1,4 @@
-﻿namespace TPUM.Logic
+﻿namespace TPUM.Data
 {
     public interface IRoom : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
@@ -7,6 +7,8 @@
         IReadOnlyCollection<IHeatSensor> HeatSensors { get; }
         float Width { get; }
         float Height { get; }
+
+        float RoomTemperature { get; set; }
 
         float AvgTemperature { get; }
 
@@ -23,9 +25,5 @@
         void RemoveHeatSensor(long id);
 
         void ClearHeatSensors();
-
-        void StartSimulation();
-
-        void EndSimulation();
     }
 }

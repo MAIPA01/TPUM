@@ -1,15 +1,16 @@
-﻿using System.Collections.ObjectModel;
-using TPUM.Data;
+﻿using TPUM.Data;
 
 namespace TPUM.Logic
 {
     public abstract class LogicApiBase : IDisposable
     {
-        public abstract ReadOnlyCollection<IRoom> Rooms { get; }
+        public abstract IReadOnlyCollection<IRoom> Rooms { get; }
 
         public abstract IRoom AddRoom(float width, float height);
 
         public abstract void RemoveRoom(long id);
+
+        public abstract void ClearRooms();
 
         public static LogicApiBase GetApi(DataApiBase? data = null)
         {
@@ -22,11 +23,11 @@ namespace TPUM.Logic
     internal class LogicApi(DataApiBase data) : LogicApiBase
     {
         private readonly List<IRoom> _rooms = [];
-        public override ReadOnlyCollection<IRoom> Rooms => _rooms.AsReadOnly();
+        public override IReadOnlyCollection<IRoom> Rooms => _rooms;
 
         public override IRoom AddRoom(float width, float height)
         {
-            var room = new Room(new Random().NextInt64(), width, height, data);
+            var room = new Room(data.AddRoom(width, height));
             room.StartSimulation();
             _rooms.Add(room);
             return room;
@@ -35,9 +36,18 @@ namespace TPUM.Logic
         public override void RemoveRoom(long id)
         {
             var room = _rooms.Find(room => room.Id == id);
-            if (room == null) return;
-            room.EndSimulation();
-            _rooms.Remove(room);
+            if (room != null)
+            {
+                room.EndSimulation();
+                _rooms.Remove(room);
+            }
+            data.RemoveRoom(id);
+        }
+
+        public override void ClearRooms()
+        {
+            _rooms.Clear();
+            data.ClearRooms();
         }
 
         public override void Dispose()

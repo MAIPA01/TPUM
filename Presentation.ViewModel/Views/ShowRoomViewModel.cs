@@ -6,7 +6,6 @@ namespace TPUM.Presentation.ViewModel
 {
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
-        // TODO: Fix Temperature Simulation
         // TODO: Add Move Functionality
         // TODO: Add Clear Functionality
         // TODO: Add Room View

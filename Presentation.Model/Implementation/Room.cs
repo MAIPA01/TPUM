@@ -22,6 +22,7 @@
         public Room(string name, Logic.IRoom room)
         {
             _room = room;
+            _room.TemperatureChanged += GetTemperatureChanged;
             Name = name;
 
             foreach (var heater in room.Heaters)
@@ -37,6 +38,12 @@
                 SubscribeToHeatSensor(modelSensor);
                 _heatSensors.Add(modelSensor);
             }
+        }
+
+        private void GetTemperatureChanged(object? source, Logic.TemperatureChangedEventArgs args)
+        {
+            if (source != _room) return;
+            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
         }
 
         private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)

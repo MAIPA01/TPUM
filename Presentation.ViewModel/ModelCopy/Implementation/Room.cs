@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
 namespace TPUM.Presentation.ViewModel
@@ -46,6 +45,7 @@ namespace TPUM.Presentation.ViewModel
         public Room(Model.IRoom room)
         {
             _room = room;
+            _room.TemperatureChanged += GetTemperatureChanged;
 
             Heaters = new ReadOnlyObservableCollection<IHeater>(_heaters);
             foreach (var heater in _room.Heaters)
@@ -65,6 +65,15 @@ namespace TPUM.Presentation.ViewModel
 
             ClearHeatSensorsCommand = new CustomCommand(ClearHeatSensors);
             ClearHeatersCommand = new CustomCommand(ClearHeaters);
+        }
+
+        private void GetTemperatureChanged(object? source, Model.TemperatureChangedEventArgs args)
+        {
+            if (source != _room) return;
+            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
+            OnPropertyChange(nameof(Heaters));
+            OnPropertyChange(nameof(HeatSensors));
+            OnPropertyChange(nameof(AvgTemperature));
         }
 
         private void GetPositionChanged(object? source, PositionChangedEventArgs args)
