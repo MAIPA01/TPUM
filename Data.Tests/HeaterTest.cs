@@ -3,7 +3,7 @@
     [TestClass]
     public sealed class HeaterTest
     {
-        private Heater _heater;
+        private IHeater _heater = default!;
         private const long _id = 10;
         private const float _x = 2f;
         private const float _y = 2f;
@@ -12,14 +12,14 @@
         [TestInitialize]
         public void Setup()
         {
-            _heater = new(_id, _x, _y, _temp);
+            _heater = new DummyHeater(_id, _x, _y, _temp);
         }
 
         [TestMethod]
         public void Heater_ShouldInitialize_WithCorrectProperties()
         {
             Assert.AreEqual(_id, _heater.Id);
-            Assert.AreEqual(new Position(_x, _y), _heater.Position);
+            Assert.AreEqual(new DummyPosition(_x, _y), _heater.Position);
             Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
             Assert.IsFalse(_heater.IsOn);
         }
@@ -27,9 +27,9 @@
         [TestMethod]
         public void SetPosition_ShouldUpdatePositionCorrectly()
         {
-            Assert.AreEqual(new Position(_x, _y), _heater.Position);
+            Assert.AreEqual(new DummyPosition(_x, _y), _heater.Position);
             _heater.Position.X += 1f;
-            Assert.AreEqual(new Position(_x + 1f, _y), _heater.Position);
+            Assert.AreEqual(new DummyPosition(_x + 1f, _y), _heater.Position);
         }
 
         [TestMethod]

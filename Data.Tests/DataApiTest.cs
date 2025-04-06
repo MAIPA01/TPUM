@@ -3,52 +3,65 @@
     [TestClass]
     public sealed class DataApiTest
     {
-        private DataApi _dataApi;
+        private DataApiBase _dataApi = default!;
+        private const float _width = 10f;
+        private const float _height = 20f;
 
         [TestInitialize]
         public void Setup()
         {
-            _dataApi = new DataApi();
+            _dataApi = DataApiBase.GetApi();
         }
 
         [TestMethod]
-        public void CreateHeater_ShouldReturnValidHeater()
+        public void AddRoom_ShouldAddRoomToList()
         {
-            float x = 10.0f, y = 20.0f, temperature = 100.0f;
+            IRoom room = _dataApi.AddRoom(_width, _height);
+            var rooms = _dataApi.Rooms;
 
-            var heater = _dataApi.CreateHeater(x, y, temperature);
-
-            Assert.IsNotNull(heater);
-            Assert.AreEqual(x, heater.Position.X, 1e-10f);
-            Assert.AreEqual(y, heater.Position.Y, 1e-10f);
-            Assert.AreEqual(0f, heater.Temperature, 1e-10f);
-            heater.TurnOn();
-            Assert.AreEqual(temperature, heater.Temperature, 1e-10f);
+            Assert.AreEqual(1, rooms.Count);
+            Assert.AreSame(room, rooms.First());
+            Assert.IsTrue(rooms.Contains(room));
+            Assert.AreEqual(_width, room.Width);
+            Assert.AreEqual(_height, room.Height);
         }
 
         [TestMethod]
-        public void CreateHeatSensor_ShouldReturnValidHeatSensor()
+        public void RemoveRoom_ShouldRemoveRoomFromList()
         {
-            float x = 15.0f, y = 25.0f;
+            IRoom room = _dataApi.AddRoom(_width, _height);
 
-            var sensor = _dataApi.CreateHeatSensor(x, y);
+            Assert.AreEqual(1, _dataApi.Rooms.Count);
 
-            Assert.IsNotNull(sensor);
-            Assert.AreEqual(x, sensor.Position.X, 1e-10f);
-            Assert.AreEqual(y, sensor.Position.Y, 1e-10f);
-            Assert.AreEqual(0f, sensor.Temperature, 1e-10f);
+            _dataApi.RemoveRoom(room.Id);
+
+            Assert.AreEqual(0, _dataApi.Rooms.Count);
         }
 
         [TestMethod]
-        public void CreatePosition_ShouldReturnValidPosition()
+        public void ClearRooms_ShouldRemoveAllRooms()
         {
-            float x = 5.0f, y = 10.0f;
+            _dataApi.AddRoom(_width, _height);
+            _dataApi.AddRoom(_width + 20f, _height + 20f);
 
-            var position = _dataApi.CreatePosition(x, y);
+            Assert.AreEqual(2, _dataApi.Rooms.Count);
 
-            Assert.IsNotNull(position);
-            Assert.AreEqual(x, position.X, 1e-10f);
-            Assert.AreEqual(y, position.Y, 1e-10f);
+            _dataApi.ClearRooms();
+
+            Assert.AreEqual(0, _dataApi.Rooms.Count);
+        }
+
+        [TestMethod]
+        public void Dispose_ShouldClearRoomsAndDisposeEachRoom()
+        {
+            _dataApi.AddRoom(_width, _height);
+            _dataApi.AddRoom(_width + 20f, _height + 20f);
+
+            Assert.AreEqual(2, _dataApi.Rooms.Count);
+
+            _dataApi.Dispose();
+
+            Assert.AreEqual(0, _dataApi.Rooms.Count);
         }
 
         [TestMethod]

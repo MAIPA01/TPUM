@@ -3,7 +3,7 @@
     [TestClass]
     public sealed class HeatSensorTest
     {
-        private HeatSensor _sensor;
+        private IHeatSensor _sensor = default!;
         private const long _id = 10;
         private const float _x = 2f;
         private const float _y = 2f;
@@ -11,7 +11,7 @@
         [TestInitialize]
         public void Setup()
         {
-            _sensor = new(_id, _x, _y);
+            _sensor = new DummyHeatSensor(_id, _x, _y);
         }
 
         [TestMethod]

@@ -1,16 +1,14 @@
-﻿using TPUM.Data;
-
-namespace TPUM.Logic.Tests
+﻿namespace TPUM.Logic.Tests
 {
     [TestClass]
     public sealed class LogicAPITest
     {
-        private LogicApi _logicApi;
+        private LogicApiBase _logicApi = default!;
 
         [TestInitialize]
         public void Setup()
         {
-            _logicApi = new(DataApiBase.GetApi());
+            _logicApi = LogicApiBase.GetApi();
         }
 
         [TestMethod]

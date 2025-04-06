@@ -3,14 +3,14 @@
     [TestClass]
     public sealed class PositionTest
     {
-        private Position _position;
+        private IPosition _position = default!;
         private const float _x = 2f;
         private const float _y = 2f;
 
         [TestInitialize]
         public void Setup()
         {
-            _position = new(_x, _y);
+            _position = new DummyPosition(_x, _y);
         }
 
         [TestMethod]
@@ -37,8 +37,8 @@
         [TestMethod]
         public void Distance_ShouldCalculateCorrectly()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 1f);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 1f);
             Assert.AreEqual(MathF.Sqrt(2f), IPosition.Distance(pos1, pos2), 1e-10f);
             Assert.AreEqual(MathF.Sqrt(2f), IPosition.Distance(pos2, pos1), 1e-10f);
         }
@@ -46,94 +46,94 @@
         [TestMethod]
         public void EqualOperator_ShouldReturnFalseForTwoPositionsWithDiffrentX()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 2f);
-            Assert.IsFalse(pos1 == pos2);
-            Assert.IsFalse(pos2 == pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 2f);
+            Assert.IsFalse((DummyPosition)pos1 == (DummyPosition)pos2);
+            Assert.IsFalse((DummyPosition)pos2 == (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void EqualOperator_ShouldReturnFalseForTwoPositionsWithDiffrentY()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 1f);
-            Assert.IsFalse(pos1 == pos2);
-            Assert.IsFalse(pos2 == pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 1f);
+            Assert.IsFalse((DummyPosition)pos1 == (DummyPosition)pos2);
+            Assert.IsFalse((DummyPosition)pos2 == (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void EqualOperator_ShouldReturnFalseForTwoDiffrentPositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 1f);
-            Assert.IsFalse(pos1 == pos2);
-            Assert.IsFalse(pos2 == pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 1f);
+            Assert.IsFalse((DummyPosition)pos1 == (DummyPosition)pos2);
+            Assert.IsFalse((DummyPosition)pos2 == (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void EqualOperator_ShouldReturnTrueForTwoSamePositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 2f);
-            Assert.IsTrue(pos1 == pos2);
-            Assert.IsTrue(pos2 == pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 2f);
+            Assert.IsTrue((DummyPosition)pos1 == (DummyPosition)pos2);
+            Assert.IsTrue((DummyPosition)pos2 == (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void EqualOperator_ShouldReturnTrueForTheSamePosition()
         {
-            Assert.AreSame(_position, _position);
-            Assert.IsTrue(_position == _position);
+            Assert.AreSame((DummyPosition)_position, (DummyPosition)_position);
+            Assert.IsTrue((DummyPosition)_position == (DummyPosition)_position);
         }
 
         [TestMethod]
         public void NotEqualOperator_ShouldReturnTrueForTwoPositionsWithDiffrentX()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 2f);
-            Assert.IsTrue(pos1 != pos2);
-            Assert.IsTrue(pos2 != pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 2f);
+            Assert.IsTrue((DummyPosition)pos1 != (DummyPosition)pos2);
+            Assert.IsTrue((DummyPosition)pos2 != (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void NotEqualOperator_ShouldReturnTrueForTwoPositionsWithDiffrentY()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 1f);
-            Assert.IsTrue(pos1 != pos2);
-            Assert.IsTrue(pos2 != pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 1f);
+            Assert.IsTrue((DummyPosition)pos1 != (DummyPosition)pos2);
+            Assert.IsTrue((DummyPosition)pos2 != (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void NotEqualOperator_ShouldReturnTrueForTwoDiffrentPositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 1f);
-            Assert.IsTrue(pos1 != pos2);
-            Assert.IsTrue(pos2 != pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 1f);
+            Assert.IsTrue((DummyPosition)pos1 != (DummyPosition)pos2);
+            Assert.IsTrue((DummyPosition)pos2 != (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void NotEqualOperator_ShouldReturnFalseForTwoSamePositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 2f);
-            Assert.IsFalse(pos1 != pos2);
-            Assert.IsFalse(pos2 != pos1);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 2f);
+            Assert.IsFalse((DummyPosition)pos1 != (DummyPosition)pos2);
+            Assert.IsFalse((DummyPosition)pos2 != (DummyPosition)pos1);
         }
 
         [TestMethod]
         public void NotEqualOperator_ShouldReturnFalseForTheSamePosition()
         {
-            Assert.AreSame(_position, _position);
-            Assert.IsFalse(_position != _position);
+            Assert.AreSame((DummyPosition)_position, (DummyPosition)_position);
+            Assert.IsFalse((DummyPosition)_position != (DummyPosition)_position);
         }
 
         [TestMethod]
         public void EqualsMethod_ShouldReturnFalseForTwoPositionsWithDiffrentX()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 2f);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 2f);
             Assert.IsFalse(pos1.Equals(pos2));
             Assert.IsFalse(pos2.Equals(pos1));
         }
@@ -141,8 +141,8 @@
         [TestMethod]
         public void EqualsMethod_ShouldReturnFalseForTwoPositionsWithDiffrentY()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 1f);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 1f);
             Assert.IsFalse(pos1.Equals(pos2));
             Assert.IsFalse(pos2.Equals(pos1));
         }
@@ -150,8 +150,8 @@
         [TestMethod]
         public void EqualsMethod_ShouldReturnFalseForTwoDiffrentPositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(1f, 1f);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(1f, 1f);
             Assert.IsFalse(pos1.Equals(pos2));
             Assert.IsFalse(pos2.Equals(pos1));
         }
@@ -159,8 +159,8 @@
         [TestMethod]
         public void EqualsMethod_ShouldReturnTrueForTwoSamePositions()
         {
-            Position pos1 = new(2f, 2f);
-            Position pos2 = new(2f, 2f);
+            IPosition pos1 = new DummyPosition(2f, 2f);
+            IPosition pos2 = new DummyPosition(2f, 2f);
             Assert.IsTrue(pos1.Equals(pos2));
             Assert.IsTrue(pos2.Equals(pos1));
         }
@@ -168,7 +168,7 @@
         [TestMethod]
         public void EqualsMethod_ShouldReturnTrueForTheSamePosition()
         {
-            Assert.AreSame(_position, _position);
+            Assert.AreSame((DummyPosition)_position, (DummyPosition)_position);
             Assert.IsTrue(_position.Equals(_position));
         }
 
