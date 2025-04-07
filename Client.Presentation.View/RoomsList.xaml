@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="TPUM.Client.Presentation.View.RoomsList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TPUM.Client.Presentation.View"
+             xmlns:ctrl="clr-namespace:TPUM.Client.Presentation.View.Controls"
+             xmlns:vm="clr-namespace:TPUM.Client.Presentation.ViewModel;assembly=Client.Presentation.ViewModel"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <vm:RoomsListViewModel x:Name="ViewModel"/>
+    </UserControl.DataContext>
+    <Grid>
+        <Button Content="Add Room" Command="{Binding AddRoomWindowCommand}" 
+                CommandParameter="{x:Type local:CreateRoomWindow}"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Width="168" Height="48" 
+                Margin="1062,41,0,0"/>
+        <ListView ItemsSource="{Binding Rooms, Mode=OneWay}"
+                  Margin="46,108,46,10">
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ctrl:RoomInfo RoomId="{Binding Id}" 
+                                   RoomName="{Binding Name}"
+                                   RoomWidth="{Binding Width}"
+                                   RoomHeight="{Binding Height}"
+                                   HeatersCount="{Binding Heaters.Count}"
+                                   SensorsCount="{Binding HeatSensors.Count}"
+                                   Temperature="{Binding AvgTemperature}"
+                                   ShowCommand="{Binding ShowRoomCommand, ElementName=ViewModel}"
+                                   RemoveCommand="{Binding RemoveRoomCommand, ElementName=ViewModel}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>
