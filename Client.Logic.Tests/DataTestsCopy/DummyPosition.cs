@@ -26,7 +26,7 @@
 
         private void GetPositionChanged(object? source, Data.PositionChangedEventArgs args)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
+            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new DummyPosition(args.LastPosition), this));
         }
 
         public static bool operator ==(DummyPosition pos1, IPosition pos2)

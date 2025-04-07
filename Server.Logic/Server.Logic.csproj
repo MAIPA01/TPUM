@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Implementation\**" />
+    <EmbeddedResource Remove="Implementation\**" />
+    <None Remove="Implementation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Server.Data\Server.Data.csproj" />
+  </ItemGroup>
+
 </Project>

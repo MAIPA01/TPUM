@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Logic", "Client.Logic\Client.Logic.csproj", "{DF3D1BAD-0B1D-476D-8AEA-2886EA8EECB6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Data", "Client.Data\Client.Data.csproj", "{C4EBF75B-5B81-4606-B1CE-A694FBCEABA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Logic", "Client.Logic\Client.Logic.csproj", "{DF3D1BAD-0B1D-476D-8AEA-2886EA8EECB6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Data.Tests", "Client.Data.Tests\Client.Data.Tests.csproj", "{4E8E65AE-E5AC-42A0-9413-D934F6F03C4E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Logic.Tests", "Client.Logic.Tests\Client.Logic.Tests.csproj", "{B5C2A083-CDF1-0C33-6BDE-F7F5D803EBEB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Presentation.Model", "Client.Presentation.Model\Client.Presentation.Model.csproj", "{39A6DEE4-21AE-0C94-534D-0C0F4340B518}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Presentation.Model.Tests", "Client.Presentation.Model.Tests\Client.Presentation.Model.Tests.csproj", "{A189EECD-E050-45E8-B9CA-F0BB2AA38FA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Presentation.ViewModel", "Client.Presentation.ViewModel\Client.Presentation.ViewModel.csproj", "{9FDEB8A3-11E3-2550-F0D4-AA37F2F7FEF0}"
 EndProject
@@ -25,24 +27,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Data", "Server.Data\Server.Data.csproj", "{B033785A-B5E8-407A-860B-564041EA9A1B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Logic", "Server.Logic\Server.Logic.csproj", "{DB65BF3F-253B-4537-B970-20DF3EAE938A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B033785A-B5E8-407A-860B-564041EA9A1B} = {B033785A-B5E8-407A-860B-564041EA9A1B}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Data.Tests", "Server.Data.Tests\Server.Data.Tests.csproj", "{6D29D391-B9A9-4C13-AE5A-3E6F57470DF9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B033785A-B5E8-407A-860B-564041EA9A1B} = {B033785A-B5E8-407A-860B-564041EA9A1B}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Logic.Tests", "Server.Logic.Tests\Server.Logic.Tests.csproj", "{1EABDE51-AF6E-4D45-A4E2-743E9C02E99D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{DB65BF3F-253B-4537-B970-20DF3EAE938A} = {DB65BF3F-253B-4537-B970-20DF3EAE938A}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Presentation.Model.Tests", "Client.Presentation.Model.Tests\Client.Presentation.Model.Tests.csproj", "{A189EECD-E050-45E8-B9CA-F0BB2AA38FA3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{39A6DEE4-21AE-0C94-534D-0C0F4340B518} = {39A6DEE4-21AE-0C94-534D-0C0F4340B518}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Presentation", "Server.Presentation\Server.Presentation.csproj", "{DBC1D2B4-700F-46CE-891F-138AC74E81EA}"
 EndProject

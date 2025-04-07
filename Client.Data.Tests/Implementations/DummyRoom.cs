@@ -73,7 +73,7 @@
         {
             if (x > Width || x < 0f || y > Height || y < 0f || HeatSensors.Count == 0) return 0f;
 
-            var pos = new Position(x, y);
+            var pos = new DummyPosition(x, y);
             var heatersTemp = 0f;
             lock (_heatersLock)
             {

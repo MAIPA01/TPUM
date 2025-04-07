@@ -63,7 +63,7 @@
                 Assert.AreEqual(5f, args.NewPosition.Y, 1e-10f);
             };
 
-            _sensor.Position = new Position(5.0f, 5.0f);
+            _sensor.Position = new DummyPosition(5.0f, 5.0f);
 
             Assert.IsTrue(eventTriggered, "TemperatureChange event was not triggered.");
         }
@@ -74,7 +74,7 @@
             bool eventTriggered = false;
             _sensor.PositionChanged += (s, e) => eventTriggered = true;
 
-            _sensor.Position = new Position(_x, _y);
+            _sensor.Position = new DummyPosition(_x, _y);
 
             Assert.IsFalse(eventTriggered);
         }

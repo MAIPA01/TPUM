@@ -39,8 +39,11 @@ namespace TPUM.Client.Presentation.Model
 
         public override void RemoveRoom(long id)
         {
-            var room = _rooms.First(room => room.Id == id);
-            _rooms.Remove(room);
+            var room = _rooms.Find(room => room.Id == id);
+            if (room != null)
+            {
+                _rooms.Remove(room);
+            }
             _logic.RemoveRoom(id);
         }
 

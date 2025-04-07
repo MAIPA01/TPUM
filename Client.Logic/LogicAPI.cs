@@ -20,14 +20,24 @@ namespace TPUM.Client.Logic
         public abstract void Dispose();
     }
 
-    internal class LogicApi(DataApiBase data) : LogicApiBase
+    internal class LogicApi : LogicApiBase
     {
+        private readonly DataApiBase _data;
         private readonly List<IRoom> _rooms = [];
         public override IReadOnlyCollection<IRoom> Rooms => _rooms;
 
+        public LogicApi(DataApiBase data)
+        {
+            _data = data;
+            foreach (var room in _data.Rooms)
+            {
+                _rooms.Add(new Room(room));
+            }
+        }
+
         public override IRoom AddRoom(float width, float height)
         {
-            var room = new Room(data.AddRoom(width, height));
+            var room = new Room(_data.AddRoom(width, height));
             room.StartSimulation();
             _rooms.Add(room);
             return room;
@@ -41,13 +51,13 @@ namespace TPUM.Client.Logic
                 room.EndSimulation();
                 _rooms.Remove(room);
             }
-            data.RemoveRoom(id);
+            _data.RemoveRoom(id);
         }
 
         public override void ClearRooms()
         {
             _rooms.Clear();
-            data.ClearRooms();
+            _data.ClearRooms();
         }
 
         public override void Dispose()
@@ -56,7 +66,7 @@ namespace TPUM.Client.Logic
             {
                 room.EndSimulation();
             }
-            data.Dispose();
+            _data.Dispose();
             foreach (var room in _rooms)
             {
                 room.Dispose();

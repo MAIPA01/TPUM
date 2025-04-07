@@ -13,7 +13,7 @@
 
         public IPosition Position
         {
-            get => new Position(_heater.Position);
+            get => new DummyPosition(_heater.Position);
             set
             {
                 _heater.Position.X = value.X;
@@ -37,7 +37,7 @@
 
         private void GetPositionChanged(object? source, Data.PositionChangedEventArgs args)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
+            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new DummyPosition(args.LastPosition), Position));
         }
 
         private void GetTemperatureChanged(object? source, Data.TemperatureChangedEventArgs args)
