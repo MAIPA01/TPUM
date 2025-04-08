@@ -13,7 +13,7 @@ namespace TPUM.Client.Presentation.ViewModel
         public event EnableChangeEventHandler? EnableChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public long Id => _room.Id;
+        public Guid Id => _room.Id;
 
         public string Name
         {
@@ -67,7 +67,7 @@ namespace TPUM.Client.Presentation.ViewModel
             ClearHeatersCommand = new CustomCommand(ClearHeaters);
         }
 
-        private void GetTemperatureChanged(object? source, Model.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Model.Events.TemperatureChangedEventArgs args)
         {
             if (source != _room) return;
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
@@ -119,7 +119,7 @@ namespace TPUM.Client.Presentation.ViewModel
             return heater;
         }
 
-        public void RemoveHeater(long id)
+        public void RemoveHeater(Guid id)
         {
             var heater = _heaters.First(h => h.Id == id);
             UnsubscribeFromHeater(heater);
@@ -157,7 +157,7 @@ namespace TPUM.Client.Presentation.ViewModel
             return sensor;
         }
 
-        public void RemoveHeatSensor(long id)
+        public void RemoveHeatSensor(Guid id)
         {
             var sensor = _heatSensors.First(sensor => sensor.Id == id);
             UnsubscribeFromHeatSensor(sensor);

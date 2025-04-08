@@ -93,11 +93,11 @@ namespace TPUM.Client.Presentation.ViewModel
         {
             if (parameter == null) return;
             if (WindowManager.MakeYesNoWindow(
-                    "Are you sure you want to remove Heater of id: '" + (long)parameter + "'?",
+                    "Are you sure you want to remove Heater of id: '" + (Guid)parameter + "'?",
                     "Heater Removal")
                 )
             {
-                CurrentRoom?.RemoveHeater((long)parameter);
+                CurrentRoom?.RemoveHeater((Guid)parameter);
             }
         }
 
@@ -112,10 +112,10 @@ namespace TPUM.Client.Presentation.ViewModel
         {
             if (parameter == null) return;
             if (!WindowManager.MakeYesNoWindow(
-                    "Are you sure you want to remove Heat Sensor of id: '" + (long)parameter + "'?",
+                    "Are you sure you want to remove Heat Sensor of id: '" + (Guid)parameter + "'?",
                     "Heat Sensor Removal")
                ) return;
-            CurrentRoom?.RemoveHeatSensor((long)parameter);
+            CurrentRoom?.RemoveHeatSensor((Guid)parameter);
             OnPropertyChanged(nameof(RoomTemp));
         }
 

@@ -4,11 +4,17 @@ namespace TPUM.Client.Logic
 {
     public abstract class LogicApiBase : IDisposable
     {
-        public abstract IReadOnlyCollection<IRoom> Rooms { get; }
+        public abstract IReadOnlyCollection<IRoomLogic> Rooms { get; }
 
-        public abstract IRoom AddRoom(float width, float height);
+        public abstract IPositionLogic CreatePosition(float x, float y);
 
-        public abstract void RemoveRoom(long id);
+        public abstract IHeaterLogic CreateHeater(float x, float y, float temperature);
+
+        public abstract IHeatSensorLogic CreateHeatSensor(float x, float y);
+
+        public abstract IRoomLogic AddRoom(float width, float height);
+
+        public abstract void RemoveRoom(Guid id);
 
         public abstract void ClearRooms();
 
@@ -23,27 +29,42 @@ namespace TPUM.Client.Logic
     internal class LogicApi : LogicApiBase
     {
         private readonly DataApiBase _data;
-        private readonly List<IRoom> _rooms = [];
-        public override IReadOnlyCollection<IRoom> Rooms => _rooms;
+        private readonly List<IRoomLogic> _rooms = [];
+        public override IReadOnlyCollection<IRoomLogic> Rooms => _rooms;
 
         public LogicApi(DataApiBase data)
         {
             _data = data;
             foreach (var room in _data.Rooms)
             {
-                _rooms.Add(new Room(room));
+                _rooms.Add(new RoomLogic(room));
             }
         }
 
-        public override IRoom AddRoom(float width, float height)
+        public override IPositionLogic CreatePosition(float x, float y)
         {
-            var room = new Room(_data.AddRoom(width, height));
+            return new PositionLogic(_data.CreatePosition(x, y));
+        }
+
+        public override IHeaterLogic CreateHeater(float x, float y, float temperature)
+        {
+            return new HeaterLogic(_data.CreateHeater(x, y, temperature));
+        }
+
+        public override IHeatSensorLogic CreateHeatSensor(float x, float y)
+        {
+            return new HeatSensorLogic(_data.CreateHeatSensor(x, y));
+        }
+
+        public override IRoomLogic AddRoom(float width, float height)
+        {
+            var room = new RoomLogic(_data.AddRoom(width, height));
             room.StartSimulation();
             _rooms.Add(room);
             return room;
         }
 
-        public override void RemoveRoom(long id)
+        public override void RemoveRoom(Guid id)
         {
             var room = _rooms.Find(room => room.Id == id);
             if (room != null)

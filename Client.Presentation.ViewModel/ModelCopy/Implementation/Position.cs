@@ -27,7 +27,7 @@ namespace TPUM.Client.Presentation.ViewModel
             _position.PositionChanged += GetPositionChanged;
         }
 
-        private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Model.Events.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
             OnPropertyChange(nameof(X));

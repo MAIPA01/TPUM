@@ -1,8 +1,10 @@
-﻿namespace TPUM.Client.Presentation.Model
+﻿using TPUM.Client.Presentation.Model.Events;
+
+namespace TPUM.Client.Presentation.Model
 {
-    public interface IRoom : INotifyTemperatureChanged, INotifyPositionChanged, INotifyEnableChanged, IDisposable
+    public interface IRoom : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
     {
-        long Id { get; }
+        Guid Id { get; }
         string Name { get; set; }
         float Width { get; }
         float Height { get; }
@@ -12,10 +14,10 @@
         IReadOnlyCollection<IHeatSensor> HeatSensors { get; }
 
         IHeater AddHeater(float x, float y, float temperature);
-        void RemoveHeater(long id);
+        void RemoveHeater(Guid id);
         void ClearHeaters();
         IHeatSensor AddHeatSensor(float x, float y);
-        void RemoveHeatSensor(long id);
+        void RemoveHeatSensor(Guid id);
         void ClearHeatSensors();
     }
 }

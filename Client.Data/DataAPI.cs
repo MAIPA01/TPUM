@@ -1,12 +1,20 @@
-﻿namespace TPUM.Client.Data
+﻿using System.Xml.Serialization;
+
+namespace TPUM.Client.Data
 {
     public abstract class DataApiBase : IDisposable
     {
-        public abstract IReadOnlyCollection<IRoom> Rooms { get; }
+        public abstract IReadOnlyCollection<IRoomData> Rooms { get; }
 
-        public abstract IRoom AddRoom(float width, float height);
+        public abstract IPositionData CreatePosition(float x, float y);
+        
+        public abstract IHeaterData CreateHeater(float x, float y, float temperature);
 
-        public abstract void RemoveRoom(long id);
+        public abstract IHeatSensorData CreateHeatSensor(float x, float y);
+
+        public abstract IRoomData AddRoom(float width, float height);
+
+        public abstract void RemoveRoom(Guid id);
 
         public abstract void ClearRooms();
 
@@ -21,8 +29,8 @@
     internal class DataApi : DataApiBase
     {
         private readonly object _roomsLock = new();
-        private readonly List<IRoom> _rooms = [];
-        public override IReadOnlyCollection<IRoom> Rooms
+        private readonly List<IRoomData> _rooms = [];
+        public override IReadOnlyCollection<IRoomData> Rooms
         {
             get
             {
@@ -33,9 +41,24 @@
             }
         }
 
-        public override IRoom AddRoom(float width, float height)
+        public override IPositionData CreatePosition(float x, float y)
         {
-            var room = new Room(new Random().NextInt64(), width, height);
+            return new PositionData(x, y);
+        }
+
+        public override IHeaterData CreateHeater(float x, float y, float temperature)
+        {
+            return new HeaterData(Guid.NewGuid(), new PositionData(x, y), temperature);
+        }
+
+        public override IHeatSensorData CreateHeatSensor(float x, float y)
+        {
+            return new HeatSensorData(Guid.NewGuid(), new PositionData(x, y));
+        }
+
+        public override IRoomData AddRoom(float width, float height)
+        {
+            IRoomData room = new RoomData(Guid.NewGuid(), width, height);
             lock (_roomsLock)
             {
                 _rooms.Add(room);
@@ -43,11 +66,11 @@
             return room;
         }
 
-        public override void RemoveRoom(long id)
+        public override void RemoveRoom(Guid id)
         {
             lock (_roomsLock)
             {
-                var room = _rooms.Find(room => room.Id == id);
+                IRoomData? room = _rooms.Find(room => room.Id == id);
                 if (room != null) _rooms.Remove(room);
             }
         }
@@ -62,11 +85,7 @@
 
         public override void Dispose()
         {
-            foreach (var room in _rooms)
-            {
-                room.Dispose();
-            }
-            _rooms.Clear();
+            ClearRooms();
             GC.SuppressFinalize(this);
         }
     }

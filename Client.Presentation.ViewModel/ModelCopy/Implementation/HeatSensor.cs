@@ -11,7 +11,7 @@ namespace TPUM.Client.Presentation.ViewModel
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public long Id => _sensor.Id;
+        public Guid Id => _sensor.Id;
 
         public IPosition Position
         {
@@ -32,13 +32,13 @@ namespace TPUM.Client.Presentation.ViewModel
             _sensor.TemperatureChanged += GetTemperatureChanged;
         }
 
-        private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Model.Events.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
             OnPropertyChange(nameof(Position));
         }
 
-        private void GetTemperatureChanged(object? source, Model.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Model.Events.TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
             OnPropertyChange(nameof(Temperature));

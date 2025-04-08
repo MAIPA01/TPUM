@@ -5,7 +5,7 @@ namespace TPUM.Client.Presentation.ViewModel
 {
     public interface IRoom : INotifyTemperatureChanged, INotifyPositionChanged, INotifyEnableChanged, INotifyPropertyChanged, IDisposable
     {
-        long Id { get; }
+        Guid Id { get; }
         string Name { get; set; }
         float Width { get; }
         float Height { get; }
@@ -18,8 +18,8 @@ namespace TPUM.Client.Presentation.ViewModel
         ICommand ClearHeatersCommand { get; }
 
         IHeater AddHeater(float x, float y, float temperature);
-        void RemoveHeater(long id);
+        void RemoveHeater(Guid id);
         IHeatSensor AddHeatSensor(float x, float y);
-        void RemoveHeatSensor(long id);
+        void RemoveHeatSensor(Guid id);
     }
 }

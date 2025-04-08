@@ -10,10 +10,10 @@ namespace TPUM.Client.Presentation.View.Controls
     public partial class RoomInfo : UserControl
     {
         public static readonly DependencyProperty RoomIdProperty =
-            DependencyProperty.Register(nameof(RoomId), typeof(long), typeof(RoomInfo));
-        public long RoomId
+            DependencyProperty.Register(nameof(RoomId), typeof(Guid), typeof(RoomInfo));
+        public Guid RoomId
         {
-            get => (long)GetValue(RoomIdProperty);
+            get => (Guid)GetValue(RoomIdProperty);
             set => SetValue(RoomIdProperty, value);
         }
 

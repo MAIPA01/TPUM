@@ -12,7 +12,7 @@ namespace TPUM.Client.Presentation.ViewModel
         public event EnableChangeEventHandler? EnableChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public long Id => _heater.Id;
+        public Guid Id => _heater.Id;
 
         public IPosition Position
         {
@@ -48,19 +48,19 @@ namespace TPUM.Client.Presentation.ViewModel
             _turnOnCommand = new CustomCommand(_ => _heater.TurnOn());
         }
 
-        private void GetPositionChanged(object? source, Model.PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, Model.Events.PositionChangedEventArgs args)
         {
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
             OnPropertyChange(nameof(Position));
         }
 
-        private void GetTemperatureChanged(object? source, Model.TemperatureChangedEventArgs args)
+        private void GetTemperatureChanged(object? source, Model.Events.TemperatureChangedEventArgs args)
         {
             TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
             OnPropertyChange(nameof(Temperature));
         }
 
-        private void GetEnableChanged(object? source, Model.EnableChangedEventArgs args)
+        private void GetEnableChanged(object? source, Model.Events.EnableChangedEventArgs args)
         {
             EnableChanged?.Invoke(this, new EnableChangeEventArgs(args.LastEnable, args.NewEnable));
             OnPropertyChange(nameof(IsOn));

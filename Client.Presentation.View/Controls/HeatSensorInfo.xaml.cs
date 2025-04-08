@@ -10,10 +10,10 @@ namespace TPUM.Client.Presentation.View.Controls
     public partial class HeatSensorInfo : UserControl
     {
         public static readonly DependencyProperty HeatSensorIdProperty =
-            DependencyProperty.Register(nameof(HeatSensorId), typeof(long), typeof(HeatSensorInfo));
-        public long HeatSensorId
+            DependencyProperty.Register(nameof(HeatSensorId), typeof(Guid), typeof(HeatSensorInfo));
+        public Guid HeatSensorId
         {
-            get => (long)GetValue(HeatSensorIdProperty);
+            get => (Guid)GetValue(HeatSensorIdProperty);
             set => SetValue(HeatSensorIdProperty, value);
         }
 

@@ -14,9 +14,41 @@
         }
 
         [TestMethod]
+        public void CreatePosition_ShouldReturnValidPosition()
+        {
+            IPositionData position = _dataApi.CreatePosition(10f, 20f);
+
+            Assert.IsNotNull(position);
+            Assert.AreEqual(10f, position.X);
+            Assert.AreEqual(20f, position.Y);
+        }
+
+        [TestMethod]
+        public void CreateHeater_ShouldReturnValidPosition()
+        {
+            IHeaterData heater = _dataApi.CreateHeater(10f, 20f, 100f);
+
+            Assert.IsNotNull(heater);
+            Assert.AreEqual(10f, heater.Position.X);
+            Assert.AreEqual(20f, heater.Position.Y);
+            Assert.AreEqual(100f, heater.Temperature);
+        }
+
+        [TestMethod]
+        public void CreateHeatSensor_ShouldReturnValidPosition()
+        {
+            IHeatSensorData sensor = _dataApi.CreateHeatSensor(10f, 20f);
+
+            Assert.IsNotNull(sensor);
+            Assert.AreEqual(10f, sensor.Position.X);
+            Assert.AreEqual(20f, sensor.Position.Y);
+            Assert.AreEqual(0f, sensor.Temperature);
+        }
+
+        [TestMethod]
         public void AddRoom_ShouldAddRoomToList()
         {
-            IRoom room = _dataApi.AddRoom(_width, _height);
+            IRoomData room = _dataApi.AddRoom(_width, _height);
             var rooms = _dataApi.Rooms;
 
             Assert.AreEqual(1, rooms.Count);
@@ -29,7 +61,7 @@
         [TestMethod]
         public void RemoveRoom_ShouldRemoveRoomFromList()
         {
-            IRoom room = _dataApi.AddRoom(_width, _height);
+            IRoomData room = _dataApi.AddRoom(_width, _height);
 
             Assert.AreEqual(1, _dataApi.Rooms.Count);
 

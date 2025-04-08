@@ -4,7 +4,7 @@ namespace TPUM.Client.Presentation.ViewModel
 {
     public interface IHeater : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, INotifyPropertyChanged, IDisposable
     {
-        long Id { get; }
+        Guid Id { get; }
         IPosition Position { get; set; }
         float Temperature { get; set; }
         bool IsOn { get; }

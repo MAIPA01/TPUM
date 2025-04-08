@@ -11,9 +11,9 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public abstract IRoom AddRoom(string name, float width, float height);
 
-        public abstract void RemoveRoom(long id);
+        public abstract void RemoveRoom(Guid id);
 
-        public abstract void SetCurrentRoom(long roomId);
+        public abstract void SetCurrentRoom(Guid roomId);
 
         public abstract void Dispose();
 
@@ -63,14 +63,14 @@ namespace TPUM.Client.Presentation.ViewModel
             return room;
         }
 
-        public override void RemoveRoom(long id)
+        public override void RemoveRoom(Guid id)
         {
             var room = _rooms.First(room => room.Id == id);
             _rooms.Remove(room);
             _model.RemoveRoom(id);
         }
 
-        public override void SetCurrentRoom(long roomId)
+        public override void SetCurrentRoom(Guid roomId)
         {
             var room = _rooms.First(room => room.Id == roomId);
             _currentRoom = room;
