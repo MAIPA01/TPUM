@@ -1,15 +1,80 @@
-﻿namespace TPUM.Server.Data.Tests
+﻿using TPUM.Server.Data.Events;
+
+namespace TPUM.Server.Data.Tests
 {
     internal class DummyHeatSensorData : IHeatSensorData
     {
+        public event PositionChangedEventHandler? PositionChanged;
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+
         public Guid Id { get; }
-        public IPositionData Position { get; set; }
-        public float Temperature { get; set; } = 0.0f;
+
+        private IPositionData _position;
+        private readonly object _positionLock = new();
+
+        public IPositionData Position
+        {
+            get
+            {
+                lock (_positionLock)
+                {
+                    return _position;
+                }
+            }
+            set
+            {
+                lock (_positionLock)
+                {
+                    if (_position.Equals(value)) return;
+                    var lastPosition = _position;
+                    _position.PositionChanged -= GetPositionChange;
+                    _position = value;
+                    _position.PositionChanged += GetPositionChange;
+                    PositionChanged?.Invoke(this, lastPosition, _position);
+                }
+            }
+        }
+
+        private float _temperature = 0.0f;
+        private readonly object _temperatureLock = new();
+
+        public float Temperature
+        {
+            get
+            {
+                lock (_temperatureLock)
+                {
+                    return _temperature;
+                }
+            }
+            set
+            {
+                lock (_temperatureLock)
+                {
+                    if (Math.Abs(_temperature - value) < 1e-10f) return;
+                    var lastTemperature = _temperature;
+                    _temperature = value;
+                    TemperatureChanged?.Invoke(this, lastTemperature, _temperature);
+                }
+            }
+        }
 
         public DummyHeatSensorData(Guid id, IPositionData position)
         {
             Id = id;
-            Position = position;
+            _position = position;
+            _position.PositionChanged += GetPositionChange;
+        }
+
+        private void GetPositionChange(object? source, IPositionData lastPosition, IPositionData newPosition)
+        {
+            PositionChanged?.Invoke(this, lastPosition, newPosition);
+        }
+
+        public void Dispose()
+        {
+            _position.PositionChanged -= GetPositionChange;
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,13 +1,10 @@
 ﻿using TPUM.Client.Data;
-using TPUM.Client.Logic.Events;
 
 namespace TPUM.Client.Logic.Tests
 {
     internal class DummyPositionLogic : IPositionLogic
     {
         private readonly IPositionData _data;
-
-        public event PositionChangedEventHandler? PositionChanged;
 
         private readonly object _xLock = new();
         public float X
@@ -19,9 +16,9 @@ namespace TPUM.Client.Logic.Tests
                 {
                     if (Math.Abs(_data.X - value) < 1e-10f) return;
 
-                    DummyPositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, _data.Y));
+                    float lastX = X;
+                    float lastY = Y;
                     _data.X = value;
-                    OnPositionChanged(this, last);
                 }
             }
         }
@@ -36,9 +33,9 @@ namespace TPUM.Client.Logic.Tests
                 {
                     if (Math.Abs(_data.Y - value) < 1e-10f) return;
 
-                    DummyPositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, _data.Y));
+                    float lastX = X;
+                    float lastY = Y;
                     _data.Y = value;
-                    OnPositionChanged(this, last);
                 }
             }
         }
@@ -46,16 +43,6 @@ namespace TPUM.Client.Logic.Tests
         public DummyPositionLogic(IPositionData data)
         {
             _data = data;
-        }
-
-        public static bool operator ==(DummyPositionLogic pos1, IPositionLogic pos2)
-        {
-            return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;
-        }
-
-        public static bool operator !=(DummyPositionLogic pos1, IPositionLogic pos2)
-        {
-            return Math.Abs(pos1.X - pos2.X) > 1e-10f || Math.Abs(pos1.Y - pos2.Y) > 1e-10f;
         }
 
         public override bool Equals(object? obj)
@@ -72,11 +59,6 @@ namespace TPUM.Client.Logic.Tests
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-        }
-
-        private void OnPositionChanged(object? source, IPositionLogic lastPosition)
-        {
-            PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, this));
         }
     }
 }
