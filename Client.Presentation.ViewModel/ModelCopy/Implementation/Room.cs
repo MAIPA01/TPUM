@@ -38,10 +38,6 @@ namespace TPUM.Client.Presentation.ViewModel
         private readonly ObservableCollection<IHeatSensor> _heatSensors = [];
         public ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
 
-        public ICommand ClearHeatSensorsCommand { get; }
-
-        public ICommand ClearHeatersCommand { get; }
-
         public Room(Model.IRoom room)
         {
             _room = room;
@@ -62,9 +58,6 @@ namespace TPUM.Client.Presentation.ViewModel
                 SubscribeToHeatSensor(roomSensor);
                 _heatSensors.Add(roomSensor);
             }
-
-            ClearHeatSensorsCommand = new CustomCommand(ClearHeatSensors);
-            ClearHeatersCommand = new CustomCommand(ClearHeaters);
         }
 
         private void GetTemperatureChanged(object? source, Model.Events.TemperatureChangedEventArgs args)
@@ -111,9 +104,11 @@ namespace TPUM.Client.Presentation.ViewModel
             heater.EnableChanged -= GetEnabledChanged;
         }
 
-        public IHeater AddHeater(float x, float y, float temperature)
+        public IHeater? AddHeater(float x, float y, float temperature)
         {
-            var heater = new Heater(_room.AddHeater(x, y, temperature));
+            var model = _room.AddHeater(x, y, temperature);
+            if (model == null) return null;
+            var heater = new Heater(model);
             SubscribeToHeater(heater);
             _heaters.Add(heater);
             return heater;
@@ -125,16 +120,6 @@ namespace TPUM.Client.Presentation.ViewModel
             UnsubscribeFromHeater(heater);
             _heaters.Remove(heater);
             _room.RemoveHeater(id);
-        }
-
-        private void ClearHeaters(object? param)
-        {
-            foreach (var heater in _heaters)
-            {
-                UnsubscribeFromHeater(heater);
-            }
-            _heaters.Clear();
-            _room.ClearHeaters();
         }
 
         private void SubscribeToHeatSensor(IHeatSensor sensor)
@@ -149,9 +134,11 @@ namespace TPUM.Client.Presentation.ViewModel
             sensor.TemperatureChanged -= GetTemperatureChanged;
         }
 
-        public IHeatSensor AddHeatSensor(float x, float y)
+        public IHeatSensor? AddHeatSensor(float x, float y)
         {
-            var sensor = new HeatSensor(_room.AddHeatSensor(x, y));
+            var model = _room.AddHeatSensor(x, y);
+            if (model == null) return null;
+            var sensor = new HeatSensor(model);
             SubscribeToHeatSensor(sensor);
             _heatSensors.Add(sensor);
             return sensor;
@@ -163,16 +150,6 @@ namespace TPUM.Client.Presentation.ViewModel
             UnsubscribeFromHeatSensor(sensor);
             _heatSensors.Remove(sensor);
             _room.RemoveHeatSensor(id);
-        }
-
-        private void ClearHeatSensors(object? param)
-        {
-            foreach (var sensor in _heatSensors)
-            {
-                UnsubscribeFromHeatSensor(sensor);
-            }
-            _heatSensors.Clear();
-            _room.ClearHeatSensors();
         }
 
         public void Dispose()

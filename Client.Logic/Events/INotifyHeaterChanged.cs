@@ -1,4 +1,4 @@
-﻿namespace TPUM.Client.Data.Events
+﻿namespace TPUM.Client.Logic.Events
 {
     public delegate void HeaterChangedEventHandler(object? source, HeaterChangedEventArgs e);
     public class HeaterChangedEventArgs : EventArgs

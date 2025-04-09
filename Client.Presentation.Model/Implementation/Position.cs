@@ -7,33 +7,49 @@ namespace TPUM.Client.Presentation.Model
     {
         public event PositionChangedEventHandler? PositionChanged;
 
-        private readonly IPositionLogic _logic;
-
+        private float _x;
         public float X
         {
-            get => _logic.X;
-            set => _logic.X = value;
+            get => _x;
+            set
+            {
+                if (MathF.Abs(_x - value) < 1e-10f) return;
+                float lastX = _x;
+                float lastY = _y;
+                _x = value;
+                OnPositionChanged(this, lastX, lastY);
+            }
         }
+
+        private float _y;
         public float Y
         {
-            get => _logic.Y;
-            set => _logic.Y = value;
+            get => _y;
+            set
+            {
+                if (MathF.Abs(_y - value) < 1e-10f) return;
+                float lastX = _x;
+                float lastY = _y;
+                _y = value;
+                OnPositionChanged(this, lastX, lastY);
+            }
         }
 
         public Position(IPositionLogic logic)
         {
-            _logic = logic;
-            _logic.PositionChanged += GetPositionChanged;
+            X = logic.X;
+            Y = logic.Y;
         }
 
-        private void GetPositionChanged(object? source, Logic.Events.PositionChangedEventArgs args)
+        internal void UpdateData(float x, float y)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), this));
+            X = x;
+            Y = y;
         }
 
-        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
+        private void OnPositionChanged(object? source, float lastX, float lastY)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastPosition, this));
+            PositionChanged?.Invoke(this, new PositionChangedEventArgs(lastX, lastY, X, Y));
         }
 
         public static bool operator ==(Position pos1, IPosition pos2)
@@ -54,13 +70,11 @@ namespace TPUM.Client.Presentation.Model
 
         public override int GetHashCode()
         {
-            return _logic.GetHashCode();
+            return 3 * X.GetHashCode() + 5 * Y.GetHashCode();
         }
 
         public void Dispose()
         {
-            _logic.PositionChanged -= GetPositionChanged;
-            _logic.Dispose();
             GC.SuppressFinalize(this);
         }
     }

@@ -1,10 +1,20 @@
 ﻿namespace TPUM.Client.Presentation.ViewModel
 {
     public delegate void PositionChangedEventHandler(object? source, PositionChangedEventArgs e);
-    public class PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition) : EventArgs
+    public class PositionChangedEventArgs : EventArgs
     {
-        public IPosition LastPosition { get; private set; } = lastPosition;
-        public IPosition NewPosition { get; private set; } = newPosition;
+        public float LastX { get; }
+        public float LastY { get; }
+        public float NewX { get; }
+        public float NewY { get; }
+
+        public PositionChangedEventArgs(float lastX, float lastY, float newX, float newY)
+        {
+            LastX = lastX;
+            LastY = lastY;
+            NewX = newX;
+            NewY = newY;
+        }
     }
 
     public interface INotifyPositionChanged

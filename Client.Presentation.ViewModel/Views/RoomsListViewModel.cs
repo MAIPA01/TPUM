@@ -9,9 +9,25 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICommand AddRoomWindowCommand { get; } = new CustomCommand(OpenAddRoomWindow);
+        public ICommand AddRoomWindowCommand { get; } = new CustomCommand(OpenAddRoomWindow, _ => MainViewModel.Instance?.IsConnected ?? false);
         public ICommand RemoveRoomCommand { get; } = new CustomCommand(RemoveRoom);
         public ICommand ShowRoomCommand { get; } = new CustomCommand(ShowRoom);
+
+        public RoomsListViewModel()
+        {
+            if (MainViewModel.Instance != null)
+            {
+                MainViewModel.Instance.PropertyChanged += GetPropertyChanged;
+            }
+        }
+
+        private void GetPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsConnected")
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AddRoomWindowCommand)));
+            }
+        }
 
         private static void OpenAddRoomWindow(object? obj)
         {

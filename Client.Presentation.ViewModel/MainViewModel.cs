@@ -20,6 +20,22 @@ namespace TPUM.Client.Presentation.ViewModel
             }
         }
 
+        private bool _isConnected = false;
+        public bool IsConnected
+        {
+            get => _isConnected;
+            set
+            {
+                if (_isConnected == value) return;
+                _isConnected = value;
+                OnPropertyChanged(nameof(IsConnected));
+                OnPropertyChanged(nameof(ConnectedString));
+            }
+        }
+        private const string _connected = "";
+        private const string _notConnected = "There is no connection to the server";
+        public string ConnectedString => IsConnected ? _connected : _notConnected;
+
         public MainViewModel()
         {
             Instance = this;
@@ -29,6 +45,11 @@ namespace TPUM.Client.Presentation.ViewModel
         {
             _currentView = Activator.CreateInstance(viewType);
             OnPropertyChanged(nameof(CurrentView));
+        }
+
+        public void SetConnectionStatus(bool connected)
+        {
+            IsConnected = connected;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? value = null)

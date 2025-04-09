@@ -11,6 +11,7 @@
         <vm:MainViewModel CurrentView="{x:Type local:RoomsList}"/>
     </Window.DataContext>
     <Grid>
+        <TextBlock Text="{Binding ConnectedString}" TextAlignment="Center" FontSize="20" FontWeight="Bold" Margin="443,16,443,676"/>
         <ContentControl Content="{Binding CurrentView}"/>
     </Grid>
 </Window>

@@ -9,7 +9,7 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public abstract IRoom? CurrentRoom { get; }
 
-        public abstract IRoom AddRoom(string name, float width, float height);
+        public abstract IRoom? AddRoom(string name, float width, float height);
 
         public abstract void RemoveRoom(Guid id);
 
@@ -19,7 +19,8 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public static ViewModelApiBase GetApi(ModelApiBase? model = null)
         {
-            return new ViewModelApi(model ?? ModelApiBase.GetApi());
+            string serverUri = "http://localhost:5000/ws/";
+            return new ViewModelApi(model ?? ModelApiBase.GetApi(serverUri));
         }
     }
 
@@ -42,6 +43,7 @@ namespace TPUM.Client.Presentation.ViewModel
         public override ReadOnlyObservableCollection<IRoom> Rooms { get; }
 
         private IRoom? _currentRoom = null;
+
         public override IRoom? CurrentRoom => _currentRoom;
 
         public ViewModelApi(ModelApiBase model)
@@ -54,11 +56,15 @@ namespace TPUM.Client.Presentation.ViewModel
             {
                 _rooms.Add(new Room(room));
             }
+
+            _model.ClientConnected += OnClientConnected;
         }
 
-        public override IRoom AddRoom(string name, float width, float height)
+        public override IRoom? AddRoom(string name, float width, float height)
         {
-            var room = new Room(_model.AddRoom(name, width, height));
+            var roomModel = _model.AddRoom(name, width, height);
+            if (roomModel == null) return null;
+            var room = new Room(roomModel);
             _rooms.Add(room);
             return room;
         }
@@ -78,12 +84,21 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public override void Dispose()
         {
+            _model.ClientConnected -= OnClientConnected;
+
             foreach (var room in _rooms)
             {
                 room.Dispose();
             }
             _rooms.Clear();
+
+            _model.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        private void OnClientConnected(object? source, Model.Events.ClientConnectedEventArgs e)
+        {
+            MainViewModel.Instance?.SetConnectionStatus(true);
         }
     }
 }

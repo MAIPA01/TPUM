@@ -6,15 +6,16 @@ namespace TPUM.Client.Presentation.Model
     internal class Room : IRoom
     {
         private readonly IRoomLogic _logic;
+        private readonly ModelApi _modelApi;
 
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PositionChangedEventHandler? PositionChanged;
         public event EnableChangedEventHandler? EnableChanged;
         public Guid Id => _logic.Id;
         public string Name { get; set; }
-        public float Width => _logic.Width;
-        public float Height => _logic.Height;
-        public float AvgTemperature => _logic.AvgTemperature;
+        public float Width { get; set; }
+        public float Height { get; set; }
+        public float AvgTemperature { get; private set; }
 
         private readonly List<IHeater> _heaters = [];
         public IReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
@@ -22,15 +23,16 @@ namespace TPUM.Client.Presentation.Model
         private readonly List<IHeatSensor> _heatSensors = [];
         public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
 
-        public Room(string name, IRoomLogic logic)
+        public Room(IRoomLogic logic, ModelApi api)
         {
             _logic = logic;
-            _logic.TemperatureChanged += GetTemperatureChanged;
-            Name = name;
+            _modelApi = api;
+            Name = "";
+            UpdateData(_logic.Name, _logic.Width, _logic.Height, _logic.AvgTemperature);
 
             foreach (var heater in logic.Heaters)
             {
-                var modelHeater = new Heater(heater);
+                var modelHeater = new Heater(heater, _modelApi);
                 SubscribeToHeater(modelHeater);
                 _heaters.Add(modelHeater);
             }
@@ -43,10 +45,12 @@ namespace TPUM.Client.Presentation.Model
             }
         }
 
-        private void GetTemperatureChanged(object? source, Logic.Events.TemperatureChangedEventArgs args)
+        internal void UpdateData(string name, float width, float height, float avgTemperature)
         {
-            if (source != _logic) return;
-            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
+            Name = name;
+            Width = width;
+            Height = height;
+            AvgTemperature = avgTemperature;
         }
 
         private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
@@ -77,33 +81,44 @@ namespace TPUM.Client.Presentation.Model
             sensor.PositionChanged -= GetPositionChanged;
         }
 
-        public IHeatSensor AddHeatSensor(float x, float y)
+        public IHeatSensor? AddHeatSensor(float x, float y)
         {
-            var modelSensor = new HeatSensor(_logic.AddHeatSensor(x, y));
+            var modelSensor = _modelApi.AddHeatSensor(Id, x, y);
+            if (modelSensor == null) return null;
+
             SubscribeToHeatSensor(modelSensor);
             _heatSensors.Add(modelSensor);
             return modelSensor;
         }
 
-        public void RemoveHeatSensor(Guid id)
+        internal IHeatSensor AddHeatSensor(IHeatSensor sensor)
         {
-            var sensor = _heatSensors.Find(sensor => sensor.Id == id);
+            SubscribeToHeatSensor(sensor);
+            _heatSensors.Add(sensor);
+            return sensor;
+        }
+
+        internal IHeatSensor? GetHeatSensor(Guid id)
+        {
+            var sensor = _heatSensors.Find(s => s.Id == id);
+            return sensor;
+        }
+
+        internal void RemoveHeatSensorFromList(Guid id)
+        {
+            var sensor = _heatSensors.Find(s => s.Id == id);
             if (sensor != null)
             {
                 UnsubscribeToHeatSensor(sensor);
+                sensor.Dispose();
                 _heatSensors.Remove(sensor);
             }
-            _logic.RemoveHeatSensor(id);
         }
 
-        public void ClearHeatSensors()
+        public void RemoveHeatSensor(Guid id)
         {
-            foreach (var sensor in _heatSensors)
-            {
-                UnsubscribeToHeatSensor(sensor);
-            }
-            _heatSensors.Clear();
-            _logic.ClearHeatSensors();
+            RemoveHeatSensorFromList(id);
+            _modelApi.RemoveHeatSensor(Id, id);
         }
 
         private void SubscribeToHeater(IHeater heater)
@@ -120,33 +135,44 @@ namespace TPUM.Client.Presentation.Model
             heater.EnableChanged -= GetEnabledChanged;
         }
 
-        public IHeater AddHeater(float x, float y, float temperature)
+        public IHeater? AddHeater(float x, float y, float temperature)
         {
-            var modelHeater = new Heater(_logic.AddHeater(x, y, temperature));
+            var modelHeater = _modelApi.AddHeater(Id, x, y, temperature);
+            if (modelHeater == null) return null;
+
             SubscribeToHeater(modelHeater);
             _heaters.Add(modelHeater);
             return modelHeater;
         }
 
-        public void RemoveHeater(Guid id)
+        internal IHeater AddHeater(IHeater heater)
+        {
+            SubscribeToHeater(heater);
+            _heaters.Add(heater);
+            return heater;
+        }
+
+        internal IHeater? GetHeater(Guid id)
+        {
+            var heater = _heaters.Find(h => h.Id == id);
+            return heater;
+        }
+
+        internal void RemoveHeaterFromList(Guid id)
         {
             var heater = _heaters.Find(heater => heater.Id == id);
             if (heater != null)
             {
                 UnsubscribeToHeater(heater);
+                heater.Dispose();
                 _heaters.Remove(heater);
             }
-            _logic.RemoveHeater(id);
         }
 
-        public void ClearHeaters()
+        public void RemoveHeater(Guid id)
         {
-            foreach (var heater in _heaters)
-            {
-                UnsubscribeToHeater(heater);
-            }
-            _heaters.Clear();
-            _logic.ClearHeaters();
+            RemoveHeaterFromList(id);
+            _modelApi.RemoveHeater(Id, id);
         }
 
         public void Dispose()

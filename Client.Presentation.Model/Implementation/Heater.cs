@@ -6,84 +6,97 @@ namespace TPUM.Client.Presentation.Model
     internal class Heater : IHeater
     {
         private readonly IHeaterLogic _logic;
+        private readonly ModelApi _modelApi;
 
         public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
         public Guid Id => _logic.Id;
+        private IPosition _position;
         public IPosition Position
         {
-            get => new Position(_logic.Position);
+            get => _position;
             set
             {
-                _logic.Position.X = value.X;
-                _logic.Position.Y = value.Y;
+                _position.X = value.X;
+                _position.Y = value.Y;
             }
         }
 
+        private float _temperature;
         public float Temperature
         {
-            get => _logic.Temperature;
-            set => _logic.Temperature = value;
+            get => _temperature;
+            set
+            {
+                if (MathF.Abs(_temperature - value) < 1e-10f) return;
+                float lastTemperature = _temperature;
+                _temperature = value;
+                OnTemperatureChanged(this, lastTemperature, _temperature);
+            }
         }
 
-        public bool IsOn => _logic.IsOn;
+        private bool _isOn;
+        public bool IsOn
+        {
+            get => _isOn;
+            private set
+            {
+                if (_isOn == value) return;
+                bool lastValue = _isOn;
+                _isOn = value;
+                OnEnableChanged(this, lastValue, _isOn);
+            }
+        }
 
-        public Heater(IHeaterLogic logic)
+        public Heater(IHeaterLogic logic, ModelApi api)
         {
             _logic = logic;
-            _logic.TemperatureChanged += GetTemperatureChanged;
-            _logic.PositionChanged += GetPositionChanged;
-            _logic.EnableChanged += GetEnableChanged;
+            _modelApi = api;
+
+            _position = new Position(_logic.Position);
+            _position.PositionChanged += GetPositionChanged;
+            Temperature = _logic.Temperature;
         }
 
-        private void GetPositionChanged(object? source, Logic.Events.PositionChangedEventArgs args)
+        internal void UpdateData(float x, float y, float temperature, bool isOn)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
+            _position.X = x;
+            _position.Y = y;
+            Temperature = temperature;
+            IsOn = isOn;
         }
 
         private void GetPositionChanged(object? source, PositionChangedEventArgs args)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastPosition, Position));
+            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastX, args.LastY, Position.X, Position.Y));
         }
 
-        private void GetTemperatureChanged(object? source, Logic.Events.TemperatureChangedEventArgs args)
+        private void OnTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
-            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
+            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(lastTemperature, newTemperature));
         }
 
-        private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
+        private void OnEnableChanged(object? source, bool lastValue, bool newValue)
         {
-            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
-        }
-
-        private void GetEnableChanged(object? source, Logic.Events.EnableChangedEventArgs args)
-        {
-            EnableChanged?.Invoke(this, new EnableChangedEventArgs(args.LastEnable, args.NewEnable));
-        }
-
-        private void GetEnableChanged(object? source, EnableChangedEventArgs args)
-        {
-            EnableChanged?.Invoke(this, new EnableChangedEventArgs(args.LastEnable, args.NewEnable));
+            EnableChanged?.Invoke(this, new EnableChangedEventArgs(lastValue, newValue));
         }
 
         public void TurnOn()
         {
-            _logic.TurnOn();
+            if (IsOn) return;
+            _modelApi.UpdateHeater(Id, Position.X, Position.Y, Temperature, true);
         }
 
         public void TurnOff()
         {
-            _logic.TurnOff();
+            if (!IsOn) return;
+            _modelApi.UpdateHeater(Id, Position.X, Position.Y, Temperature, false);
         }
 
         public void Dispose()
         {
-            _logic.TemperatureChanged -= GetTemperatureChanged;
-            _logic.PositionChanged -= GetPositionChanged;
-            _logic.EnableChanged -= GetEnableChanged;
-            _logic.Dispose();
             GC.SuppressFinalize(this);
         }
     }

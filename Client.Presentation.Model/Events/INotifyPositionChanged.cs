@@ -3,13 +3,17 @@
     public delegate void PositionChangedEventHandler(object? source, PositionChangedEventArgs e);
     public class PositionChangedEventArgs : EventArgs
     {
-        public IPosition LastPosition { get; }
-        public IPosition NewPosition { get; }
+        public float LastX { get; }
+        public float LastY { get; }
+        public float NewX { get; }
+        public float NewY { get; }
 
-        public PositionChangedEventArgs(IPosition lastPosition, IPosition newPosition)
+        public PositionChangedEventArgs(float lastX, float lastY, float newX, float newY)
         {
-            LastPosition = lastPosition;
-            NewPosition = newPosition;
+            LastX = lastX;
+            LastY = lastY;
+            NewX = newX;
+            NewY = newY;
         }
     }
 

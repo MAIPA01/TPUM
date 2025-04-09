@@ -11,49 +11,57 @@ namespace TPUM.Client.Presentation.Model
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
         public Guid Id => _logic.Id;
+
+        private IPosition _position;
         public IPosition Position
         {
-            get => new Position(_logic.Position);
+            get => _position;
             set
             {
-                _logic.Position.X = value.X;
-                _logic.Position.Y = value.Y;
+                _position.X = value.X;
+                _position.Y = value.Y;
             }
         }
-        public float Temperature => _logic.Temperature;
+
+        private float _temperature;
+        public float Temperature
+        {
+            get => _temperature;
+            private set
+            {
+                float lastTemperature = _temperature;
+                _temperature = value;
+                OnTemperatureChanged(this, lastTemperature, _temperature);
+            }
+        }
 
         public HeatSensor(IHeatSensorLogic logic)
         {
             _logic = logic;
-            _logic.PositionChanged += GetPositionChanged;
-            _logic.TemperatureChanged += GetTemperatureChanged;
+            _position = new Position(_logic.Position);
+            _position.PositionChanged += GetPositionChanged;
+            Temperature = _logic.Temperature;
         }
 
-        private void GetPositionChanged(object? source, Logic.Events.PositionChangedEventArgs args)
+        internal void UpdateData(float x, float y, float temperature)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(new Position(args.LastPosition), Position));
+            _position.X = x;
+            _position.Y = y;
+            Temperature = temperature;
         }
 
         private void GetPositionChanged(object? source, PositionChangedEventArgs args)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastPosition, Position));
+            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastX, args.LastY, Position.X, Position.Y));
         }
 
-        private void GetTemperatureChanged(object? source, Logic.Events.TemperatureChangedEventArgs args)
+        private void OnTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
-            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
-        }
-
-        private void GetTemperatureChanged(object? source, TemperatureChangedEventArgs args)
-        {
-            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(args.LastTemperature, args.NewTemperature));
+            TemperatureChanged?.Invoke(this, new TemperatureChangedEventArgs(lastTemperature, newTemperature));
         }
 
         public void Dispose()
         {
-            _logic.PositionChanged -= GetPositionChanged;
-            _logic.TemperatureChanged -= GetTemperatureChanged;
-            _logic.Dispose();
             GC.SuppressFinalize(this);
         }
     }

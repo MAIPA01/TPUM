@@ -8,13 +8,28 @@ namespace TPUM.Client.Data
     {
         private readonly ClientWebSocket _client = new();
         private readonly CancellationTokenSource _cts = new();
+        private const int ReconnectIntervalInSeconds = 5;
 
         public event MessageReceivedEventHandler? MessageReceived;
+        public event ClientConnectedEventHandler? ClientConnected;
 
         public async Task ConnectAsync(string uri)
         {
-            await _client.ConnectAsync(new Uri(uri), CancellationToken.None);
-            _ = ReceiveLoop();
+            while (_client.State != WebSocketState.Open)
+            {
+                try
+                {
+                    await _client.ConnectAsync(new Uri(uri), CancellationToken.None);
+                    _ = ReceiveLoop();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Blad polaczenia: {ex.Message}. Ponawiam probe za {ReconnectIntervalInSeconds} sekund...");
+                    await Task.Delay(ReconnectIntervalInSeconds * 1000);
+                }
+            }
+
+            ClientConnected?.Invoke(this, ClientConnectedEventArgs.Empty);
         }
         public async Task SendAsync(string xml)
         {
@@ -65,6 +80,17 @@ namespace TPUM.Client.Data
         private void OnMessageReceived(object? source, string xml)
         {
             MessageReceived?.Invoke(source, new MessageReceivedEventArgs(xml));
+        }
+
+        public void Dispose()
+        {
+            if (_client != null)
+            {
+                _cts.Cancel();
+                _client.Dispose();
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

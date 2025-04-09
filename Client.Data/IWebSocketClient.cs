@@ -1,6 +1,8 @@
-﻿namespace TPUM.Client.Data
+﻿using TPUM.Client.Data.Events;
+
+namespace TPUM.Client.Data
 {
-    public interface IWebSocketClient
+    internal interface IWebSocketClient : IDisposable, INotifyMessageReceived, INotifyClientConnected
     {
         Task ConnectAsync(string uri);
 

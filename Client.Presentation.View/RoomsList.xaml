@@ -12,7 +12,7 @@
         <vm:RoomsListViewModel x:Name="ViewModel"/>
     </UserControl.DataContext>
     <Grid>
-        <Button Content="Add Room" Command="{Binding AddRoomWindowCommand}" 
+        <Button Content="Add Room" Command="{Binding AddRoomWindowCommand}"
                 CommandParameter="{x:Type local:CreateRoomWindow}"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Width="168" Height="48" 
                 Margin="1062,41,0,0"/>
