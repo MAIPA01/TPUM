@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Numerics;
 using TPUM.Server.Data;
 using TPUM.Server.Logic.Events;
 
@@ -7,10 +9,15 @@ namespace TPUM.Server.Logic
     internal class RoomLogic : IRoomLogic
     {
         private readonly IRoomData _data;
+
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+        public event EnableChangedEventHandler? EnableChanged;
+        public event PositionChangedEventHandler? PositionChanged;
+
         public Guid Id => _data.Id;
 
         // TODO: jednostki wypisac
-        private readonly List<IHeaterLogic> _heaters = [];
+        private readonly List<HeaterLogic> _heaters = [];
 
         private readonly object _heatersLock = new();
         public IReadOnlyCollection<IHeaterLogic> Heaters
@@ -24,7 +31,7 @@ namespace TPUM.Server.Logic
             }
         }
 
-        private readonly List<IHeatSensorLogic> _heatSensors = [];
+        private readonly List<HeatSensorLogic> _heatSensors = [];
 
         private readonly object _heatSensorsLock = new();
         public IReadOnlyCollection<IHeatSensorLogic> HeatSensors
@@ -44,31 +51,31 @@ namespace TPUM.Server.Logic
 
         private float _roomTemperature = 0.0f;
 
-        public float AvgTemperature
-        {
-            get
-            {
-                lock (_heatSensorsLock)
-                {
-                    return _heatSensors.Count == 0 ? 0f : _heatSensors.Average(heatSensor => heatSensor.Temperature);
-                }
-            }
-        }
-
         private Task? _task;
         private CancellationTokenSource? _cts;
 
-        private const float TemperatureDecayFactor = 0.1f;
-
-        public event TemperatureChangedEventHandler? TemperatureChanged;
-        public event EnableChangedEventHandler? EnableChanged;
-        public event PositionChangedEventHandler? PositionChanged;
+        private const float TemperatureDecayFactor = 0.5f;
 
         private readonly object _roomTemperatureLock = new();
 
         public RoomLogic(IRoomData data)
         {
             _data = data;
+
+            foreach (var heaterData in _data.Heaters)
+            {
+                var heater = new HeaterLogic(heaterData);
+                SubscribeToHeater(heater);
+                _heaters.Add(heater);
+            }
+
+            foreach (var sensorData in _data.HeatSensors)
+            {
+                var sensor = new HeatSensorLogic(sensorData);
+                SubscribeToHeatSensor(sensor);
+                _heatSensors.Add(sensor);
+            }
+
             _task = null;
             _cts = null;
         }
@@ -88,11 +95,10 @@ namespace TPUM.Server.Logic
             EnableChanged?.Invoke(source, lastEnable, newEnable);
         }
 
-        private float GetTemperatureAtPosition(float x, float y)
+        private float GetTemperatureAtPosition(IPositionLogic position)
         {
-            if (x > Width || x < 0f || y > Height || y < 0f || HeatSensors.Count == 0) return 0f;
+            if (HeatSensors.Count == 0 || position.X > Width || position.X < 0f || position.Y > Height || position.Y < 0f) return 0f;
 
-            var pos = new PositionLogic(DataApiBase.GetApi().CreatePosition(x, y));
             var heatersTemp = 0f;
             lock (_heatersLock)
             {
@@ -100,7 +106,7 @@ namespace TPUM.Server.Logic
                 if (onHeaters.Count != 0)
                 {
                     heatersTemp += (from heater in onHeaters
-                                    let dist = IPositionLogic.Distance(pos, heater.Position)
+                                    let dist = IPositionLogic.Distance(position, heater.Position)
                                     select MathF.Min(heater.Temperature,
                                         heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist))).Sum();
                     heatersTemp = MathF.Min(heatersTemp, onHeaters.Max(heater => heater.Temperature));
@@ -113,7 +119,7 @@ namespace TPUM.Server.Logic
             {
                 foreach (var sensor in HeatSensors)
                 {
-                    var dist = IPositionLogic.Distance(pos, sensor.Position);
+                    var dist = IPositionLogic.Distance(position, sensor.Position);
                     var weight = dist > 0f ? 1f / dist : float.MaxValue;
                     if (Math.Abs(weight - float.MaxValue) < 1e-10f) return sensor.Temperature;
                     sensorsSum += sensor.Temperature * weight;
@@ -125,7 +131,10 @@ namespace TPUM.Server.Logic
 
             var temp = MathF.Max(sensorsTemp, heatersTemp);
 
-            return temp > 0 ? temp : _roomTemperature;
+            lock (_roomTemperatureLock)
+            {
+                return temp > 0 ? temp : _roomTemperature;
+            }
         }
 
 
@@ -179,7 +188,7 @@ namespace TPUM.Server.Logic
         {
             lock (_heatersLock)
             {
-                IHeaterLogic? heater = _heaters.Find(heater => heater.Id == id);
+                var heater = _heaters.Find(heater => heater.Id == id);
                 if (heater == null) return;
                 UnsubscribeFromHeater(heater);
                 _heaters.Remove(heater);
@@ -219,9 +228,10 @@ namespace TPUM.Server.Logic
             if (y > Height || y < 0f)
                 throw new ArgumentOutOfRangeException(nameof(y));
 
-            IHeatSensorLogic sensor = new HeatSensorLogic(_data.AddHeatSensor(x, y));
+            var sensor = new HeatSensorLogic(_data.AddHeatSensor(x, y));
+            sensor.SetTemperature(GetTemperatureAtPosition(sensor.Position));
             SubscribeToHeatSensor(sensor);
-            lock (_heatSensors)
+            lock (_heatSensorsLock)
             {
                 _heatSensors.Add(sensor);
             }
@@ -247,7 +257,7 @@ namespace TPUM.Server.Logic
         {
             lock (_heatSensorsLock)
             {
-                IHeatSensorLogic? sensor = _heatSensors.Find(sensor => sensor.Id == id);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == id);
                 if (sensor == null) return;
                 UnsubscribeFromHeatSensor(sensor);
                 _heatSensors.Remove(sensor);
@@ -268,13 +278,11 @@ namespace TPUM.Server.Logic
             _data.ClearHeatSensors();
         }
 
-        public void StartSimulation()
+        internal void StartSimulation()
         {
-            if (_task == null || _task.IsCompleted)
-            {
-                _cts = new CancellationTokenSource();
-                _task = Task.Run(() => TaskMethod(_cts.Token), _cts.Token);
-            }
+            if (_task != null && !_task.IsCompleted) return;
+            _cts = new CancellationTokenSource();
+            _task = Task.Run(() => TaskMethod(_cts.Token), _cts.Token);
         }
 
         private async Task TaskMethod(CancellationToken token)
@@ -319,22 +327,28 @@ namespace TPUM.Server.Logic
                 {
                     foreach (var sensor in _heatSensors)
                     {
-                        (sensor as HeatSensorLogic)?.SetTemperature(MathF.Max(sensor.Temperature - TemperatureDecayFactor * deltaTime, 0f));
+                        var temperature = MathF.Max(sensor.Temperature - TemperatureDecayFactor * deltaTime, 0f);
 
-                        if (onHeaters.Count == 0) continue;
-                        foreach (var tempDiff in from heater in onHeaters let dist = IPositionLogic.Distance(sensor.Position, heater.Position) 
-                                 select MathF.Min(heater.Temperature, heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist)) * deltaTime)
+                        if (onHeaters.Count == 0)
                         {
-                            (sensor as HeatSensorLogic)?.SetTemperature(sensor.Temperature + tempDiff -
-                                                                   TemperatureDecayFactor * deltaTime);
+                            sensor.SetTemperature(temperature);
+                            continue;
                         }
-                        (sensor as HeatSensorLogic)?.SetTemperature(MathF.Min(sensor.Temperature, onHeaters.Max(heater => heater.Temperature)));
+                        foreach (var heater in onHeaters)
+                        {
+                            var dist = IPositionLogic.Distance(sensor.Position, heater.Position);
+                            var tempDiff = MathF.Min(heater.Temperature, 
+                                heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist)) * deltaTime;
+                            temperature += tempDiff - TemperatureDecayFactor * deltaTime;
+                        }
+                        temperature = MathF.Min(temperature, onHeaters.Max(heater => heater.Temperature));
+                        sensor.SetTemperature(temperature);
                     }
                 }
             }
         }
 
-        public void EndSimulation()
+        internal void EndSimulation()
         {
             if (_cts == null || _task == null || _task.IsCompleted)
                 return;
@@ -357,18 +371,8 @@ namespace TPUM.Server.Logic
         public void Dispose()
         {
             EndSimulation();
-            foreach (var heater in _heaters)
-            {
-                UnsubscribeFromHeater(heater);
-                heater.Dispose();
-            }
-            _heaters.Clear();
-            foreach (var heatSensor in _heatSensors)
-            {
-                UnsubscribeFromHeatSensor(heatSensor);
-                heatSensor.Dispose();
-            }
-            _heatSensors.Clear();
+            ClearHeaters();
+            ClearHeatSensors();
             GC.SuppressFinalize(this);
         }
     }

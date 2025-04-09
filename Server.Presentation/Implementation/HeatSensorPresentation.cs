@@ -15,15 +15,7 @@ namespace TPUM.Server.Presentation
         public IPositionPresentation Position
         {
             get => new PositionPresentation(_logic.Position);
-            set
-            {
-                var lastPosition = new PositionPresentation(_logic.Position);
-                _logic.PositionChanged -= GetPositionChanged;
-                _logic.Position.X = value.X;
-                _logic.Position.Y = value.Y;
-                _logic.PositionChanged += GetPositionChanged;
-                OnPositionChanged(lastPosition);
-            }
+            set => _logic.Position.SetPosition(value.X, value.Y);
         }
 
         public float Temperature => _logic.Temperature;
@@ -37,17 +29,12 @@ namespace TPUM.Server.Presentation
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
+            PositionChanged?.Invoke(Guid.Empty, this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
         }
 
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
-            TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
-        }
-
-        private void OnPositionChanged(IPositionPresentation lastPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, Position);
+            TemperatureChanged?.Invoke(Guid.Empty, this, lastTemperature, newTemperature);
         }
 
         public void Dispose()

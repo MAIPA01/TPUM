@@ -74,7 +74,7 @@ namespace TPUM.Client.Data
     [XmlRoot("AllDataRequest")]
     internal class AllDataRequest
     {
-        public bool IWant {  get; set; }
+        public bool WantAll {  get; set; }
     }
 
     [XmlRoot("AllDataRequestResponse")]

@@ -4,12 +4,6 @@
     {
         public abstract IReadOnlyCollection<IRoomData> Rooms { get; }
 
-        public abstract IPositionData CreatePosition(float x, float y);
-        
-        public abstract IHeaterData CreateHeater(float x, float y, float temperature);
-
-        public abstract IHeatSensorData CreateHeatSensor(float x, float y);
-
         public abstract IRoomData AddRoom(string name, float width, float height);
 
         public abstract bool ContainsRoom(Guid id);
@@ -31,7 +25,7 @@
     internal class DataApi : DataApiBase
     {
         private readonly object _roomsLock = new();
-        private readonly List<IRoomData> _rooms = [];
+        private readonly List<RoomData> _rooms = [];
         public override IReadOnlyCollection<IRoomData> Rooms
         {
             get
@@ -43,24 +37,9 @@
             }
         }
 
-        public override IPositionData CreatePosition(float x, float y)
-        {
-            return new PositionData(x, y);
-        }
-
-        public override IHeaterData CreateHeater(float x, float y, float temperature)
-        {
-            return new HeaterData(Guid.NewGuid(), new PositionData(x, y), temperature);
-        }
-
-        public override IHeatSensorData CreateHeatSensor(float x, float y)
-        {
-            return new HeatSensorData(Guid.NewGuid(), new PositionData(x, y));
-        }
-
         public override IRoomData AddRoom(string name, float width, float height)
         {
-            IRoomData room = new RoomData(Guid.NewGuid(), name, width, height);
+            var room = new RoomData(Guid.NewGuid(), name, width, height);
             lock (_roomsLock)
             {
                 _rooms.Add(room);
@@ -88,7 +67,7 @@
         {
             lock (_roomsLock)
             {
-                IRoomData? room = _rooms.Find(room => room.Id == id);
+                var room = _rooms.Find(room => room.Id == id);
                 if (room != null) _rooms.Remove(room);
             }
         }

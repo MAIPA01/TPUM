@@ -16,15 +16,7 @@ namespace TPUM.Server.Presentation
         public IPositionPresentation Position
         {
             get => new PositionPresentation(_logic.Position);
-            set
-            {
-                var lastPosition = new PositionPresentation(_logic.Position);
-                _logic.PositionChanged -= GetPositionChanged;
-                _logic.Position.X = value.X;
-                _logic.Position.Y = value.Y;
-                _logic.PositionChanged += GetPositionChanged;
-                OnPositionChange(lastPosition);
-            }
+            set => _logic.Position.SetPosition(value.X, value.Y);
         }
 
         public float Temperature
@@ -43,17 +35,17 @@ namespace TPUM.Server.Presentation
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
+            PositionChanged?.Invoke(Guid.Empty, this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
         }
 
         private void GetEnableChanged(object? source, bool lastEnabled, bool newEnabled)
         {
-            EnableChanged?.Invoke(this, lastEnabled, newEnabled);
+            EnableChanged?.Invoke(Guid.Empty, this, lastEnabled, newEnabled);
         }
 
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
-            TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
+            TemperatureChanged?.Invoke(Guid.Empty, this, lastTemperature, newTemperature);
         }
 
         public void TurnOn()
@@ -66,16 +58,12 @@ namespace TPUM.Server.Presentation
             _logic.TurnOff();
         }
 
-        private void OnPositionChange(IPositionPresentation lastPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, Position);
-        }
-
         public void Dispose()
         {
             _logic.PositionChanged -= GetPositionChanged;
             _logic.TemperatureChanged -= GetTemperatureChanged;
             _logic.EnableChanged -= GetEnableChanged;
+            GC.SuppressFinalize(this);
         }
     }
 }

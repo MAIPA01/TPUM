@@ -11,8 +11,6 @@ namespace TPUM.Server.Logic
         float Width { get; }
         float Height { get; }
 
-        float AvgTemperature { get; }
-
         IHeaterLogic AddHeater(float x, float y, float temperature);
 
         bool ContainsHeater(Guid id);
@@ -32,9 +30,5 @@ namespace TPUM.Server.Logic
         void RemoveHeatSensor(Guid id);
 
         void ClearHeatSensors();
-
-        void StartSimulation();
-
-        void EndSimulation();
     }
 }

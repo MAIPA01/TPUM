@@ -29,7 +29,12 @@ namespace TPUM.Server.Presentation
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
+            PositionChanged?.Invoke(Guid.Empty, this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _logic.SetPosition(x, y);
         }
 
         public void Dispose()

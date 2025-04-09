@@ -10,80 +10,45 @@ namespace TPUM.Server.Logic
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public Guid Id => _data.Id;
-
-        private readonly object _posLock = new();
-        private IPositionLogic _position;
         public IPositionLogic Position
         {
-            get
-            {
-                lock (_posLock)
-                {
-                    return _position;
-                }
-            }
-            set
-            {
-                lock (_posLock)
-                {
-                    if (_position.Equals(value)) return;
-                    IPositionLogic last = new PositionLogic(DataApiBase.GetApi().CreatePosition(_position.X, _position.Y));
-                    _position.PositionChanged -= GetPositionChanged;
-                    // By nie wywolaly sie eventy 2 razy
-                    _position.X = value.X;
-                    _position.Y = value.Y;
-                    _position.PositionChanged += GetPositionChanged;
-                    OnPositionChanged(this, last);
-                }
-            }
+            get => new PositionLogic(_data.Position);
+            set => _data.Position.SetPosition(value.X, value.Y);
         }
-
-        private readonly object _tempLock = new();
         public float Temperature => _data.Temperature;
 
         public HeatSensorLogic(IHeatSensorData data)
         {
             _data = data;
-            _position = new PositionLogic(_data.Position);
-            _position.PositionChanged += GetPositionChanged;
+            _data.PositionChanged += GetPositionChanged;
+            _data.TemperatureChanged += GetTemperatureChanged;
         }
 
         internal void SetTemperature(float temperature)
         {
-            lock (_tempLock)
-            {
-                if (Math.Abs(_data.Temperature - temperature) < 1e-10f) return;
-                float last = _data.Temperature;
-                _data.Temperature = temperature;
-                OnTemperatureChanged(this, last);
-            }
+            _data.Temperature = temperature;
         }
 
-        private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
+        private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
         {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
+            PositionChanged?.Invoke(this, new PositionLogic(lastPosition), new PositionLogic(newPosition));
+        }
+
+        private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
+        {
+            TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
         }
 
         public void Dispose()
         {
-            _position.PositionChanged -= GetPositionChanged;
-            _position.Dispose();
+            _data.PositionChanged -= GetPositionChanged;
+            _data.TemperatureChanged -= GetTemperatureChanged;
             GC.SuppressFinalize(this);
         }
 
         public override int GetHashCode()
         {
             return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode();
-        }
-
-        private void OnPositionChanged(object? source, IPositionLogic lastPosition)
-        {
-            PositionChanged?.Invoke(source, lastPosition, _position);
-        }
-
-        private void OnTemperatureChanged(object? source, float lastTemperature)
-        {
-            TemperatureChanged?.Invoke(source, lastTemperature, _data.Temperature);
         }
     }
 }

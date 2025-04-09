@@ -11,8 +11,6 @@ namespace TPUM.Server.Presentation
         float Width { get; }
         float Height { get; }
 
-        float AvgTemperature { get; }
-
         IHeaterPresentation AddHeater(float x, float y, float temperature);
 
         bool ContainsHeater(Guid id);

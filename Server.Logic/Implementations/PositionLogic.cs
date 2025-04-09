@@ -9,75 +9,53 @@ namespace TPUM.Server.Logic
 
         public event PositionChangedEventHandler? PositionChanged;
 
-        private readonly object _xLock = new();
         public float X
         {
-            get {
-                lock (_xLock)
-                {
-                    return _data.X;
-                }
-            }
-            set
-            {
-                lock (_xLock)
-                {
-                    if (Math.Abs(_data.X - value) < 1e-10f) return;
-
-                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, Y));
-                    _data.X = value;
-                    OnPositionChanged(this, last);
-                }
-            }
+            get => _data.X;
+            set => _data.X = value;
         }
 
-        private readonly object _yLock = new();
         public float Y
         {
-            get
-            {
-                lock (_yLock)
-                {
-                    return _data.Y;
-                }
-            }
-            set
-            {
-                lock (_yLock)
-                {
-                    if (Math.Abs(_data.Y - value) < 1e-10f) return;
-
-                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(X, _data.Y));
-                    _data.Y = value;
-                    OnPositionChanged(this, last);
-                }
-            }
+            get => _data.Y;
+            set => _data.Y = value;
         }
 
         public PositionLogic(IPositionData data)
         {
             _data = data;
+            _data.PositionChanged += GetPositionChange;
+        }
+
+        private void GetPositionChange(object? source, IPositionData lastPosition, IPositionData newPosition)
+        {
+            PositionChanged?.Invoke(this, new PositionLogic(lastPosition), new PositionLogic(newPosition));
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _data.SetPosition(x, y);
         }
 
         public override bool Equals(object? obj)
         {
-            if (obj is not IPositionLogic position) return false;
-            return Math.Abs(X - position.X) < 1e-10f && Math.Abs(Y - position.Y) < 1e-10f;
+            return obj switch
+            {
+                IPositionLogic logic => Math.Abs(X - logic.X) < 1e-10f && Math.Abs(Y - logic.Y) < 1e-10f,
+                IPositionData data => _data.Equals(data),
+                _ => false
+            };
         }
 
         public override int GetHashCode()
         {
-            return 3 * _data.X.GetHashCode() + 5 * _data.Y.GetHashCode();
+            return _data.GetHashCode();
         }
 
         public void Dispose()
         {
+            _data.PositionChanged -= GetPositionChange;
             GC.SuppressFinalize(this);
-        }
-
-        private void OnPositionChanged(object? source, IPositionLogic lastPosition)
-        {
-            PositionChanged?.Invoke(source, lastPosition, this);
         }
     }
 }

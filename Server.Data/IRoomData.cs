@@ -1,6 +1,8 @@
-﻿namespace TPUM.Server.Data
+﻿using TPUM.Server.Data.Events;
+
+namespace TPUM.Server.Data
 {
-    public interface IRoomData
+    public interface IRoomData : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
         Guid Id { get; }
         string Name { get; }

@@ -1,14 +1,20 @@
-﻿namespace TPUM.Server.Data
+﻿using TPUM.Server.Data.Events;
+
+namespace TPUM.Server.Data
 {
     internal class RoomData : IRoomData
     {
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+        public event EnableChangedEventHandler? EnableChanged;
+        public event PositionChangedEventHandler? PositionChanged;
+
         public Guid Id { get; }
         public string Name { get; }
         public float Width { get; }
         public float Height { get; }
 
         private readonly object _heatersLock = new();
-        private readonly List<IHeaterData> _heaters = [];
+        private readonly List<HeaterData> _heaters = [];
         public IReadOnlyCollection<IHeaterData> Heaters
         { 
             get
@@ -21,7 +27,7 @@
         }
 
         private readonly object _heatSensorsLock = new();
-        private readonly List<IHeatSensorData> _heatSensors = [];
+        private readonly List<HeatSensorData> _heatSensors = [];
         public IReadOnlyCollection<IHeatSensorData> HeatSensors
         {
             get
@@ -41,10 +47,40 @@
             Height = height;
         }
 
+        private void GetPositionChange(object? source, IPositionData lastPosition, IPositionData newPosition)
+        {
+            PositionChanged?.Invoke(source, lastPosition, newPosition);
+        }
+
+        private void GetTemperatureChange(object? source, float lastTemperature, float newTemperature)
+        {
+            TemperatureChanged?.Invoke(source, lastTemperature, newTemperature);
+        }
+
+        private void GetEnableChange(object? source, bool lastEnable, bool newEnable)
+        {
+            EnableChanged?.Invoke(source, lastEnable, newEnable);
+        }
+
+        private void SubscribeToHeater(IHeaterData heater)
+        {
+            heater.PositionChanged += GetPositionChange;
+            heater.TemperatureChanged += GetTemperatureChange;
+            heater.EnableChanged += GetEnableChange;
+        }
+
+        private void UnsubscribeFromHeater(IHeaterData heater)
+        {
+            heater.PositionChanged -= GetPositionChange;
+            heater.TemperatureChanged -= GetTemperatureChange;
+            heater.EnableChanged -= GetEnableChange;
+        }
+
         public IHeaterData AddHeater(float x, float y, float temperature)
         {
-            IHeaterData heater = new HeaterData(Guid.NewGuid(), new PositionData(x, y), temperature);
-            lock (_heatersLock) 
+            var heater = new HeaterData(Guid.NewGuid(), new PositionData(x, y), temperature);
+            SubscribeToHeater(heater);
+            lock (_heatersLock)
             {
                 _heaters.Add(heater);
             }
@@ -71,8 +107,10 @@
         {
             lock (_heatersLock)
             {
-                IHeaterData? heater = _heaters.Find(heater => heater.Id == id);
-                if (heater != null) _heaters.Remove(heater);
+                var heater = _heaters.Find(heater => heater.Id == id);
+                if (heater == null) return;
+                UnsubscribeFromHeater(heater);
+                _heaters.Remove(heater);
             }
         }
 
@@ -80,13 +118,30 @@
         {
             lock (_heatersLock)
             {
+                foreach (var heater in _heaters)
+                {
+                    UnsubscribeFromHeater(heater);
+                }
                 _heaters.Clear();
             }
         }
 
+        private void SubscribeToHeatSensor(IHeatSensorData sensor)
+        {
+            sensor.PositionChanged += GetPositionChange;
+            sensor.TemperatureChanged += GetTemperatureChange;
+        }
+
+        private void UnsubscribeFromHeatSensor(IHeatSensorData sensor)
+        {
+            sensor.PositionChanged -= GetPositionChange;
+            sensor.TemperatureChanged -= GetTemperatureChange;
+        }
+
         public IHeatSensorData AddHeatSensor(float x, float y)
         {
-            IHeatSensorData sensor = new HeatSensorData(Guid.NewGuid(), new PositionData(x, y));
+            var sensor = new HeatSensorData(Guid.NewGuid(), new PositionData(x, y));
+            SubscribeToHeatSensor(sensor);
             lock (_heatSensorsLock)
             {
                 _heatSensors.Add(sensor);
@@ -114,8 +169,10 @@
         {
             lock (_heatSensorsLock)
             {
-                IHeatSensorData? sensor = _heatSensors.Find(sensor => sensor.Id == id);
-                if (sensor != null) _heatSensors.Remove(sensor);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == id);
+                if (sensor == null) return;
+                UnsubscribeFromHeatSensor(sensor);
+                _heatSensors.Remove(sensor);
             }
         }
 
@@ -123,8 +180,18 @@
         {
             lock (_heatSensorsLock)
             {
+                foreach (var sensor in _heatSensors)
+                {
+                    UnsubscribeFromHeatSensor(sensor);
+                }
                 _heatSensors.Clear();
             }
+        }
+        public void Dispose()
+        {
+            ClearHeaters();
+            ClearHeatSensors();
+            GC.SuppressFinalize(this);
         }
     }
 }

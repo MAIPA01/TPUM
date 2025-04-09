@@ -54,7 +54,38 @@ namespace TPUM.Server.Presentation
     }
 
 
+    internal class RoomDataContract
+    {
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
+
+        [XmlArray("Heaters")]
+        [XmlArrayItem("Heater")]
+        public List<HeaterDataContract> Heaters { get; set; } = [];
+
+        [XmlArray("HeatSensors")]
+        [XmlArrayItem("HeatSensor")]
+        public List<HeatSensorDataContract> HeatSensors { get; set; } = [];
+    }
+
+
     // REQUEST DATA
+    [XmlRoot("AllDataRequest")]
+    internal class AllDataRequest
+    {
+        public bool WantAll { get; set; }
+    }
+
+    [XmlRoot("AllDataRequestResponse")]
+    internal class AllDataRequestResponse
+    {
+        [XmlArray("Rooms")]
+        [XmlArrayItem("Room")]
+        public List<RoomDataContract> Rooms { get; set; } = [];
+    }
+
     [XmlRoot("RoomDataRequest")]
     internal class RoomDataRequest
     {

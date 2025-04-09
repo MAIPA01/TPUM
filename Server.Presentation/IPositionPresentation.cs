@@ -6,5 +6,7 @@ namespace TPUM.Server.Presentation
     {
         float X { get; set; }
         float Y { get; set; }
+
+        void SetPosition(float x, float y);
     }
 }
