@@ -7,20 +7,33 @@ namespace TPUM.Client.Data
     internal class WebSocketClient : IWebSocketClient
     {
         private readonly ClientWebSocket _client = new();
+        private readonly ClientWebSocket _broadcastClient = new();
         private readonly CancellationTokenSource _cts = new();
         private const int ReconnectIntervalInSeconds = 5;
 
         public event MessageReceivedEventHandler? MessageReceived;
         public event ClientConnectedEventHandler? ClientConnected;
 
-        public async Task ConnectAsync(string uri)
+        public async Task ConnectAsync(string uri, string broadcastUri)
         {
             while (_client.State != WebSocketState.Open)
             {
                 try
                 {
                     await _client.ConnectAsync(new Uri(uri), CancellationToken.None);
-                    _ = ReceiveLoop();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Blad polaczenia: {ex.Message}. Ponawiam probe za {ReconnectIntervalInSeconds} sekund...");
+                    await Task.Delay(ReconnectIntervalInSeconds * 1000);
+                }
+            }
+
+            while (_broadcastClient.State != WebSocketState.Open)
+            {
+                try
+                {
+                    await _broadcastClient.ConnectAsync(new Uri(broadcastUri), CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
@@ -30,6 +43,7 @@ namespace TPUM.Client.Data
             }
 
             ClientConnected?.Invoke(this, ClientConnectedEventArgs.Empty);
+            _ = Task.Run(ReceiveLoop);
         }
         public async Task SendAsync(string xml)
         {
@@ -39,40 +53,24 @@ namespace TPUM.Client.Data
 
         public async Task<string> ReceiveAsync()
         {
-            var buffer = new byte[4096];
-            while (true)
+            return await Task.Run(async () =>
             {
-                ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
-                WebSocketReceiveResult result = _client.ReceiveAsync(segment, CancellationToken.None).Result;
-                if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    return "";
-                }
-
-                int count = result.Count;
-                while (!result.EndOfMessage)
-                {
-                    if (count >= buffer.Length)
-                    {
-                        return "";
-                    }
-
-                    segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-                    result = _client.ReceiveAsync(segment, CancellationToken.None).Result;
-                    count += result.Count;
-                }
-
-                return Encoding.UTF8.GetString(buffer, 0, count);
-            }
-            //var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            //return Encoding.UTF8.GetString(buffer, 0, result.Count);
+                var buffer = new byte[4096];
+                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                return result.MessageType != WebSocketMessageType.Binary
+                    ? ""
+                    : Encoding.UTF8.GetString(buffer, 0, result.Count);
+            });
         }
 
         public async Task<string> SendAndReceiveAsync(string xml)
         {
-            await SendAsync(xml);
-            var result = await ReceiveAsync();
-            return result;
+            return Task.Run(async () =>
+            {
+                await SendAsync(xml);
+                var result = await ReceiveAsync();
+                return result;
+            }).Result;
         }
 
         private async Task ReceiveLoop()
@@ -80,25 +78,28 @@ namespace TPUM.Client.Data
             var buffer = new byte[4096];
             while (!_cts.IsCancellationRequested)
             {
-                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
-                if (result.MessageType == WebSocketMessageType.Binary)
-                {
-                    var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    OnMessageReceived(this, xml);
-                }
+                var result = await _broadcastClient.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
+                if (result.MessageType != WebSocketMessageType.Binary) continue;
+                var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                OnMessageReceived(this, xml);
             }
+        }
+
+        private static async Task DisconnectSocketAsync(ClientWebSocket client)
+        {
+            if (client.State == WebSocketState.Open || client.State == WebSocketState.CloseReceived)
+            {
+                await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client disconnecting",
+                    CancellationToken.None);
+            } 
+            client.Dispose();
         }
 
         public async Task DisconnectAsync()
         {
-            if (_client == null) return;
-            _cts.Cancel();
-            if (_client.State == WebSocketState.Open || _client.State == WebSocketState.CloseReceived)
-            {
-                await _client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client disconnecting", CancellationToken.None);
-            }
-
-            _client.Dispose();
+            await _cts.CancelAsync();
+            await DisconnectSocketAsync(_client);
+            await DisconnectSocketAsync(_broadcastClient);
         }
 
         private void OnMessageReceived(object? source, string xml)
@@ -108,12 +109,9 @@ namespace TPUM.Client.Data
 
         public void Dispose()
         {
-            if (_client != null)
-            {
-                _cts.Cancel();
-                _client.Dispose();
-            }
-
+            _cts.Cancel();
+            _client.Dispose();
+            _broadcastClient.Dispose();
             GC.SuppressFinalize(this);
         }
     }

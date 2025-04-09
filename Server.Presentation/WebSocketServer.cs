@@ -11,13 +11,17 @@ namespace TPUM.Server.Presentation
         public event ClientMessageReceivedEventHandler? ClientMessageReceived;
 
         private readonly HttpListener _httpListener = new();
+        private readonly HttpListener _httpBroadcastListener = new();
         private readonly string _uriPrefix;
+        private readonly string _broadcastUriPrefix;
 
         private readonly ConcurrentDictionary<Guid, WebSocket> _clients = new();
+        private readonly ConcurrentDictionary<Guid, WebSocket> _broadcastClients = new();
 
-        public WebSocketServer(string uriPrefix)
+        public WebSocketServer(string uriPrefix, string broadcastUriPrefix)
         {
             _uriPrefix = uriPrefix;
+            _broadcastUriPrefix = broadcastUriPrefix;
         }
 
         public async Task StartAsync()
@@ -25,7 +29,10 @@ namespace TPUM.Server.Presentation
             _httpListener.Prefixes.Add(_uriPrefix);
             _httpListener.Start();
 
-            Console.WriteLine($"✅ WebSocket Server started on {_uriPrefix}");
+            _httpBroadcastListener.Prefixes.Add(_broadcastUriPrefix);
+            _httpBroadcastListener.Start();
+
+            Console.WriteLine($"✅ WebSocket Server started on {_uriPrefix} and broadcast on {_broadcastUriPrefix}");
 
             while (true)
             {
@@ -42,6 +49,23 @@ namespace TPUM.Server.Presentation
 
                     // Obsługa klienta w tle
                     _ = Task.Run(() => HandleClientAsync(clientId, wsContext.WebSocket));
+                }
+                else
+                {
+                    context.Response.StatusCode = 400;
+                    context.Response.Close();
+                }
+
+                context = await _httpBroadcastListener.GetContextAsync();
+
+                if (context.Request.IsWebSocketRequest)
+                {
+                    var wsContext = await context.AcceptWebSocketAsync(null);
+                    var clientId = Guid.NewGuid();
+
+                    _broadcastClients.TryAdd(clientId, wsContext.WebSocket);
+
+                    Console.WriteLine($"⚫ Broadcast Client {clientId} connected.");
                 }
                 else
                 {
@@ -92,19 +116,15 @@ namespace TPUM.Server.Presentation
                 return;
             }
 
-            //var data = Encoding.UTF8.GetBytes(message);
-            //await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
-
-            var data = Encoding.UTF8.GetBytes("HII");
+            var data = Encoding.UTF8.GetBytes(message);
             await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
-            Console.WriteLine("D");
         }
 
         public async Task BroadcastAsync(string message)
         {
             var data = Encoding.UTF8.GetBytes(message);
 
-            foreach (var (clientId, socket) in _clients)
+            foreach (var (_, socket) in _broadcastClients)
             {
                 if (socket.State == WebSocketState.Open)
                 {

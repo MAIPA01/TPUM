@@ -23,10 +23,8 @@ namespace TPUM.Client.Presentation.ViewModel
 
         private void GetPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "IsConnected")
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AddRoomWindowCommand)));
-            }
+            if (e.PropertyName != nameof(MainViewModel.Instance.IsConnected)) return;
+            AddRoomWindowCommand.OnCanExecuteChanged();
         }
 
         private static void OpenAddRoomWindow(object? obj)

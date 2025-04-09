@@ -43,9 +43,9 @@ namespace TPUM.Client.Logic
             return new LogicApi(data);
         }
 
-        public static LogicApiBase GetApi(string serverUri)
+        public static LogicApiBase GetApi(string serverUri, string broadcastUri)
         {
-            return new LogicApi(DataApiBase.GetApi(serverUri));
+            return new LogicApi(DataApiBase.GetApi(serverUri, broadcastUri));
         }
     }
 

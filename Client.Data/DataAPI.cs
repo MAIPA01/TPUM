@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using TPUM.Client.Data.Events;
 
 namespace TPUM.Client.Data
@@ -37,9 +38,9 @@ namespace TPUM.Client.Data
 
         public abstract void Dispose();
 
-        public static DataApiBase GetApi(string serverUri)
+        public static DataApiBase GetApi(string serverUri, string broadcastUri)
         {
-            return new DataApi(serverUri);
+            return new DataApi(serverUri, broadcastUri);
         }
     }
 
@@ -66,11 +67,11 @@ namespace TPUM.Client.Data
             }
         }
 
-        public DataApi(string serverUri)
+        public DataApi(string serverUri, string broadcastUri)
         {
             _client = new WebSocketClient();
             _client.ClientConnected += OnClientConnected;
-            _client.ConnectAsync(serverUri);
+            _client.ConnectAsync(serverUri, broadcastUri);
             _client.MessageReceived += HandleBroadcast;
         }
 
@@ -91,7 +92,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new AddHeaterRequest { RoomId = roomId, X = x, Y = y, Temperature = temperature };
-                var res = SendRequestAndDeserialize<AddHeaterRequest, HeaterAddedResponse>(req);
+                var res = SendRequestAndDeserialize<AddHeaterRequest, HeaterAddedResponse?>(req);
+
+                if (res == null) return null;
 
                 if (!res.Success) return null;
 
@@ -115,7 +118,9 @@ namespace TPUM.Client.Data
                 if (heater != null) return heater;
 
                 var req = new HeaterDataRequest { Id = id, RoomId = id };
-                var res = SendRequestAndDeserialize<HeaterDataRequest, HeaterDataRequestResponse>(req);
+                var res = SendRequestAndDeserialize<HeaterDataRequest, HeaterDataRequestResponse?>(req);
+
+                if (res == null) return null;
 
                 if (res.NotFound) return null;
 
@@ -136,7 +141,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new UpdateHeaterRequest { Id = id, RoomId = roomId, X = x, Y = y, Temperature = temperature, IsOn = isOn };
-                var res = SendRequestAndDeserialize<UpdateHeaterRequest, HeaterUpdatedResponse>(req);
+                var res = SendRequestAndDeserialize<UpdateHeaterRequest, HeaterUpdatedResponse?>(req);
+
+                if (res == null) return;
 
                 if (!res.Success) return;
 
@@ -163,7 +170,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new RemoveHeaterRequest { Id = id, RoomId = roomId };
-                var res = SendRequestAndDeserialize<RemoveHeaterRequest, HeaterRemovedResponse>(req);
+                var res = SendRequestAndDeserialize<RemoveHeaterRequest, HeaterRemovedResponse?>(req);
+
+                if (res == null) return;
 
                 if (!res.Success) return;
 
@@ -183,7 +192,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new AddHeatSensorRequest { RoomId = roomId, X = x, Y = y };
-                var res = SendRequestAndDeserialize<AddHeatSensorRequest, HeatSensorAddedResponse>(req);
+                var res = SendRequestAndDeserialize<AddHeatSensorRequest, HeatSensorAddedResponse?>(req);
+
+                if (res == null) return null;
 
                 if (!res.Success) return null;
 
@@ -207,7 +218,9 @@ namespace TPUM.Client.Data
                 if (sensor != null) return sensor;
 
                 var req = new HeatSensorDataRequest { Id = id, RoomId = roomId };
-                var res = SendRequestAndDeserialize<HeatSensorDataRequest, HeatSensorDataRequestResponse>(req);
+                var res = SendRequestAndDeserialize<HeatSensorDataRequest, HeatSensorDataRequestResponse?>(req);
+
+                if (res == null) return null;
 
                 if (res.NotFound) return null;
 
@@ -228,7 +241,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new UpdateHeatSensorRequest { Id = id, RoomId = roomId, X = x, Y = y };
-                var res = SendRequestAndDeserialize<UpdateHeatSensorRequest, HeatSensorUpdatedResponse>(req);
+                var res = SendRequestAndDeserialize<UpdateHeatSensorRequest, HeatSensorUpdatedResponse?>(req);
+
+                if (res == null) return;
 
                 if (!res.Success) return;
 
@@ -253,7 +268,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new RemoveHeatSensorRequest { Id = id, RoomId = roomId };
-                var res = SendRequestAndDeserialize<RemoveHeatSensorRequest, HeatSensorRemovedResponse>(req);
+                var res = SendRequestAndDeserialize<RemoveHeatSensorRequest, HeatSensorRemovedResponse?>(req);
+
+                if (res == null) return;
 
                 if (!res.Success) return;
 
@@ -270,7 +287,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new AddRoomRequest { Name = name, Width = width, Height = height };
-                var res = SendRequestAndDeserialize<AddRoomRequest, RoomAddedResponse>(req);
+                var res = SendRequestAndDeserialize<AddRoomRequest, RoomAddedResponse?>(req);
+
+                if (res == null) return null;
 
                 if (!res.Success) return null;
 
@@ -291,7 +310,9 @@ namespace TPUM.Client.Data
                 if (room != null) return room;
 
                 var req = new RoomDataRequest { RoomId = id };
-                var res = SendRequestAndDeserialize<RoomDataRequest, RoomDataRequestResponse>(req);
+                var res = SendRequestAndDeserialize<RoomDataRequest, RoomDataRequestResponse?>(req);
+
+                if (res == null) return null;
 
                 if (res.NotFound) return null;
 
@@ -329,7 +350,9 @@ namespace TPUM.Client.Data
             if (!_connected) return;
 
             var req = new UpdateRoomRequest { Id = id, Name = name, Width = width, Height = height };
-            var res = SendRequestAndDeserialize<UpdateRoomRequest, RoomUpdatedResponse>(req);
+            var res = SendRequestAndDeserialize<UpdateRoomRequest, RoomUpdatedResponse?>(req);
+
+            if (res == null) return;
 
             if (!res.Success) return;
 
@@ -353,7 +376,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new RemoveRoomRequest { Id = id };
-                var res = SendRequestAndDeserialize<RemoveRoomRequest, RoomRemovedResponse>(req);
+                var res = SendRequestAndDeserialize<RemoveRoomRequest, RoomRemovedResponse?>(req);
+
+                if (res == null) return;
 
                 if (!res.Success) return;
 
@@ -603,7 +628,9 @@ namespace TPUM.Client.Data
             lock (_roomsLock)
             {
                 var req = new AllDataRequest { WantAll = true };
-                var res = SendRequestAndDeserialize<AllDataRequest, AllDataRequestResponse>(req);
+                var res = SendRequestAndDeserialize<AllDataRequest, AllDataRequestResponse?>(req);
+
+                if (res == null) return;
 
                 foreach (var roomDto in res.Rooms)
                 {

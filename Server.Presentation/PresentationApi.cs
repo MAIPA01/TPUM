@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using TPUM.Server.Logic;
+﻿using TPUM.Server.Logic;
 
 namespace TPUM.Server.Presentation
 {
@@ -9,9 +8,9 @@ namespace TPUM.Server.Presentation
 
         public abstract void Dispose();
 
-        public static PresentationApiBase GetApi(string uriPrefix, LogicApiBase? logic = null)
+        public static PresentationApiBase GetApi(string uriPrefix, string uriBroadcastPrefix, LogicApiBase? logic = null)
         {
-            return new PresentationApi(uriPrefix, logic ?? LogicApiBase.GetApi());
+            return new PresentationApi(uriPrefix, uriBroadcastPrefix, logic ?? LogicApiBase.GetApi());
         }
     }
 
@@ -23,7 +22,7 @@ namespace TPUM.Server.Presentation
 
         private readonly WebSocketServer _server;
 
-        public PresentationApi(string uriPrefix, LogicApiBase logic)
+        public PresentationApi(string uriPrefix, string uriBroadcastPrefix, LogicApiBase logic)
         {
             _logic = logic;
             foreach (var logicRoom in _logic.Rooms)
@@ -32,7 +31,7 @@ namespace TPUM.Server.Presentation
                 SubscribeToRoom(room);
                 _rooms.Add(room);
             }
-            _server = new WebSocketServer(uriPrefix);
+            _server = new WebSocketServer(uriPrefix, uriBroadcastPrefix);
             _server.ClientMessageReceived += HandleClientMessage;
         }
 
@@ -602,7 +601,7 @@ namespace TPUM.Server.Presentation
             {
                 Console.WriteLine($"Update Heater {updateHeaterRequest.Id} ({updateHeaterRequest.X}, {updateHeaterRequest.Y})" +
                                   $" {updateHeaterRequest.Temperature}\u00b0C On:{updateHeaterRequest.IsOn} in Room " +
-                                  $"{getHeaterRequest.RoomId} Request from client: {clientId}");
+                                  $"{updateHeaterRequest.RoomId} Request from client: {clientId}");
 
                 var response = new HeaterUpdatedResponse
                 {

@@ -18,9 +18,9 @@ namespace TPUM.Client.Presentation.Model
             return new ModelApi(logic);
         }
 
-        public static ModelApiBase GetApi(string serverUri)
+        public static ModelApiBase GetApi(string serverUri, string broadcastUri)
         {
-            return new ModelApi(LogicApiBase.GetApi(serverUri));
+            return new ModelApi(LogicApiBase.GetApi(serverUri, broadcastUri));
         }
     }
 

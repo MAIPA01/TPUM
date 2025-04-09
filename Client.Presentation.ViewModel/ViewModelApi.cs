@@ -19,8 +19,9 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public static ViewModelApiBase GetApi(ModelApiBase? model = null)
         {
-            string serverUri = "ws://localhost:5000/ws/";
-            return new ViewModelApi(model ?? ModelApiBase.GetApi(serverUri));
+            string serverUri = "ws://localhost:5000/ws";
+            string broadcastUri = "ws://localhost:5050/ws";
+            return new ViewModelApi(model ?? ModelApiBase.GetApi(serverUri, broadcastUri));
         }
     }
 
