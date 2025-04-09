@@ -7,6 +7,7 @@ namespace TPUM.Server.Logic
         Guid Id { get; }
         IReadOnlyCollection<IHeaterLogic> Heaters { get; }
         IReadOnlyCollection<IHeatSensorLogic> HeatSensors { get; }
+        string Name { get; }
         float Width { get; }
         float Height { get; }
 
@@ -24,7 +25,7 @@ namespace TPUM.Server.Logic
 
         IHeatSensorLogic AddHeatSensor(float x, float y);
 
-        bool ContainsHestSensor(Guid id);
+        bool ContainsHeatSensor(Guid id);
 
         IHeatSensorLogic? GetHeatSensor(Guid id);
 

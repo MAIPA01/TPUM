@@ -2,11 +2,14 @@
 using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
+using TPUM.Server.Presentation.Events;
 
 namespace TPUM.Server.Presentation
 {
-    internal class WebSocketServer
+    internal class WebSocketServer : INotifyOnClientMessageReceived
     {
+        public event ClientMessageReceivedEventHandler? ClientMessageReceived;
+
         private readonly HttpListener _httpListener = new();
         private readonly string _uriPrefix;
 
@@ -62,8 +65,7 @@ namespace TPUM.Server.Presentation
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     Console.WriteLine($"📨 Received from {clientId}: {message}");
 
-                    var response = Encoding.UTF8.GetBytes($"🔁 Echo: {message}");
-                    await webSocket.SendAsync(new ArraySegment<byte>(response), WebSocketMessageType.Text, true, CancellationToken.None);
+                    OnClientMessageReceived(clientId, message);
                 }
             }
             catch (WebSocketException wse)
@@ -82,6 +84,18 @@ namespace TPUM.Server.Presentation
             }
         }
 
+        public async Task SendAsync(Guid clientId, string message)
+        {
+            if (!_clients.TryGetValue(clientId, out var socket))
+            {
+                Console.WriteLine($"⚠️ Client {clientId} could not be found.");
+                return;
+            }
+
+            var data = Encoding.UTF8.GetBytes($"🔁 Echo: {message}");
+            await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
         public async Task BroadcastAsync(string message)
         {
             var data = Encoding.UTF8.GetBytes(message);
@@ -93,6 +107,11 @@ namespace TPUM.Server.Presentation
                     await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
                 }
             }
+        }
+
+        private void OnClientMessageReceived(Guid clientId, string message)
+        {
+            ClientMessageReceived?.Invoke(this, clientId, message);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace TPUM.Client.Data
+namespace TPUM.Server.Presentation
 {
     internal static class XmlSerializerHelper
     {

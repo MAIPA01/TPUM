@@ -3,6 +3,7 @@
     internal class RoomData : IRoomData
     {
         public Guid Id { get; }
+        public string Name { get; }
         public float Width { get; }
         public float Height { get; }
 
@@ -32,9 +33,10 @@
             }
         }
 
-        public RoomData(Guid id, float width, float height)
+        public RoomData(Guid id, string name, float width, float height)
         {
             Id = id;
+            Name = name;
             Width = width;
             Height = height;
         }

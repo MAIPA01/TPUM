@@ -4,9 +4,9 @@
     {
         static async Task Main(string[] args)
         {
+            var api = PresentationApiBase.GetApi("http://localhost:5000/ws/");
             Console.WriteLine("Server starting...");
-            var server = new WebSocketServer("http://localhost:5000/ws/");
-            await server.StartAsync();
+            await api.StartServer();
         }
     }
 }

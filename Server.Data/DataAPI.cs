@@ -10,7 +10,7 @@
 
         public abstract IHeatSensorData CreateHeatSensor(float x, float y);
 
-        public abstract IRoomData AddRoom(float width, float height);
+        public abstract IRoomData AddRoom(string name, float width, float height);
 
         public abstract bool ContainsRoom(Guid id);
 
@@ -58,9 +58,9 @@
             return new HeatSensorData(Guid.NewGuid(), new PositionData(x, y));
         }
 
-        public override IRoomData AddRoom(float width, float height)
+        public override IRoomData AddRoom(string name, float width, float height)
         {
-            IRoomData room = new RoomData(Guid.NewGuid(), width, height);
+            IRoomData room = new RoomData(Guid.NewGuid(), name, width, height);
             lock (_roomsLock)
             {
                 _rooms.Add(room);

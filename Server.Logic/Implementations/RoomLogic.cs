@@ -38,6 +38,7 @@ namespace TPUM.Server.Logic
             }
         }
 
+        public string Name => _data.Name;
         public float Width => _data.Width;
         public float Height => _data.Height;
 

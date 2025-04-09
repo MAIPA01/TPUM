@@ -12,7 +12,7 @@ namespace TPUM.Server.Logic
 
         public abstract IHeatSensorLogic CreateHeatSensor(float x, float y);
 
-        public abstract IRoomLogic AddRoom(float width, float height);
+        public abstract IRoomLogic AddRoom(string name, float width, float height);
 
         public abstract bool ContainsRoom(Guid id);
 
@@ -34,7 +34,7 @@ namespace TPUM.Server.Logic
     {
         private readonly DataApiBase _data;
         private readonly List<IRoomLogic> _rooms = [];
-        public override IReadOnlyCollection<IRoomLogic> Rooms => _rooms;
+        public override IReadOnlyCollection<IRoomLogic> Rooms => _rooms.AsReadOnly();
 
         public LogicApi(DataApiBase data)
         {
@@ -60,9 +60,9 @@ namespace TPUM.Server.Logic
             return new HeatSensorLogic(_data.CreateHeatSensor(x, y));
         }
 
-        public override IRoomLogic AddRoom(float width, float height)
+        public override IRoomLogic AddRoom(string name, float width, float height)
         {
-            var room = new RoomLogic(_data.AddRoom(width, height));
+            var room = new RoomLogic(_data.AddRoom(name, width, height));
             room.StartSimulation();
             _rooms.Add(room);
             return room;

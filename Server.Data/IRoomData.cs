@@ -3,6 +3,7 @@
     public interface IRoomData
     {
         Guid Id { get; }
+        string Name { get; }
         float Width { get; }
         float Height { get; }
         IReadOnlyCollection<IHeaterData> Heaters { get; }
