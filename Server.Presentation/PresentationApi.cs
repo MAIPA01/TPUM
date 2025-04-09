@@ -386,7 +386,7 @@ namespace TPUM.Server.Presentation
                 var responseMsg = XmlSerializerHelper.Serialize(response);
                 _ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"All Data send to client: {clientId}");
+                Console.WriteLine($"All Data send to client: {clientId} \n{responseMsg}");
             }
             else if (XmlSerializerHelper.TryDeserialize<RoomDataRequest>(message, out var getRoomRequest))
             {

@@ -34,14 +34,38 @@ namespace TPUM.Client.Data
         public async Task SendAsync(string xml)
         {
             var bytes = Encoding.UTF8.GetBytes(xml);
-            await _client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await _client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
         public async Task<string> ReceiveAsync()
         {
             var buffer = new byte[4096];
-            var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            return Encoding.UTF8.GetString(buffer, 0, result.Count);
+            while (true)
+            {
+                ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+                WebSocketReceiveResult result = _client.ReceiveAsync(segment, CancellationToken.None).Result;
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    return "";
+                }
+
+                int count = result.Count;
+                while (!result.EndOfMessage)
+                {
+                    if (count >= buffer.Length)
+                    {
+                        return "";
+                    }
+
+                    segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
+                    result = _client.ReceiveAsync(segment, CancellationToken.None).Result;
+                    count += result.Count;
+                }
+
+                return Encoding.UTF8.GetString(buffer, 0, count);
+            }
+            //var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            //return Encoding.UTF8.GetString(buffer, 0, result.Count);
         }
 
         public async Task<string> SendAndReceiveAsync(string xml)
@@ -57,7 +81,7 @@ namespace TPUM.Client.Data
             while (!_cts.IsCancellationRequested)
             {
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
-                if (result.MessageType == WebSocketMessageType.Text)
+                if (result.MessageType == WebSocketMessageType.Binary)
                 {
                     var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     OnMessageReceived(this, xml);

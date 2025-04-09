@@ -602,7 +602,7 @@ namespace TPUM.Client.Data
         {
             lock (_roomsLock)
             {
-                var req = new AllDataRequest { IWant = true };
+                var req = new AllDataRequest { WantAll = true };
                 var res = SendRequestAndDeserialize<AllDataRequest, AllDataRequestResponse>(req);
 
                 foreach (var roomDto in res.Rooms)

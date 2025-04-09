@@ -63,7 +63,7 @@ namespace TPUM.Server.Presentation
                         break;
 
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    Console.WriteLine($"📨 Received from {clientId}: {message}");
+                    Console.WriteLine($"📨 Received from {clientId}: \n{message}");
 
                     OnClientMessageReceived(clientId, message);
                 }
@@ -92,8 +92,12 @@ namespace TPUM.Server.Presentation
                 return;
             }
 
-            var data = Encoding.UTF8.GetBytes($"🔁 Echo: {message}");
-            await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+            //var data = Encoding.UTF8.GetBytes(message);
+            //await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
+
+            var data = Encoding.UTF8.GetBytes("HII");
+            await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
+            Console.WriteLine("D");
         }
 
         public async Task BroadcastAsync(string message)
@@ -104,7 +108,7 @@ namespace TPUM.Server.Presentation
             {
                 if (socket.State == WebSocketState.Open)
                 {
-                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
                 }
             }
         }

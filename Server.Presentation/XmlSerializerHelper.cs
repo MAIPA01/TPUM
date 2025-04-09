@@ -2,13 +2,20 @@
 
 namespace TPUM.Server.Presentation
 {
-    internal static class XmlSerializerHelper
+    public static class XmlSerializerHelper
     {
         public static string Serialize<T>(T obj)
         {
             using var stringWriter = new StringWriter();
-            var serializer = new XmlSerializer(typeof(T));
-            serializer.Serialize(stringWriter, obj);
+            try
+            {
+                var serializer = new XmlSerializer(typeof(T));
+                serializer.Serialize(stringWriter, obj);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             return stringWriter.ToString();
         }
 
@@ -36,7 +43,7 @@ namespace TPUM.Server.Presentation
 
 
     // DTO
-    internal class HeaterDataContract
+    public class HeaterDataContract
     {
         public Guid Id { get; set; }
         public float X { get; set; }
@@ -45,7 +52,7 @@ namespace TPUM.Server.Presentation
         public float Temperature { get; set; }
     }
 
-    internal class HeatSensorDataContract
+    public class HeatSensorDataContract
     {
         public Guid Id { get; set; }
         public float X { get; set; }
@@ -54,7 +61,7 @@ namespace TPUM.Server.Presentation
     }
 
 
-    internal class RoomDataContract
+    public class RoomDataContract
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
@@ -73,13 +80,13 @@ namespace TPUM.Server.Presentation
 
     // REQUEST DATA
     [XmlRoot("AllDataRequest")]
-    internal class AllDataRequest
+    public class AllDataRequest
     {
         public bool WantAll { get; set; }
     }
 
     [XmlRoot("AllDataRequestResponse")]
-    internal class AllDataRequestResponse
+    public class AllDataRequestResponse
     {
         [XmlArray("Rooms")]
         [XmlArrayItem("Room")]
@@ -87,13 +94,13 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("RoomDataRequest")]
-    internal class RoomDataRequest
+    public class RoomDataRequest
     {
         public Guid RoomId { get; set; }
     }
 
     [XmlRoot("RoomDataRequestResponse")]
-    internal class RoomDataRequestResponse
+    public class RoomDataRequestResponse
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
@@ -112,14 +119,14 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeaterDataRequest")]
-    internal class HeaterDataRequest
+    public class HeaterDataRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
     }
 
     [XmlRoot("HeaterDataRequestResponse")]
-    internal class HeaterDataRequestResponse
+    public class HeaterDataRequestResponse
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
@@ -132,14 +139,14 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeatSensorDataRequest")]
-    internal class HeatSensorDataRequest
+    public class HeatSensorDataRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
     }
 
     [XmlRoot("HeatSensorDataRequestResponse")]
-    internal class HeatSensorDataRequestResponse
+    public class HeatSensorDataRequestResponse
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
@@ -153,7 +160,7 @@ namespace TPUM.Server.Presentation
 
     // ADD
     [XmlRoot("AddRoomRequest")]
-    internal class AddRoomRequest
+    public class AddRoomRequest
     {
         public required string Name { get; set; }
         public float Width { get; set; }
@@ -161,14 +168,14 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("RoomAddedResponse")]
-    internal class RoomAddedResponse
+    public class RoomAddedResponse
     {
         public Guid Id { get; set; }
         public bool Success => Id != Guid.Empty;
     }
 
     [XmlRoot("AddHeaterRequest")]
-    internal class AddHeaterRequest
+    public class AddHeaterRequest
     {
         public Guid RoomId { get; set; }
         public float X { get; set; }
@@ -177,14 +184,14 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeaterAddedResponse")]
-    internal class HeaterAddedResponse
+    public class HeaterAddedResponse
     {
         public Guid Id { get; set; }
         public bool Success => Id != Guid.Empty;
     }
 
     [XmlRoot("AddHeatSensorRequest")]
-    internal class AddHeatSensorRequest
+    public class AddHeatSensorRequest
     {
         public Guid RoomId { get; set; }
         public float X { get; set; }
@@ -192,7 +199,7 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeatSensorAddedResponse")]
-    internal class HeatSensorAddedResponse
+    public class HeatSensorAddedResponse
     {
         public Guid Id { get; set; }
         public bool Success => Id != Guid.Empty;
@@ -201,7 +208,7 @@ namespace TPUM.Server.Presentation
 
     // UPDATE
     [XmlRoot("UpdateRoomRequest")]
-    internal class UpdateRoomRequest
+    public class UpdateRoomRequest
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
@@ -210,13 +217,13 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("RoomUpdatedResponse")]
-    internal class RoomUpdatedResponse
+    public class RoomUpdatedResponse
     {
         public bool Success;
     }
 
     [XmlRoot("UpdateHeaterRequest")]
-    internal class UpdateHeaterRequest
+    public class UpdateHeaterRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
@@ -227,13 +234,13 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeaterUpdatedResponse")]
-    internal class HeaterUpdatedResponse
+    public class HeaterUpdatedResponse
     {
         public bool Success;
     }
 
     [XmlRoot("UpdateHeatSensorRequest")]
-    internal class UpdateHeatSensorRequest
+    public class UpdateHeatSensorRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
@@ -242,7 +249,7 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeatSensorUpdatedResponse")]
-    internal class HeatSensorUpdatedResponse
+    public class HeatSensorUpdatedResponse
     {
         public bool Success;
     }
@@ -250,39 +257,39 @@ namespace TPUM.Server.Presentation
 
     // REMOVE
     [XmlRoot("RemoveRoomRequest")]
-    internal class RemoveRoomRequest
+    public class RemoveRoomRequest
     {
         public Guid Id { get; set; }
     }
 
     [XmlRoot("RoomRemovedResponse")]
-    internal class RoomRemovedResponse
+    public class RoomRemovedResponse
     {
         public bool Success { get; set; }
     }
 
     [XmlRoot("RemoveHeaterRequest")]
-    internal class RemoveHeaterRequest
+    public class RemoveHeaterRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
     }
 
     [XmlRoot("HeaterRemovedResponse")]
-    internal class HeaterRemovedResponse
+    public class HeaterRemovedResponse
     {
         public bool Success { get; set; }
     }
 
     [XmlRoot("RemoveHeatSensorRequest")]
-    internal class RemoveHeatSensorRequest
+    public class RemoveHeatSensorRequest
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
     }
 
     [XmlRoot("HeatSensorRemovedResponse")]
-    internal class HeatSensorRemovedResponse
+    public class HeatSensorRemovedResponse
     {
         public bool Success { get; set; }
     }
@@ -290,7 +297,7 @@ namespace TPUM.Server.Presentation
 
     // BROADCAST
     [XmlRoot("RoomBroadcast")]
-    internal class RoomBroadcast
+    public class RoomBroadcast
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
@@ -310,7 +317,7 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeaterBroadcast")]
-    internal class HeaterBroadcast
+    public class HeaterBroadcast
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
@@ -324,7 +331,7 @@ namespace TPUM.Server.Presentation
     }
 
     [XmlRoot("HeatSensorBroadcast")]
-    internal class HeatSensorBroadcast
+    public class HeatSensorBroadcast
     {
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
