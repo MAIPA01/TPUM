@@ -1,6 +1,6 @@
-﻿using TPUM.Client.Logic.Events;
+﻿using TPUM.Server.Logic.Events;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     public interface IRoomLogic : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
@@ -10,18 +10,23 @@ namespace TPUM.Client.Logic
         float Width { get; }
         float Height { get; }
 
-        float RoomTemperature { get; set; }
         float AvgTemperature { get; }
 
-        float GetTemperatureAtPosition(float x, float y);
-
         IHeaterLogic AddHeater(float x, float y, float temperature);
+
+        bool ContainsHeater(Guid id);
+
+        IHeaterLogic? GetHeater(Guid id);
 
         void RemoveHeater(Guid id);
 
         void ClearHeaters();
 
         IHeatSensorLogic AddHeatSensor(float x, float y);
+
+        bool ContainsHestSensor(Guid id);
+
+        IHeatSensorLogic? GetHeatSensor(Guid id);
 
         void RemoveHeatSensor(Guid id);
 

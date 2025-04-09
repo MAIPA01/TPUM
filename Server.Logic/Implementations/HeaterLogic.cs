@@ -1,7 +1,7 @@
-﻿using TPUM.Client.Data;
-using TPUM.Client.Logic.Events;
+﻿using TPUM.Server.Data;
+using TPUM.Server.Logic.Events;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     internal class HeaterLogic : IHeaterLogic
     {
@@ -10,13 +10,27 @@ namespace TPUM.Client.Logic
         public Guid Id => _data.Id;
 
         private readonly object _onLock = new();
-        public bool IsOn => _data.IsOn;
+        public bool IsOn {
+            get
+            {
+                lock (_onLock)
+                {
+                    return _data.IsOn;
+                }
+            }
+        }
 
         private readonly object _posLock = new();
         private IPositionLogic _position;
         public IPositionLogic Position
         {
-            get => _position;
+            get
+            {
+                lock (_posLock)
+                {
+                    return _position;
+                }
+            }
             set
             {
                 lock (_posLock)
@@ -38,7 +52,10 @@ namespace TPUM.Client.Logic
         {
             get
             {
-                return IsOn ? _data.Temperature : 0f;
+                lock (_tempLock)
+                {
+                    return IsOn ? _data.Temperature : 0f;
+                }
             }
             set
             {
@@ -63,9 +80,9 @@ namespace TPUM.Client.Logic
             _position.PositionChanged += GetPositionChanged;
         }
 
-        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastPosition, Position));
+            PositionChanged?.Invoke(this, lastPosition, newPosition);
         }
 
         public void TurnOn()
@@ -99,17 +116,17 @@ namespace TPUM.Client.Logic
 
         private void OnPositionChanged(object? source, IPositionLogic lastPosition)
         {
-            PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, _position));
+            PositionChanged?.Invoke(source, lastPosition, _position);
         }
 
         private void OnEnableChanged(object? source, bool lastEnable)
         {
-            EnableChanged?.Invoke(source, new EnableChangedEventArgs(lastEnable, _data.IsOn));
+            EnableChanged?.Invoke(source, lastEnable, _data.IsOn);
         }
 
         private void OnTemperatureChanged(object? source, float lastTemperature)
         {
-            TemperatureChanged?.Invoke(source, new TemperatureChangedEventArgs(lastTemperature, _data.Temperature));
+            TemperatureChanged?.Invoke(source, lastTemperature, _data.Temperature);
         }
     }
 }

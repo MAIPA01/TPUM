@@ -1,6 +1,4 @@
-﻿using Server.Presentation;
-
-namespace TPUM.Server.Presentation
+﻿namespace TPUM.Server.Presentation
 {
     class Program
     {

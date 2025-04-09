@@ -1,6 +1,6 @@
-﻿using TPUM.Client.Data;
+﻿using TPUM.Server.Data;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     public abstract class LogicApiBase : IDisposable
     {
@@ -13,6 +13,10 @@ namespace TPUM.Client.Logic
         public abstract IHeatSensorLogic CreateHeatSensor(float x, float y);
 
         public abstract IRoomLogic AddRoom(float width, float height);
+
+        public abstract bool ContainsRoom(Guid id);
+
+        public abstract IRoomLogic? GetRoom(Guid id);
 
         public abstract void RemoveRoom(Guid id);
 
@@ -62,6 +66,16 @@ namespace TPUM.Client.Logic
             room.StartSimulation();
             _rooms.Add(room);
             return room;
+        }
+
+        public override bool ContainsRoom(Guid id)
+        {
+            return _data.ContainsRoom(id);
+        }
+
+        public override IRoomLogic? GetRoom(Guid id)
+        {
+            return _rooms.Find(room => room.Id == id);
         }
 
         public override void RemoveRoom(Guid id)

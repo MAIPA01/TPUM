@@ -12,6 +12,10 @@
 
         public abstract IRoomData AddRoom(float width, float height);
 
+        public abstract bool ContainsRoom(Guid id);
+
+        public abstract IRoomData? GetRoom(Guid id);
+
         public abstract void RemoveRoom(Guid id);
 
         public abstract void ClearRooms();
@@ -62,6 +66,22 @@
                 _rooms.Add(room);
             }
             return room;
+        }
+
+        public override bool ContainsRoom(Guid id)
+        {
+            lock (_roomsLock)
+            {
+                return _rooms.Find(room => room.Id == id) != null;
+            }
+        }
+
+        public override IRoomData? GetRoom(Guid id)
+        {
+            lock (_roomsLock)
+            {
+                return _rooms.Find(room => room.Id == id);
+            }
         }
 
         public override void RemoveRoom(Guid id)

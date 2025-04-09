@@ -1,7 +1,7 @@
-﻿using TPUM.Client.Data;
-using TPUM.Client.Logic.Events;
+﻿using TPUM.Server.Data;
+using TPUM.Server.Logic.Events;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     internal class PositionLogic : IPositionLogic
     {
@@ -12,14 +12,19 @@ namespace TPUM.Client.Logic
         private readonly object _xLock = new();
         public float X
         {
-            get => _data.X;
+            get {
+                lock (_xLock)
+                {
+                    return _data.X;
+                }
+            }
             set
             {
                 lock (_xLock)
                 {
                     if (Math.Abs(_data.X - value) < 1e-10f) return;
 
-                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, _data.Y));
+                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, Y));
                     _data.X = value;
                     OnPositionChanged(this, last);
                 }
@@ -29,14 +34,20 @@ namespace TPUM.Client.Logic
         private readonly object _yLock = new();
         public float Y
         {
-            get => _data.Y;
+            get
+            {
+                lock (_yLock)
+                {
+                    return _data.Y;
+                }
+            }
             set
             {
                 lock (_yLock)
                 {
                     if (Math.Abs(_data.Y - value) < 1e-10f) return;
 
-                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(_data.X, _data.Y));
+                    PositionLogic last = new(DataApiBase.GetApi().CreatePosition(X, _data.Y));
                     _data.Y = value;
                     OnPositionChanged(this, last);
                 }
@@ -48,20 +59,10 @@ namespace TPUM.Client.Logic
             _data = data;
         }
 
-        public static bool operator ==(PositionLogic pos1, IPositionLogic pos2)
-        {
-            return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;
-        }
-
-        public static bool operator !=(PositionLogic pos1, IPositionLogic pos2)
-        {
-            return Math.Abs(pos1.X - pos2.X) > 1e-10f || Math.Abs(pos1.Y - pos2.Y) > 1e-10f;
-        }
-
         public override bool Equals(object? obj)
         {
             if (obj is not IPositionLogic position) return false;
-            return this == position;
+            return Math.Abs(X - position.X) < 1e-10f && Math.Abs(Y - position.Y) < 1e-10f;
         }
 
         public override int GetHashCode()
@@ -76,7 +77,7 @@ namespace TPUM.Client.Logic
 
         private void OnPositionChanged(object? source, IPositionLogic lastPosition)
         {
-            PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, this));
+            PositionChanged?.Invoke(source, lastPosition, this);
         }
     }
 }

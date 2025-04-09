@@ -1,6 +1,6 @@
-﻿using TPUM.Client.Logic.Events;
+﻿using TPUM.Server.Logic.Events;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     public interface IPositionLogic : INotifyPositionChanged, IDisposable
     {

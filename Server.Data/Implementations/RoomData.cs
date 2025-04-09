@@ -12,7 +12,10 @@
         { 
             get
             {
-                return _heaters.AsReadOnly();
+                lock (_heatersLock)
+                {
+                    return _heaters.AsReadOnly();
+                }
             }
         }
 
@@ -22,7 +25,10 @@
         {
             get
             {
-                return _heatSensors.AsReadOnly();
+                lock (_heatSensorsLock)
+                {
+                    return _heatSensors.AsReadOnly();
+                }
             }
         }
 
@@ -41,6 +47,22 @@
                 _heaters.Add(heater);
             }
             return heater;
+        }
+
+        public bool ContainsHeater(Guid id)
+        {
+            lock (_heatersLock)
+            {
+                return _heaters.Find(heater => heater.Id == id) != null;
+            }
+        }
+
+        public IHeaterData? GetHeater(Guid id)
+        {
+            lock (_heatersLock)
+            {
+                return _heaters.Find(heater => heater.Id == id);
+            }
         }
 
         public void RemoveHeater(Guid id)
@@ -68,6 +90,22 @@
                 _heatSensors.Add(sensor);
             }
             return sensor;
+        }
+
+        public bool ContainsHeatSensor(Guid id)
+        {
+            lock (_heatSensorsLock)
+            {
+                return _heatSensors.Find(sensor => sensor.Id == id) != null;
+            }
+        }
+
+        public IHeatSensorData? GetHeatSensor(Guid id)
+        {
+            lock (_heatSensorsLock)
+            {
+                return _heatSensors.Find(sensor => sensor.Id == id);
+            }
         }
 
         public void RemoveHeatSensor(Guid id)

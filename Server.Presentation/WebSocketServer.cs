@@ -3,7 +3,7 @@ using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
 
-namespace Server.Presentation
+namespace TPUM.Server.Presentation
 {
     internal class WebSocketServer
     {

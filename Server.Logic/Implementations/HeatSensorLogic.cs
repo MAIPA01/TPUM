@@ -1,7 +1,7 @@
-﻿using TPUM.Client.Data;
-using TPUM.Client.Logic.Events;
+﻿using TPUM.Server.Data;
+using TPUM.Server.Logic.Events;
 
-namespace TPUM.Client.Logic
+namespace TPUM.Server.Logic
 {
     internal class HeatSensorLogic : IHeatSensorLogic
     {
@@ -15,7 +15,13 @@ namespace TPUM.Client.Logic
         private IPositionLogic _position;
         public IPositionLogic Position
         {
-            get => _position;
+            get
+            {
+                lock (_posLock)
+                {
+                    return _position;
+                }
+            }
             set
             {
                 lock (_posLock)
@@ -53,9 +59,9 @@ namespace TPUM.Client.Logic
             }
         }
 
-        private void GetPositionChanged(object? source, PositionChangedEventArgs args)
+        private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(this, new PositionChangedEventArgs(args.LastPosition, Position));
+            PositionChanged?.Invoke(this, lastPosition, newPosition);
         }
 
         public void Dispose()
@@ -72,12 +78,12 @@ namespace TPUM.Client.Logic
 
         private void OnPositionChanged(object? source, IPositionLogic lastPosition)
         {
-            PositionChanged?.Invoke(source, new PositionChangedEventArgs(lastPosition, _position));
+            PositionChanged?.Invoke(source, lastPosition, _position);
         }
 
         private void OnTemperatureChanged(object? source, float lastTemperature)
         {
-            TemperatureChanged?.Invoke(source, new TemperatureChangedEventArgs(lastTemperature, _data.Temperature));
+            TemperatureChanged?.Invoke(source, lastTemperature, _data.Temperature);
         }
     }
 }
