@@ -1,6 +1,4 @@
-﻿using TPUM.Client.Data;
-
-namespace TPUM.Client.Logic.Tests
+﻿namespace TPUM.Client.Logic.Tests
 {
     [TestClass]
     public sealed class PositionLogicTest
@@ -8,12 +6,6 @@ namespace TPUM.Client.Logic.Tests
         private IPositionLogic _position = default!;
         private const float _x = 2f;
         private const float _y = 2f;
-
-        public class TestPositionData : IPositionData
-        {
-            public float X { get; set; }
-            public float Y { get; set; }
-        }
 
         [TestInitialize]
         public void Setup()

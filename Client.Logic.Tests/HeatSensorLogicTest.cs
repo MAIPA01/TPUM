@@ -1,6 +1,4 @@
-﻿using TPUM.Client.Data;
-
-namespace TPUM.Client.Logic.Tests
+﻿namespace TPUM.Client.Logic.Tests
 {
     [TestClass]
     public sealed class HeatSensorLogicTest
@@ -8,19 +6,6 @@ namespace TPUM.Client.Logic.Tests
         private IHeatSensorLogic _sensor = default!;
         private const float _x = 2f;
         private const float _y = 2f;
-
-        public class TestPositionData : IPositionData
-        {
-            public float X { get; set; }
-            public float Y { get; set; }
-        }
-
-        public class TestHeatSensorData : IHeatSensorData
-        {
-            public Guid Id { get; set; } = Guid.NewGuid();
-            public IPositionData Position { get; set; } = new TestPositionData();
-            public float Temperature { get; set; }
-        }
 
         [TestInitialize]
         public void Setup()
