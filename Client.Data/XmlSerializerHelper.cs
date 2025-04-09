@@ -168,6 +168,55 @@ namespace TPUM.Client.Data
     }
 
 
+    // UPDATE
+    [XmlRoot("UpdateRoomRequest")]
+    internal class UpdateRoomRequest
+    {
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
+    }
+
+    [XmlRoot("RoomUpdatedResponse")]
+    internal class RoomUpdatedResponse
+    {
+        public bool Success;
+    }
+
+    [XmlRoot("UpdateHeaterRequest")]
+    internal class UpdateHeaterRequest
+    {
+        public Guid Id { get; set; }
+        public Guid RoomId { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Temperature { get; set; }
+        public bool IsOn { get; set; }
+    }
+
+    [XmlRoot("HeaterUpdatedResponse")]
+    internal class HeaterUpdatedResponse
+    {
+        public bool Success;
+    }
+
+    [XmlRoot("UpdateHeatSensorRequest")]
+    internal class UpdateHeatSensorRequest
+    {
+        public Guid Id { get; set; }
+        public Guid RoomId { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+    }
+
+    [XmlRoot("HeatSensorUpdatedResponse")]
+    internal class HeatSensorUpdatedResponse
+    {
+        public bool Success;
+    }
+
+
     // REMOVE
     [XmlRoot("RemoveRoomRequest")]
     internal class RemoveRoomRequest

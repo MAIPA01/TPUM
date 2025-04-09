@@ -10,17 +10,23 @@ namespace TPUM.Client.Data
 
         public abstract IHeaterData? GetHeater(Guid roomId, Guid id);
 
+        public abstract void UpdateHeater(Guid roomId, Guid id, float x, float y, float temperature, bool isOn);
+
         public abstract void RemoveHeater(Guid roomId, Guid id);
 
         public abstract IHeatSensorData? AddHeatSensor(Guid roomId, float x, float y);
 
         public abstract IHeatSensorData? GetHeatSensor(Guid roomId, Guid id);
 
+        public abstract void UpdateHeatSensor(Guid roomId, Guid id, float x, float y);
+
         public abstract void RemoveHeatSensor(Guid roomId, Guid id);
 
         public abstract IRoomData? AddRoom(string name, float width, float height);
 
         public abstract IRoomData? GetRoom(Guid id);
+
+        public abstract void UpdateRoom(Guid id, string name, float width, float height);
 
         public abstract void RemoveRoom(Guid id);
 
@@ -100,6 +106,31 @@ namespace TPUM.Client.Data
             }
         }
 
+        public override void UpdateHeater(Guid roomId, Guid id, float x, float y, float temperature, bool isOn)
+        {
+            var room = GetRoom(roomId);
+            if (room == null) return;
+
+            lock (_roomsLock)
+            {
+                var req = new UpdateHeaterRequest { Id = id, RoomId = roomId, X = x, Y = y, Temperature = temperature, IsOn = isOn };
+                var xml = XmlSerializerHelper.Serialize(req);
+                var responseXml = _client.SendAndReceiveAsync(xml).Result;
+                var res = XmlSerializerHelper.Deserialize<HeaterUpdatedResponse>(responseXml);
+
+                if (!res.Success) return;
+
+                var heater = room.GetHeater(id);
+
+                if (heater == null) return;
+
+                heater.Position.X = x;
+                heater.Position.Y = y;
+                heater.Temperature = temperature;
+                heater.IsOn = isOn;
+            }
+        }
+
         public override void RemoveHeater(Guid roomId, Guid id)
         {
             var room = GetRoom(roomId);
@@ -157,6 +188,29 @@ namespace TPUM.Client.Data
                 sensor = new HeatSensorData(res.Id, new PositionData(res.X, res.Y), res.Temperature);
                 room.AddHeatSensor(sensor);
                 return sensor;
+            }
+        }
+
+        public override void UpdateHeatSensor(Guid roomId, Guid id, float x, float y)
+        {
+            var room = GetRoom(roomId);
+            if (room == null) return;
+
+            lock (_roomsLock)
+            {
+                var req = new UpdateHeatSensorRequest { Id = id, RoomId = roomId, X = x, Y = y };
+                var xml = XmlSerializerHelper.Serialize(req);
+                var responseXml = _client.SendAndReceiveAsync(xml).Result;
+                var res = XmlSerializerHelper.Deserialize<HeatSensorUpdatedResponse>(responseXml);
+
+                if (!res.Success) return;
+
+                var sensor = room.GetHeatSensor(id);
+
+                if (sensor == null) return;
+
+                sensor.Position.X = x;
+                sensor.Position.Y = y;
             }
         }
 
@@ -234,6 +288,26 @@ namespace TPUM.Client.Data
 
                 _rooms.Add(room);
                 return room;
+            }
+        }
+
+        public override void UpdateRoom(Guid id, string name, float width, float height)
+        {
+            var req = new UpdateRoomRequest { Id = id, Name = name, Width = width, Height = height };
+            var xml = XmlSerializerHelper.Serialize(req);
+            var responseXml = _client.SendAndReceiveAsync(xml).Result;
+            var res = XmlSerializerHelper.Deserialize<RoomUpdatedResponse>(responseXml);
+
+            if (!res.Success) return;
+
+            var room = GetRoom(id);
+            if (room == null) return;
+
+            lock (_roomsLock)
+            {
+                room.Name = name;
+                room.Width = width;
+                room.Height = height;
             }
         }
 

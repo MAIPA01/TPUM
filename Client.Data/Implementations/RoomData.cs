@@ -3,9 +3,9 @@
     internal class RoomData : IRoomData
     {
         public Guid Id { get; }
-        public string Name { get; }
-        public float Width { get; }
-        public float Height { get; }
+        public string Name { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
 
         private readonly object _heatersLock = new();
         private readonly List<IHeaterData> _heaters = [];

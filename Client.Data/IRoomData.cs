@@ -3,9 +3,9 @@
     public interface IRoomData : IDisposable
     {
         Guid Id { get; }
-        string Name { get; }
-        float Width { get; }
-        float Height { get; }
+        string Name { get; set; }
+        float Width { get; set; }
+        float Height { get; set; }
         IReadOnlyCollection<IHeaterData> Heaters { get; }
         IReadOnlyCollection<IHeatSensorData> HeatSensors { get; }
         IHeaterData AddHeater(IHeaterData heater);
