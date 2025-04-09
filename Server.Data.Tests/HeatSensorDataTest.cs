@@ -48,5 +48,18 @@
             _sensor.Temperature = 1f;
             Assert.AreEqual(1f, _sensor.Temperature, 1e-10f);
         }
+
+        [TestMethod]
+        public void HeatSensorData_TemperatureChangeEvent_IsTriggered()
+        {
+            var position = new DummyPositionData(1, 1);
+            var sensor = new DummyHeatSensorData(Guid.NewGuid(), position);
+            bool eventTriggered = false;
+
+            sensor.TemperatureChanged += (s, oldT, newT) => eventTriggered = true;
+
+            sensor.Temperature = 20.5f;
+            Assert.IsTrue(eventTriggered);
+        }
     }
 }

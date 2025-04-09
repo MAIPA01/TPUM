@@ -59,5 +59,29 @@
             _heater.Temperature = _temp + 1f;
             Assert.AreEqual(_temp + 1f, _heater.Temperature, 1e-10f);
         }
+
+        [TestMethod]
+        public void HeaterData_EnableChangedEvent_IsTriggered()
+        {
+            var heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(1, 1), 25.0f);
+            bool eventTriggered = false;
+
+            heater.EnableChanged += (s, oldV, newV) => eventTriggered = true;
+
+            heater.IsOn = true;
+            Assert.IsTrue(eventTriggered);
+        }
+
+        [TestMethod]
+        public void HeaterData_PositionChangeEvent_IsTriggered()
+        {
+            var heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(1, 1), 22.0f);
+            bool eventTriggered = false;
+
+            heater.PositionChanged += (s, oldPos, newPos) => eventTriggered = true;
+
+            heater.Position = new DummyPositionData(2, 2);
+            Assert.IsTrue(eventTriggered);
+        }
     }
 }

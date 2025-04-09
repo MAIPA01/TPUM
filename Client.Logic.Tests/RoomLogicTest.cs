@@ -5,16 +5,92 @@ namespace TPUM.Client.Logic.Tests
     [TestClass]
     public sealed class RoomLogicTest
     {
-        private DataApiBase _dataApi = default!;
         private IRoomLogic _room = default!;
         private const float _width = 100f;
         private const float _height = 100f;
 
+        public class TestPositionData : IPositionData
+        {
+            public float X { get; set; }
+            public float Y { get; set; }
+        }
+
+        public class TestHeaterData : IHeaterData
+        {
+            public Guid Id { get; set; } = Guid.NewGuid();
+            public IPositionData Position { get; set; } = new TestPositionData();
+            public float Temperature { get; set; }
+            public bool IsOn { get; set; }
+        }
+
+        public class TestHeatSensorData : IHeatSensorData
+        {
+            public Guid Id { get; set; } = Guid.NewGuid();
+            public IPositionData Position { get; set; } = new TestPositionData();
+            public float Temperature { get; set; }
+        }
+
+        public class TestRoomData : IRoomData
+        {
+            public Guid Id { get; set; } = Guid.NewGuid();
+            public string Name { get; set; } = "TestRoom";
+            public float Width { get; set; } = 5.0f;
+            public float Height { get; set; } = 4.0f;
+
+            public IReadOnlyCollection<IHeaterData> Heaters => throw new NotImplementedException();
+
+            public IReadOnlyCollection<IHeatSensorData> HeatSensors => throw new NotImplementedException();
+
+            public IHeaterData AddHeater(IHeaterData heater)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IHeatSensorData AddHeatSensor(IHeatSensorData sensor)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool ContainsHeater(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool ContainsHeatSensor(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IHeaterData? GetHeater(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IHeatSensorData? GetHeatSensor(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void RemoveHeater(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void RemoveHeatSensor(Guid id)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         [TestInitialize]
         public void Setup()
         {
-            _dataApi = DataApiBase.GetApi();
-            _room = new DummyRoomLogic(_dataApi.AddRoom(_width, _height));
+            _room = new DummyRoomLogic(new TestRoomData { Width = _width, Height = _height });
         }
 
         [TestMethod]
@@ -24,190 +100,56 @@ namespace TPUM.Client.Logic.Tests
             Assert.AreEqual(_height, _room.Height, 1e-10f);
             Assert.AreEqual(0, _room.Heaters.Count);
             Assert.AreEqual(0, _room.HeatSensors.Count);
-            Assert.AreEqual(0f, _room.RoomTemperature, 1e-10f);
             Assert.AreEqual(0f, _room.AvgTemperature, 1e-10f);
         }
 
         [TestMethod]
-        public void AddHeater_ShouldAddHeaterToRoom()
+        public void RoomLogic_CanAddAndRemoveHeater()
         {
-            IHeaterLogic heater = _room.AddHeater(5f, 5f, 100f);
+            var room = new DummyRoomLogic(new TestRoomData());
+            var heater = new DummyHeaterLogic(new TestHeaterData());
 
-            Assert.IsNotNull(heater);
-            Assert.AreEqual(1, _room.Heaters.Count);
-            Assert.AreSame(heater, _room.Heaters.First());
+            var added = room.AddHeater(heater);
+
+            Assert.IsTrue(room.Heaters.Contains(added));
+
+            room.RemoveHeater(added.Id);
+
+            Assert.IsFalse(room.Heaters.Contains(added));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void AddHeater_ShouldThrowException_WhenPositionOutOfRange()
+        public void RoomLogic_CanAddAndRemoveHeatSensor()
         {
-            _room.AddHeater(110f, 5f, 100f);
+            var room = new DummyRoomLogic(new TestRoomData());
+            var sensor = new DummyHeatSensorLogic(new TestHeatSensorData());
+
+            var added = room.AddHeatSensor(sensor);
+
+            Assert.IsTrue(room.HeatSensors.Contains(added));
+
+            room.RemoveHeatSensor(added.Id);
+
+            Assert.IsFalse(room.HeatSensors.Contains(added));
         }
 
         [TestMethod]
-        public void RemoveHeater_ShouldNotRemoveHeaterFromRoomIfIdNotFound()
+        public void RoomLogic_ShouldCalculateAverageTemperature()
         {
-            IHeaterLogic heater = _room.AddHeater(5f, 5f, 100f);
+            var room = new DummyRoomLogic(new TestRoomData());
+            room.AddHeatSensor(new DummyHeatSensorLogic(new TestHeatSensorData { Temperature = 20 }));
+            room.AddHeatSensor(new DummyHeatSensorLogic(new TestHeatSensorData { Temperature = 22 }));
+            room.AddHeatSensor(new DummyHeatSensorLogic(new TestHeatSensorData { Temperature = 24 }));
 
-            _room.RemoveHeater(Guid.Empty);
-
-            Assert.AreEqual(1, _room.Heaters.Count);
+            Assert.AreEqual(22f, room.AvgTemperature);
         }
 
         [TestMethod]
-        public void RemoveHeater_ShouldRemoveHeaterFromRoom()
+        public void RoomLogic_ShouldReturnZeroAvgTemp_WhenNoSensors()
         {
-            IHeaterLogic heater = _room.AddHeater(5f, 5f, 100f);
+            var room = new DummyRoomLogic(new TestRoomData());
 
-            _room.RemoveHeater(heater.Id);
-
-            Assert.AreEqual(0, _room.Heaters.Count);
-        }
-
-        [TestMethod]
-        public void AddHeatSensor_ShouldAddSensorToRoom()
-        {
-            IHeatSensorLogic sensor = _room.AddHeatSensor(5f, 5f);
-
-            Assert.IsNotNull(sensor);
-            Assert.AreEqual(1, _room.HeatSensors.Count);
-            Assert.AreSame(sensor, _room.HeatSensors.First());
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void AddHeatSensor_ShouldThrowException_WhenPositionOutOfRange()
-        {
-            _room.AddHeatSensor(110f, 5f);
-        }
-
-        [TestMethod]
-        public void GetTemperatureAtPosition_ShouldReturnCorrectTemperature()
-        {
-            IHeatSensorLogic sensor = _room.AddHeatSensor(5f, 5f);
-            ((DummyHeatSensorLogic)sensor).SetTemperature(25f);
-
-            float temp = ((DummyRoomLogic)_room).GetTemperatureAtPosition(5f, 5f);
-            Assert.AreEqual(25f, temp);
-        }
-
-        [TestMethod]
-        public void GetTemperatureAtPosition_ShouldReturnCorrectTemperature_WithMultipleSensors()
-        {
-            IHeatSensorLogic sensor1 = _room.AddHeatSensor(5f, 5f);
-            ((DummyHeatSensorLogic)sensor1).SetTemperature(25f);
-
-            IHeatSensorLogic sensor2 = _room.AddHeatSensor(5f, 7f);
-            ((DummyHeatSensorLogic)sensor2).SetTemperature(35f);
-
-            float temp = _room.GetTemperatureAtPosition(5f, 6f);
-            Assert.AreEqual(30f, temp);
-        }
-
-        [TestMethod]
-        public void GetTemperatureAtPosition_ShouldWeightTemperatureByDistance()
-        {
-            IHeatSensorLogic sensor1 = _room.AddHeatSensor(2f, 2f);
-            ((DummyHeatSensorLogic)sensor1).SetTemperature(40f);
-
-            IHeatSensorLogic sensor2 = _room.AddHeatSensor(8f, 8f);
-            ((DummyHeatSensorLogic)sensor2).SetTemperature(20f);
-
-            float temp = _room.GetTemperatureAtPosition(6f, 6f);
-
-            Assert.IsTrue(temp < 30f && temp > 20f, $"Expected temperature between 20 and 30, but got {temp}");
-        }
-
-        [TestMethod]
-        public void RemoveHeatSensor_ShouldNotRemoveHeatSensorFromRoomIfIdNotFound()
-        {
-            IHeatSensorLogic sensor = _room.AddHeatSensor(5f, 5f);
-
-            _room.RemoveHeatSensor(Guid.Empty);
-
-            Assert.AreEqual(1, _room.HeatSensors.Count);
-        }
-
-        [TestMethod]
-        public void RemoveHeatSensor_ShouldRemoveHeatSensorFromRoom()
-        {
-            IHeatSensorLogic sensor = _room.AddHeatSensor(5f, 5f);
-
-            _room.RemoveHeatSensor(sensor.Id);
-
-            Assert.AreEqual(0, _room.HeatSensors.Count);
-        }
-
-        [TestMethod]
-        public void AvgTemperature_ShouldReturnZero_WhenNoSensors()
-        {
-            Assert.AreEqual(0f, _room.AvgTemperature);
-        }
-
-        [TestMethod]
-        public void AvgTemperature_ShouldCalculateCorrectly()
-        {
-            IHeatSensorLogic sensor1 = _room.AddHeatSensor(3f, 3f);
-            ((DummyHeatSensorLogic)sensor1).SetTemperature(20f);
-            IHeatSensorLogic sensor2 = _room.AddHeatSensor(7f, 7f);
-            ((DummyHeatSensorLogic)sensor2).SetTemperature(30f);
-
-            Assert.AreEqual(25f, _room.AvgTemperature);
-        }
-
-        [TestMethod]
-        public void ClearHeaters_ShouldRemoveAllHeaters()
-        {
-            _room.AddHeater(5f, 5f, 100f);
-            Assert.AreEqual(1, _room.Heaters.Count);
-
-            _room.ClearHeaters();
-            Assert.AreEqual(0, _room.Heaters.Count);
-        }
-
-        [TestMethod]
-        public void ClearHeatSensors_ShouldRemoveAllSensors()
-        {
-            _room.AddHeatSensor(5f, 5f);
-            Assert.AreEqual(1, _room.HeatSensors.Count);
-
-            _room.ClearHeatSensors();
-            Assert.AreEqual(0, _room.HeatSensors.Count);
-        }
-
-        [TestMethod]
-        public void Dispose_ShouldClearHeatSensorsAndHeatersAfterDisposing()
-        {
-            _room.AddHeatSensor(5f, 5f);
-            Assert.AreEqual(1, _room.HeatSensors.Count);
-            _room.AddHeater(5f, 5f, 100f);
-            Assert.AreEqual(1, _room.Heaters.Count);
-
-            _room.Dispose();
-
-            Assert.AreEqual(0, _room.HeatSensors.Count);
-            Assert.AreEqual(0, _room.Heaters.Count);
-        }
-
-        [TestMethod]
-        public void UpdateTemperature_ShouldUpdateSensorTemperaturesBasedOnHeater()
-        {
-            IHeaterLogic heater = _room.AddHeater(5f, 5f, 100f);
-            heater.TurnOn();
-
-            IHeatSensorLogic sensor1 = _room.AddHeatSensor(3f, 3f);
-            ((DummyHeatSensorLogic)sensor1).SetTemperature(20f);
-            IHeatSensorLogic sensor2 = _room.AddHeatSensor(7f, 7f);
-            ((DummyHeatSensorLogic)sensor2).SetTemperature(20f);
-
-            float initialTemp1 = sensor1.Temperature;
-            float initialTemp2 = sensor2.Temperature;
-
-            ((DummyRoomLogic)_room).UpdateTemperature(200);
-
-            Assert.IsTrue(sensor1.Temperature > initialTemp1, $"Expected sensor1 temperature to increase from {initialTemp1}, but got {sensor1.Temperature}");
-            Assert.IsTrue(sensor2.Temperature > initialTemp2, $"Expected sensor2 temperature to increase from {initialTemp2}, but got {sensor2.Temperature}");
+            Assert.AreEqual(0f, room.AvgTemperature);
         }
     };
 }

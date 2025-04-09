@@ -1,167 +1,90 @@
-﻿using TPUM.Client.Data;
-
-namespace TPUM.Client.Logic.Tests
+﻿namespace TPUM.Client.Logic.Tests
 {
     [TestClass]
     public sealed class HeaterLogicTest
     {
-        private DataApiBase _dataApi = default!;
         private IHeaterLogic _heater = default!;
         private IPositionLogic _position = default!;
-        private const float _x = 2f;
-        private const float _y = 2f;
-        private const float _temp = 21f;
+
+        public class TestPositionData : Data.IPositionData
+        {
+            public float X { get; set; }
+            public float Y { get; set; }
+        }
+
+        public class TestHeaterData : Data.IHeaterData
+        {
+            public Guid Id { get; set; } = Guid.NewGuid();
+            public Data.IPositionData Position { get; set; } = new TestPositionData();
+            private float _temperature = 0.0f;
+            public float Temperature { get; set; }
+            public bool IsOn { get; set; }
+        }
 
         [TestInitialize]
         public void Setup()
         {
-            _dataApi = DataApiBase.GetApi();
-            _position = new DummyPositionLogic(_dataApi.CreatePosition(_x, _y));
-            _heater = new DummyHeaterLogic(_dataApi.CreateHeater(_x, _y, _temp));
+            var _posData = new TestPositionData { X = 1.0f, Y = 2.0f };
+            _position = new DummyPositionLogic(_posData);
+            _heater = new DummyHeaterLogic(new TestHeaterData
+            {
+                Position = _posData,
+                Temperature = 22.5f,
+                IsOn = false
+            });
         }
 
         [TestMethod]
         public void Heater_ShouldInitialize_WithCorrectProperties()
         {
-            Assert.AreEqual(_position, _heater.Position);
-            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
+            Assert.AreEqual(_position.X, _heater.Position.X);
+            Assert.AreEqual(_position.Y, _heater.Position.Y);
             Assert.IsFalse(_heater.IsOn);
+            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
         }
 
         [TestMethod]
-        public void SetPosition_ShouldUpdatePositionCorrectly()
+        public void SetPosition_ShouldUpdatePositionXCorrectly()
         {
-            Assert.AreEqual(_position, _heater.Position);
+            Assert.AreEqual(_position.X, _heater.Position.X);
             _heater.Position.X += 1f;
             _position.X += 1f;
-            Assert.AreEqual(_position, _heater.Position);
+            Assert.AreEqual(_position.X, _heater.Position.X);
         }
 
         [TestMethod]
-        public void IsOn_ShouldReturnCorrectState_WhenTurnedOnAndOff()
+        public void SetPosition_ShouldUpdatePositionYCorrectly()
         {
-            Assert.IsFalse(_heater.IsOn);
-
-            _heater.TurnOn();
-            Assert.IsTrue(_heater.IsOn);
-
-            _heater.TurnOff();
-            Assert.IsFalse(_heater.IsOn);
+            Assert.AreEqual(_position.Y, _heater.Position.Y);
+            _heater.Position.Y += 1f;
+            _position.Y += 1f;
+            Assert.AreEqual(_position.Y, _heater.Position.Y);
         }
 
         [TestMethod]
-        public void IsOn_ShouldNotChangeIfTurnedOnTwice()
+        public void HeaterLogic_ShouldReturnTemperature_IfOn()
         {
-            Assert.IsFalse(_heater.IsOn);
-
-            _heater.TurnOn();
-            Assert.IsTrue(_heater.IsOn);
-
-            _heater.TurnOn();
-            Assert.IsTrue(_heater.IsOn);
-        }
-
-        [TestMethod]
-        public void Temperature_ShouldReturnZero_WhenHeaterIsOff()
-        {
-            _heater.TurnOff();
-            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
-        }
-
-        [TestMethod]
-        public void Temperature_ShouldReturnCorrectValue_WhenHeaterIsOn()
-        {
-            _heater.TurnOff();
-            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
-
-            _heater.TurnOn();
-            Assert.AreEqual(_temp, _heater.Temperature, 1e-10f);
-        }
-
-        [TestMethod]
-        public void SetTemperature_ShouldUpdateTemperatureCorrectly()
-        {
-            _heater.TurnOn();
-            _heater.Temperature = _temp + 1f;
-            Assert.AreEqual(_temp + 1f, _heater.Temperature, 1e-10f);
-        }
-
-        [TestMethod]
-        public void TemperatureChangedEvent_ShouldBeTriggered_WhenTemperatureChanges()
-        {
-            bool eventTriggered = false;
-            _heater.TemperatureChanged += (sender, args) =>
+            var data = new TestHeaterData
             {
-                eventTriggered = true;
-                Assert.AreEqual(_temp, args.LastTemperature, 1e-10f);
-                Assert.AreEqual(30.0f, args.NewTemperature, 1e-10f);
+                Temperature = 22.5f,
+                IsOn = true
             };
+            var logic = new DummyHeaterLogic(data);
 
-            _heater.Temperature = 30.0f;
-
-            Assert.IsTrue(eventTriggered, "TemperatureChanged event was not triggered.");
+            Assert.AreEqual(22.5f, logic.Temperature);
         }
 
         [TestMethod]
-        public void EnableChangedEvent_ShouldBeTriggered_WhenHeaterIsTurnedOn()
+        public void HeaterLogic_ShouldReturnZeroTemperature_IfOff()
         {
-            bool eventTriggered = false;
-            _heater.EnableChanged += (sender, args) =>
+            var data = new TestHeaterData
             {
-                eventTriggered = true;
-                Assert.IsFalse(args.LastEnable);
-                Assert.IsTrue(args.NewEnable);
+                Temperature = 22.5f,
+                IsOn = false
             };
+            var logic = new DummyHeaterLogic(data);
 
-            _heater.TurnOn();
-
-            Assert.IsTrue(eventTriggered, "EnableChange event was not triggered.");
-        }
-
-        [TestMethod]
-        public void EnableChangedEvent_ShouldBeTriggered_WhenHeaterIsTurnedOff()
-        {
-            _heater.TurnOn();
-            bool eventTriggered = false;
-            _heater.EnableChanged += (sender, args) =>
-            {
-                eventTriggered = true;
-                Assert.IsTrue(args.LastEnable);
-                Assert.IsFalse(args.NewEnable);
-            };
-
-            _heater.TurnOff();
-
-            Assert.IsTrue(eventTriggered, "EnableChange event was not triggered.");
-        }
-
-        [TestMethod]
-        public void Position_SetNewValue_ShouldTriggerEvent()
-        {
-            bool eventTriggered = false;
-            _heater.PositionChanged += (sender, args) =>
-            {
-                eventTriggered = true;
-                Assert.AreEqual(_x, args.LastPosition.X, 1e-10f);
-                Assert.AreEqual(_y, args.LastPosition.Y, 1e-10f);
-                Assert.AreEqual(5f, args.NewPosition.X, 1e-10f);
-                Assert.AreEqual(5f, args.NewPosition.Y, 1e-10f);
-            };
-
-            _heater.Position = new DummyPositionLogic(_dataApi.CreatePosition(5f, 5f));
-
-            Assert.IsTrue(eventTriggered, "PositionChange event was not triggered.");
-        }
-
-        [TestMethod]
-        public void Position_SetSameValue_ShouldNotTriggerEvent()
-        {
-            bool eventTriggered = false;
-            _heater.PositionChanged += (s, e) => eventTriggered = true;
-
-            _heater.Position = new DummyPositionLogic(_dataApi.CreatePosition(_x, _y));
-
-            Assert.IsFalse(eventTriggered);
+            Assert.AreEqual(0f, logic.Temperature);
         }
     }
 }

@@ -33,5 +33,17 @@
             _position.Y += 1f;
             Assert.AreEqual(_y + 1f, _position.Y, 1e-10f);
         }
+
+        [TestMethod]
+        public void PositionData_PositionChangeEvent_IsTriggered()
+        {
+            var position = new DummyPositionData(0, 0);
+            bool eventTriggered = false;
+
+            position.PositionChanged += (s, old, newPos) => eventTriggered = true;
+
+            position.X = 10;
+            Assert.IsTrue(eventTriggered);
+        }
     }
 }
