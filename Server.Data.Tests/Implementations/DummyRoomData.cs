@@ -1,9 +1,8 @@
-﻿namespace TPUM.Client.Data
+﻿namespace TPUM.Server.Data.Tests
 {
-    internal class RoomData : IRoomData
+    internal class DummyRoomData : IRoomData
     {
         public Guid Id { get; }
-        public string Name { get; }
         public float Width { get; }
         public float Height { get; }
 
@@ -13,10 +12,7 @@
         {
             get
             {
-                lock (_heatersLock)
-                {
-                    return _heaters.AsReadOnly();
-                }
+                return _heaters.AsReadOnly();
             }
         }
 
@@ -26,44 +22,25 @@
         {
             get
             {
-                lock (_heatSensorsLock)
-                {
-                    return _heatSensors.AsReadOnly();
-                }
+                return _heatSensors.AsReadOnly();
             }
         }
 
-        public RoomData(Guid id, string name, float width, float height)
+        public DummyRoomData(Guid id, float width, float height)
         {
             Id = id;
-            Name = name;
             Width = width;
             Height = height;
         }
 
-        public IHeaterData AddHeater(IHeaterData heater)
+        public IHeaterData AddHeater(float x, float y, float temperature)
         {
+            IHeaterData heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(x, y), temperature);
             lock (_heatersLock)
             {
                 _heaters.Add(heater);
             }
             return heater;
-        }
-
-        public bool ContainsHeater(Guid id)
-        {
-            lock ( _heatersLock)
-            {
-                return _heaters.Find(heater => heater.Id == id) != null;
-            }
-        }
-
-        public IHeaterData? GetHeater(Guid id)
-        {
-            lock (_heatersLock)
-            {
-                return _heaters.Find(heater => heater.Id == id);
-            }
         }
 
         public void RemoveHeater(Guid id)
@@ -75,29 +52,22 @@
             }
         }
 
-        public IHeatSensorData AddHeatSensor(IHeatSensorData sensor)
+        public void ClearHeaters()
         {
+            lock (_heatersLock)
+            {
+                _heaters.Clear();
+            }
+        }
+
+        public IHeatSensorData AddHeatSensor(float x, float y)
+        {
+            IHeatSensorData sensor = new DummyHeatSensorData(Guid.NewGuid(), new DummyPositionData(x, y));
             lock (_heatSensorsLock)
             {
                 _heatSensors.Add(sensor);
             }
             return sensor;
-        }
-
-        public bool ContainsHeatSensor(Guid id)
-        {
-            lock (_heatSensorsLock)
-            {
-                return _heatSensors.Find(sensor => sensor.Id == id) != null;
-            }
-        }
-
-        public IHeatSensorData? GetHeatSensor(Guid id)
-        {
-            lock (_heatSensorsLock)
-            {
-                return _heatSensors.Find(sensor => sensor.Id == id);
-            }
         }
 
         public void RemoveHeatSensor(Guid id)
@@ -109,11 +79,12 @@
             }
         }
 
-        public void Dispose()
+        public void ClearHeatSensors()
         {
-            _heaters.Clear();
-            _heatSensors.Clear();
-            GC.SuppressFinalize(this);
+            lock (_heatSensorsLock)
+            {
+                _heatSensors.Clear();
+            }
         }
     }
 }

@@ -1,16 +1,18 @@
-﻿namespace TPUM.Client.Data
+﻿namespace TPUM.Server.Data
 {
-    internal class HeatSensorData : IHeatSensorData
+    internal class HeaterData : IHeaterData
     {
         public Guid Id { get; }
+        public bool IsOn { get; set; }
         public IPositionData Position { get; set; }
         public float Temperature { get; set; }
 
-        public HeatSensorData(Guid id, IPositionData position, float temperature = 0.0f)
+        public HeaterData(Guid id, IPositionData position, float temperature, bool isOn = false)
         {
             Id = id;
             Position = position;
             Temperature = temperature;
+            IsOn = isOn;
         }
     }
 }

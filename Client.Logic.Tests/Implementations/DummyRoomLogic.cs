@@ -2,9 +2,13 @@
 using TPUM.Client.Data;
 using TPUM.Client.Logic.Events;
 
-namespace TPUM.Client.Logic.Tests
+namespace TPUM.Client.Logic
 {
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
     internal class DummyRoomLogic : IRoomLogic
+========
+    internal class RoomLogic : IRoomLogic
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
     {
         private readonly IRoomData _data;
         public Guid Id => _data.Id;
@@ -65,7 +69,11 @@ namespace TPUM.Client.Logic.Tests
 
         private readonly object _roomTemperatureLock = new();
 
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
         public DummyRoomLogic(IRoomData data)
+========
+        public RoomLogic(IRoomData data)
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
         {
             _data = data;
             _task = null;
@@ -91,7 +99,11 @@ namespace TPUM.Client.Logic.Tests
         {
             if (x > Width || x < 0f || y > Height || y < 0f || HeatSensors.Count == 0) return 0f;
 
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
             var pos = new DummyPositionLogic(DataApiBase.GetApi().CreatePosition(x, y));
+========
+            var pos = new PositionLogic(DataApiBase.GetApi().CreatePosition(x, y));
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
             var heatersTemp = 0f;
             lock (_heatersLock)
             {
@@ -127,6 +139,10 @@ namespace TPUM.Client.Logic.Tests
             return temp > 0 ? temp : RoomTemperature;
         }
 
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
+========
+
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
         private void SubscribeToHeater(IHeaterLogic heater)
         {
             heater.PositionChanged += GetPositionChanged;
@@ -148,7 +164,11 @@ namespace TPUM.Client.Logic.Tests
             if (y > Height || y < 0f)
                 throw new ArgumentOutOfRangeException(nameof(y));
 
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
             var heater = new DummyHeaterLogic(_data.AddHeater(x, y, temperature));
+========
+            var heater = new HeaterLogic(_data.AddHeater(x, y, temperature));
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
             SubscribeToHeater(heater);
             lock (_heatersLock)
             {
@@ -201,7 +221,11 @@ namespace TPUM.Client.Logic.Tests
             if (y > Height || y < 0f)
                 throw new ArgumentOutOfRangeException(nameof(y));
 
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
             IHeatSensorLogic sensor = new DummyHeatSensorLogic(_data.AddHeatSensor(x, y));
+========
+            IHeatSensorLogic sensor = new HeatSensorLogic(_data.AddHeatSensor(x, y));
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
             SubscribeToHeatSensor(sensor);
             lock (_heatSensors)
             {
@@ -286,6 +310,7 @@ namespace TPUM.Client.Logic.Tests
                 {
                     foreach (var sensor in _heatSensors)
                     {
+<<<<<<<< Updated upstream:Client.Logic.Tests/Implementations/DummyRoomLogic.cs
                         (sensor as DummyHeatSensorLogic)?.SetTemperature(MathF.Max(sensor.Temperature - TemperatureDecayFactor * deltaTime, 0f));
 
                         if (onHeaters.Count == 0) continue;
@@ -297,6 +322,18 @@ namespace TPUM.Client.Logic.Tests
                                                                    TemperatureDecayFactor * deltaTime);
                         }
                         (sensor as DummyHeatSensorLogic)?.SetTemperature(MathF.Min(sensor.Temperature, onHeaters.Max(heater => heater.Temperature)));
+========
+                        (sensor as HeatSensorLogic)?.SetTemperature(MathF.Max(sensor.Temperature - TemperatureDecayFactor * deltaTime, 0f));
+
+                        if (onHeaters.Count == 0) continue;
+                        foreach (var tempDiff in from heater in onHeaters let dist = IPositionLogic.Distance(sensor.Position, heater.Position) 
+                                 select MathF.Min(heater.Temperature, heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist)) * deltaTime)
+                        {
+                            (sensor as HeatSensorLogic)?.SetTemperature(sensor.Temperature + tempDiff -
+                                                                   TemperatureDecayFactor * deltaTime);
+                        }
+                        (sensor as HeatSensorLogic)?.SetTemperature(MathF.Min(sensor.Temperature, onHeaters.Max(heater => heater.Temperature)));
+>>>>>>>> Stashed changes:Server.Logic/Implementations/RoomLogic.cs
                     }
                 }
             }
