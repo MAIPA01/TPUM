@@ -1,6 +1,8 @@
-﻿namespace TPUM.Client.Data
+﻿using TPUM.Client.Data.Events;
+
+namespace TPUM.Client.Data
 {
-    public interface IHeaterData
+    public interface IHeaterData : INotifyPositionChanged, INotifyEnableChanged, INotifyTemperatureChanged, IDisposable
     {
         Guid Id { get; }
         bool IsOn { get; set; }

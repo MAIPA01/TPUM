@@ -7,33 +7,19 @@ namespace TPUM.Client.Data
     internal class WebSocketClient : IWebSocketClient
     {
         private readonly ClientWebSocket _client = new();
-        private readonly ClientWebSocket _broadcastClient = new();
         private readonly CancellationTokenSource _cts = new();
         private const int ReconnectIntervalInSeconds = 5;
 
         public event MessageReceivedEventHandler? MessageReceived;
         public event ClientConnectedEventHandler? ClientConnected;
 
-        public async Task ConnectAsync(string uri, string broadcastUri)
+        public async Task ConnectAsync(string uri)
         {
             while (_client.State != WebSocketState.Open)
             {
                 try
                 {
                     await _client.ConnectAsync(new Uri(uri), CancellationToken.None);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Blad polaczenia: {ex.Message}. Ponawiam probe za {ReconnectIntervalInSeconds} sekund...");
-                    await Task.Delay(ReconnectIntervalInSeconds * 1000);
-                }
-            }
-
-            while (_broadcastClient.State != WebSocketState.Open)
-            {
-                try
-                {
-                    await _broadcastClient.ConnectAsync(new Uri(broadcastUri), CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
@@ -51,34 +37,12 @@ namespace TPUM.Client.Data
             await _client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
-        public async Task<string> ReceiveAsync()
-        {
-            return await Task.Run(async () =>
-            {
-                var buffer = new byte[4096];
-                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                return result.MessageType != WebSocketMessageType.Binary
-                    ? ""
-                    : Encoding.UTF8.GetString(buffer, 0, result.Count);
-            });
-        }
-
-        public async Task<string> SendAndReceiveAsync(string xml)
-        {
-            return Task.Run(async () =>
-            {
-                await SendAsync(xml);
-                var result = await ReceiveAsync();
-                return result;
-            }).Result;
-        }
-
         private async Task ReceiveLoop()
         {
             var buffer = new byte[4096];
             while (!_cts.IsCancellationRequested)
             {
-                var result = await _broadcastClient.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
+                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
                 if (result.MessageType != WebSocketMessageType.Binary) continue;
                 var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 OnMessageReceived(this, xml);
@@ -91,7 +55,11 @@ namespace TPUM.Client.Data
             {
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client disconnecting",
                     CancellationToken.None);
-            } 
+            }
+            else if (client.State == WebSocketState.Aborted)
+            {
+                client.Abort();
+            }
             client.Dispose();
         }
 
@@ -99,7 +67,6 @@ namespace TPUM.Client.Data
         {
             await _cts.CancelAsync();
             await DisconnectSocketAsync(_client);
-            await DisconnectSocketAsync(_broadcastClient);
         }
 
         private void OnMessageReceived(object? source, string xml)
@@ -111,7 +78,6 @@ namespace TPUM.Client.Data
         {
             _cts.Cancel();
             _client.Dispose();
-            _broadcastClient.Dispose();
             GC.SuppressFinalize(this);
         }
     }

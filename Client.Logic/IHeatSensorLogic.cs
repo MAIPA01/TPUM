@@ -1,9 +1,11 @@
-﻿namespace TPUM.Client.Logic
+﻿using TPUM.Client.Logic.Events;
+
+namespace TPUM.Client.Logic
 {
-    public interface IHeatSensorLogic : IDisposable
+    public interface IHeatSensorLogic : INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
     {
         Guid Id { get; }
-        IPositionLogic Position { get; }
+        IPositionLogic Position { get; set; }
         float Temperature { get; }
     }
 }

@@ -1,20 +1,29 @@
 ﻿using TPUM.Client.Data;
+using TPUM.Client.Logic.Events;
 
 namespace TPUM.Client.Logic
 {
     internal class RoomLogic : IRoomLogic
     {
+        public event HeaterAddedEventHandler? HeaterAdded;
+        public event HeaterRemovedEventHandler? HeaterRemoved;
+        public event HeatSensorAddedEventHandler? HeatSensorAdded;
+        public event HeatSensorRemovedEventHandler? HeatSensorRemoved;
+        public event PositionChangedEventHandler? PositionChanged;
+        public event TemperatureChangedEventHandler? TemperatureChanged;
+        public event EnableChangedEventHandler? EnableChanged;
+
         private readonly IRoomData _data;
         public Guid Id => _data.Id;
 
-        private readonly List<IHeaterLogic> _heaters = [];
+        private readonly object _roomLock = new();
 
-        private readonly object _heatersLock = new();
+        private readonly List<IHeaterLogic> _heaters = [];
         public IReadOnlyCollection<IHeaterLogic> Heaters
         {
             get
             {
-                lock (_heatersLock)
+                lock (_roomLock)
                 {
                     return _heaters.AsReadOnly();
                 }
@@ -22,13 +31,11 @@ namespace TPUM.Client.Logic
         }
 
         private readonly List<IHeatSensorLogic> _heatSensors = [];
-
-        private readonly object _heatSensorsLock = new();
         public IReadOnlyCollection<IHeatSensorLogic> HeatSensors
         {
             get
             {
-                lock (_heatSensorsLock)
+                lock (_roomLock)
                 {
                     return _heatSensors.AsReadOnly();
                 }
@@ -39,20 +46,16 @@ namespace TPUM.Client.Logic
         public float Width => _data.Width;
         public float Height => _data.Height;
 
-        public float AvgTemperature
-        {
-            get
-            {
-                lock (_heatSensorsLock)
-                {
-                    return _heatSensors.Count == 0 ? 0f : _heatSensors.Average(heatSensor => heatSensor.Temperature);
-                }
-            }
-        }
-
         public RoomLogic(IRoomData data)
         {
             _data = data;
+            _data.PositionChanged += GetPositionChanged;
+            _data.TemperatureChanged += GetTemperatureChanged;
+            _data.EnableChanged += GetEnableChanged;
+            _data.HeaterAdded += GetHeaterAdded;
+            _data.HeaterRemoved += GetHeaterRemoved;
+            _data.HeatSensorAdded += GetHeatSensorAdded;
+            _data.HeatSensorRemoved += GetHeatSensorRemoved;
         }
 
         public IHeaterLogic AddHeater(IHeaterLogic logic)
@@ -142,6 +145,16 @@ namespace TPUM.Client.Logic
             _heatSensors.Clear();
 
             GC.SuppressFinalize(this);
+        }
+
+        public void AddHeater(float x, float y, float temperature)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddHeatSensor(float x, float y)
+        {
+            throw new NotImplementedException();
         }
     }
 }
