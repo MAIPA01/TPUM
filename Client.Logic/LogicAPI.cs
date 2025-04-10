@@ -27,7 +27,7 @@ namespace TPUM.Client.Logic
         public static LogicApiBase GetApi(string serverUri)
         {
             // TODO: zrobić singletone?
-            return new LogicApi(DataApiBase.GetApi(serverUri));
+            return GetApi(DataApiBase.GetApi(serverUri));
         }
     }
 

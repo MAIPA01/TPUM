@@ -7,11 +7,15 @@ namespace TPUM.Client.Presentation.ViewModel
     public class ShowRoomViewModel : INotifyPropertyChanged
     {
         // TODO: Add Move Functionality
+        // TODO: Add Rename Functionality
         // TODO: Add Clear Functionality
-        // TODO: Add Room View
-        // TODO: Add Heaters View
-        // TODO: Add HeatSensors View
-        public IRoom? CurrentRoom => ViewModelApi.Instance.CurrentRoom;
+        // TODO: Add Room View On Plane
+        // TODO: Add Heaters View On Plane
+        // TODO: Add HeatSensors View On Plane
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public IRoom? CurrentRoom => MainViewModel.Instance?.ViewModelApi.CurrentRoom;
 
         public string RoomName => CurrentRoom?.Name ?? "";
 
@@ -51,17 +55,17 @@ namespace TPUM.Client.Presentation.ViewModel
             CurrentRoom.PositionChanged += GetPositionChange;
         }
 
-        private void GetTemperatureChange(object? source, TemperatureChangedEventArgs args)
+        private void GetTemperatureChange(object? source, float lastTemperature, float newTemperature)
         {
             OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private void GetEnableChange(object? source, EnableChangeEventArgs args)
+        private void GetEnableChange(object? source, bool lastEnable, bool newEnable)
         {
             OnPropertyChanged(nameof(RoomTemp));
         }
 
-        private void GetPositionChange(object? source, PositionChangedEventArgs args)
+        private void GetPositionChange(object? source, IPosition lastPosition, IPosition newPosition)
         {
             OnPropertyChanged(nameof(RoomTemp));
         }
@@ -118,8 +122,6 @@ namespace TPUM.Client.Presentation.ViewModel
             CurrentRoom?.RemoveHeatSensor((Guid)parameter);
             OnPropertyChanged(nameof(RoomTemp));
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string value)
         {

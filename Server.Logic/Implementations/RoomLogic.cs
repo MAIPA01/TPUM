@@ -295,7 +295,7 @@ namespace TPUM.Server.Logic
                 stopwatch.Restart();
                 try
                 {
-                    await Task.Delay(5, token);
+                    await Task.Delay(2500, token);
                 }
                 catch (TaskCanceledException)
                 {
@@ -312,7 +312,7 @@ namespace TPUM.Server.Logic
                 var onHeaters = _heaters.FindAll(heater => heater.IsOn);
                 lock (_roomTemperatureLock)
                 {
-                    _roomTemperature = MathF.Max(_roomTemperature - TemperatureDecayFactor * deltaTime, 0f);
+                    _roomTemperature -= TemperatureDecayFactor * deltaTime;
                     if (onHeaters.Count != 0)
                     {
                         foreach (var heater in onHeaters)
@@ -321,17 +321,17 @@ namespace TPUM.Server.Logic
                         }
                         _roomTemperature = MathF.Min(_roomTemperature, onHeaters.Max(heater => heater.Temperature));
                     }
+                    _roomTemperature = MathF.Max(_roomTemperature, 0f);
                 }
 
                 lock (_heatSensorsLock)
                 {
                     foreach (var sensor in _heatSensors)
                     {
-                        var temperature = MathF.Max(sensor.Temperature - TemperatureDecayFactor * deltaTime, 0f);
-
+                        var temperature = sensor.Temperature - TemperatureDecayFactor * deltaTime;
                         if (onHeaters.Count == 0)
                         {
-                            sensor.SetTemperature(temperature);
+                            sensor.SetTemperature(MathF.Max(temperature, 0f));
                             continue;
                         }
                         foreach (var heater in onHeaters)
@@ -342,7 +342,7 @@ namespace TPUM.Server.Logic
                             temperature += tempDiff - TemperatureDecayFactor * deltaTime;
                         }
                         temperature = MathF.Min(temperature, onHeaters.Max(heater => heater.Temperature));
-                        sensor.SetTemperature(temperature);
+                        sensor.SetTemperature(MathF.Max(temperature, 0f));
                     }
                 }
             }

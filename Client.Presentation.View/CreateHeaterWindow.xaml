@@ -3,9 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TPUM.Client.Presentation.View"
         xmlns:vm="clr-namespace:TPUM.Client.Presentation.ViewModel;assembly=Client.Presentation.ViewModel"
-        xmlns:rules="clr-namespace:TPUM.Client.Presentation.ViewModel.Rules;assembly=Client.Presentation.ViewModel"
+        xmlns:rules="clr-namespace:TPUM.Client.Presentation.View.Rules"
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize"
@@ -46,7 +45,7 @@
         </TextBox>
         <TextBlock HorizontalAlignment="Left" Margin="46,217,0,0" 
            TextWrapping="Wrap" VerticalAlignment="Top" Height="22">
-            <Run Language="pl-pl" Text="Temperature"/>
+            <Run Language="pl-pl" Text="Temperature (°C)"/>
         </TextBlock>
         <TextBox HorizontalAlignment="Center" Height="56" Margin="0,239,0,0" 
          TextWrapping="Wrap" VerticalAlignment="Top" Width="246">

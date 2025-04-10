@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:TPUM.Client.Presentation.View"
              xmlns:ctrls="clr-namespace:TPUM.Client.Presentation.View.Controls"
              xmlns:vm="clr-namespace:TPUM.Client.Presentation.ViewModel;assembly=Client.Presentation.ViewModel"
-             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1270">
     <UserControl.DataContext>
@@ -44,14 +43,16 @@
             <!-- Heaters -->
             <StackPanel Grid.Column="0">
                 <TextBlock Text="Heaters"/>
-                <ListView ItemsSource="{Binding Heaters, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Height="580" Margin="0, 5">
+                <ListView ItemsSource="{Binding Heaters, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                          Height="580" Margin="0, 5">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ctrls:HeaterInfo 
                                 HeaterId="{Binding Id}"
                                 Position="{Binding Position}"
                                 IsOn="{Binding IsOn}"
-                                Temperature="{Binding Temperature}"
+                                CurrentTemperature="{Binding CurrentTemperature}"
+                                DesiredTemperature="{Binding DesiredTemperature}"
                                 TurnText="{Binding TurnText}"
                                 TurnCommand="{Binding TurnCommand}"
                                 MoveCommand="{Binding MoveHeaterCommand, ElementName=ViewModel}"
@@ -59,7 +60,8 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Button Content="Add Heater" Command="{Binding AddHeaterCommand}" CommandParameter="{x:Type local:CreateHeaterWindow}"/>
+                <Button Content="Add Heater" Command="{Binding AddHeaterCommand}" 
+                        CommandParameter="{x:Type local:CreateHeaterWindow}"/>
             </StackPanel>
 
             <!-- Room -->
@@ -81,7 +83,8 @@
             <!-- Sensors -->
             <StackPanel Grid.Column="2">
                 <TextBlock Text="Sensors"/>
-                <ListView ItemsSource="{Binding HeatSensors, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Height="580" Margin="0, 5">
+                <ListView ItemsSource="{Binding HeatSensors, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                          Height="580" Margin="0, 5">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ctrls:HeatSensorInfo 
@@ -93,7 +96,8 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Button Content="Add Sensor" Command="{Binding AddHeatSensorCommand}" CommandParameter="{x:Type local:CreateHeatSensorWindow}"/>
+                <Button Content="Add Sensor" Command="{Binding AddHeatSensorCommand}" 
+                        CommandParameter="{x:Type local:CreateHeatSensorWindow}"/>
             </StackPanel>
         </Grid>
     </Grid>

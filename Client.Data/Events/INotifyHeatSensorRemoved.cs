@@ -1,6 +1,6 @@
 ﻿namespace TPUM.Client.Data.Events
 {
-    public delegate void HeatSensorRemovedEventHandler(object? source, Guid roomId, Guid id);
+    public delegate void HeatSensorRemovedEventHandler(object? source, Guid sensorId);
 
     public interface INotifyHeatSensorRemoved
     {

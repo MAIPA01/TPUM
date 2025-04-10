@@ -94,7 +94,7 @@ namespace TPUM.Client.Data
             {
                 SubscribeToHeater(heater);
                 _heaters.Add(heater);
-                HeaterAdded?.Invoke(this, roomId, heater);
+                HeaterAdded?.Invoke(this, heater);
             }
         }
 
@@ -124,13 +124,13 @@ namespace TPUM.Client.Data
             if (roomId != Id) return;
             lock (_roomLock)
             {
-                IHeaterData? heater = _heaters.Find(heater => heater.Id == heaterId);
+                var heater = _heaters.Find(heater => heater.Id == heaterId);
                 if (heater != null)
                 {
                     UnsubscribeFromHeater(heater);
                     _heaters.Remove(heater);
                 }
-                HeaterRemoved?.Invoke(this, roomId, heaterId);
+                HeaterRemoved?.Invoke(this, heaterId);
             }
         }
 
@@ -165,11 +165,12 @@ namespace TPUM.Client.Data
 
         private void GetHeatSensorAdded(object? source, Guid roomId, IHeatSensorData sensor)
         {
+            if (roomId != Id) return;
             lock (_roomLock)
             {
                 SubscribeToHeatSensor(sensor);
                 _heatSensors.Add(sensor);
-                HeatSensorAdded?.Invoke(this, roomId, sensor);
+                HeatSensorAdded?.Invoke(this, sensor);
             }
         }
 
@@ -199,13 +200,13 @@ namespace TPUM.Client.Data
             if (Id != roomId) return;
             lock (_roomLock)
             {
-                IHeatSensorData? sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
                 if (sensor != null)
                 {
                     UnsubscribeFromHeatSensor(sensor);
                     _heatSensors.Remove(sensor);
                 }
-                HeatSensorRemoved?.Invoke(this, roomId, sensorId);
+                HeatSensorRemoved?.Invoke(this, sensorId);
             }
         }
 

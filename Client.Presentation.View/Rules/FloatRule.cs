@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Controls;
 
-namespace TPUM.Client.Presentation.ViewModel.Rules
+namespace TPUM.Client.Presentation.View.Rules
 {
     public class FloatRule : ValidationRule
     {

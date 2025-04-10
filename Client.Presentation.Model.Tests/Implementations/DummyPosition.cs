@@ -3,7 +3,7 @@ using TPUM.Client.Presentation.Model.Events;
 
 namespace TPUM.Client.Presentation.Model.Tests
 {
-    internal class DummyPosition : IPosition
+    internal class DummyPosition : IPositionModel
     {
         public event PositionChangedEventHandler? PositionChanged;
 
@@ -52,19 +52,19 @@ namespace TPUM.Client.Presentation.Model.Tests
             PositionChanged?.Invoke(this, new PositionChangedEventArgs(lastX, lastY, X, Y));
         }
 
-        public static bool operator ==(DummyPosition pos1, IPosition pos2)
+        public static bool operator ==(DummyPosition pos1, IPositionModel pos2)
         {
             return Math.Abs(pos1.X - pos2.X) < 1e-10f && Math.Abs(pos1.Y - pos2.Y) < 1e-10f;
         }
 
-        public static bool operator !=(DummyPosition pos1, IPosition pos2)
+        public static bool operator !=(DummyPosition pos1, IPositionModel pos2)
         {
             return Math.Abs(pos1.X - pos2.X) > 1e-10f || Math.Abs(pos1.Y - pos2.Y) > 1e-10f;
         }
 
         public override bool Equals(object? obj)
         {
-            if (obj is not IPosition position) return false;
+            if (obj is not IPositionModel position) return false;
             return this == position;
         }
 

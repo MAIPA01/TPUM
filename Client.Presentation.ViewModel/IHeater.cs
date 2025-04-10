@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using TPUM.Client.Presentation.ViewModel.Events;
+using System.ComponentModel;
 
 namespace TPUM.Client.Presentation.ViewModel
 {
@@ -6,7 +7,8 @@ namespace TPUM.Client.Presentation.ViewModel
     {
         Guid Id { get; }
         IPosition Position { get; set; }
-        float Temperature { get; set; }
+        float CurrentTemperature { get; }
+        float DesiredTemperature { get; set; }
         bool IsOn { get; }
 
         string TurnText { get; }

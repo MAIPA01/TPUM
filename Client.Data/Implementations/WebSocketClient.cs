@@ -28,9 +28,10 @@ namespace TPUM.Client.Data
                 }
             }
 
-            ClientConnected?.Invoke(this, ClientConnectedEventArgs.Empty);
+            ClientConnected?.Invoke(this);
             _ = Task.Run(ReceiveLoop);
         }
+
         public async Task SendAsync(string xml)
         {
             var bytes = Encoding.UTF8.GetBytes(xml);
@@ -71,7 +72,7 @@ namespace TPUM.Client.Data
 
         private void OnMessageReceived(object? source, string xml)
         {
-            MessageReceived?.Invoke(source, new MessageReceivedEventArgs(xml));
+            MessageReceived?.Invoke(source, xml);
         }
 
         public void Dispose()

@@ -11,17 +11,13 @@ namespace TPUM.Server.Presentation
         public event ClientMessageReceivedEventHandler? ClientMessageReceived;
 
         private readonly HttpListener _httpListener = new();
-        private readonly HttpListener _httpBroadcastListener = new();
         private readonly string _uriPrefix;
-        private readonly string _broadcastUriPrefix;
 
         private readonly ConcurrentDictionary<Guid, WebSocket> _clients = new();
-        private readonly ConcurrentDictionary<Guid, WebSocket> _broadcastClients = new();
 
-        public WebSocketServer(string uriPrefix, string broadcastUriPrefix)
+        public WebSocketServer(string uriPrefix)
         {
             _uriPrefix = uriPrefix;
-            _broadcastUriPrefix = broadcastUriPrefix;
         }
 
         public async Task StartAsync()
@@ -29,10 +25,7 @@ namespace TPUM.Server.Presentation
             _httpListener.Prefixes.Add(_uriPrefix);
             _httpListener.Start();
 
-            _httpBroadcastListener.Prefixes.Add(_broadcastUriPrefix);
-            _httpBroadcastListener.Start();
-
-            Console.WriteLine($"✅ WebSocket Server started on {_uriPrefix} and broadcast on {_broadcastUriPrefix}");
+            Console.WriteLine($"✅ WebSocket Server started on {_uriPrefix}\n");
 
             while (true)
             {
@@ -45,27 +38,10 @@ namespace TPUM.Server.Presentation
 
                     _clients.TryAdd(clientId, wsContext.WebSocket);
 
-                    Console.WriteLine($"⚫ Client {clientId} connected.");
+                    Console.WriteLine($"⚫ Client {clientId} connected.\n");
 
                     // Obsługa klienta w tle
                     _ = Task.Run(() => HandleClientAsync(clientId, wsContext.WebSocket));
-                }
-                else
-                {
-                    context.Response.StatusCode = 400;
-                    context.Response.Close();
-                }
-
-                context = await _httpBroadcastListener.GetContextAsync();
-
-                if (context.Request.IsWebSocketRequest)
-                {
-                    var wsContext = await context.AcceptWebSocketAsync(null);
-                    var clientId = Guid.NewGuid();
-
-                    _broadcastClients.TryAdd(clientId, wsContext.WebSocket);
-
-                    Console.WriteLine($"⚫ Broadcast Client {clientId} connected.");
                 }
                 else
                 {
@@ -87,14 +63,14 @@ namespace TPUM.Server.Presentation
                         break;
 
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    Console.WriteLine($"📨 Received from {clientId}: \n{message}");
+                    Console.WriteLine($"📨 Received from {clientId}:\n{message}\n");
 
                     OnClientMessageReceived(clientId, message);
                 }
             }
             catch (WebSocketException wse)
             {
-                Console.WriteLine($"⚠️ Client {clientId} error: {wse.Message}");
+                Console.WriteLine($"⚠️ Client {clientId} error:\n{wse.Message}\n");
             }
             finally
             {
@@ -103,7 +79,7 @@ namespace TPUM.Server.Presentation
                 {
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye!", CancellationToken.None);
                     webSocket.Dispose();
-                    Console.WriteLine($"❌ Client {clientId} disconnected.");
+                    Console.WriteLine($"❌ Client {clientId} disconnected.\n");
                 }
             }
         }
@@ -112,7 +88,7 @@ namespace TPUM.Server.Presentation
         {
             if (!_clients.TryGetValue(clientId, out var socket))
             {
-                Console.WriteLine($"⚠️ Client {clientId} could not be found.");
+                Console.WriteLine($"⚠️ Client {clientId} could not be found.\n");
                 return;
             }
 
@@ -124,11 +100,12 @@ namespace TPUM.Server.Presentation
         {
             var data = Encoding.UTF8.GetBytes(message);
 
-            foreach (var (_, socket) in _broadcastClients)
+            foreach (var (_, socket) in _clients)
             {
                 if (socket.State == WebSocketState.Open)
                 {
-                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
+                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, 
+                        CancellationToken.None);
                 }
             }
         }

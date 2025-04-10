@@ -25,7 +25,12 @@ namespace TPUM.Client.Data
         }
     }
 
-    internal class DataApi : DataApiBase, INotifyHeaterAdded, INotifyHeaterRemoved, INotifyHeatSensorAdded, INotifyHeatSensorRemoved
+    internal delegate void DataApiHeaterAddedEventHandler(object? source, Guid roomId, IHeaterData heater);
+    internal delegate void DataApiHeaterRemovedEventHandler(object? source, Guid roomId, Guid heaterId);
+    internal delegate void DataApiHeatSensorAddedEventHandler(object? source, Guid roomId, IHeatSensorData sensor);
+    internal delegate void DataApiHeatSensorRemovedEventHandler(object? source, Guid roomId, Guid sensorId);
+
+    internal class DataApi : DataApiBase
     {
         private readonly WebSocketClient _client;
         private bool _connected = false;
@@ -34,10 +39,10 @@ namespace TPUM.Client.Data
         public override event RoomRemovedEventHandler? RoomRemoved;
         public override event RoomAddedEventHandler? RoomAdded;
 
-        public event HeaterAddedEventHandler? HeaterAdded;
-        public event HeaterRemovedEventHandler? HeaterRemoved;
-        public event HeatSensorAddedEventHandler? HeatSensorAdded;
-        public event HeatSensorRemovedEventHandler? HeatSensorRemoved;
+        public event DataApiHeaterAddedEventHandler? HeaterAdded;
+        public event DataApiHeaterRemovedEventHandler? HeaterRemoved;
+        public event DataApiHeatSensorAddedEventHandler? HeatSensorAdded;
+        public event DataApiHeatSensorRemovedEventHandler? HeatSensorRemoved;
 
         private readonly object _roomsLock = new();
         private readonly List<IRoomData> _rooms = [];
@@ -382,6 +387,7 @@ namespace TPUM.Client.Data
                     if (sensorRes.Updated)
                     {
                         DoUpdateHeatSensor(sensorRes.RoomId, sensorRes.Id, sensorRes.X, sensorRes.Y, sensorRes.Temperature);
+                        return;
                     }
 
                     DoAddHeatSensor(sensorRes.RoomId, sensorRes.Id, sensorRes.X, sensorRes.Y, sensorRes.Temperature);

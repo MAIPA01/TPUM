@@ -69,5 +69,22 @@ namespace TPUM.Client.Data
                 PositionChanged?.Invoke(this, lastPosition, this);
             }
         }
+
+        public override bool Equals(object? obj)
+        {
+            lock (_posLock)
+            {
+                if (obj is not IPositionData position) return false;
+                return Math.Abs(_x - position.X) < 1e-10f && Math.Abs(_y - position.Y) < 1e-10f;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            lock (_posLock)
+            {
+                return 3 * X.GetHashCode() + 5 * Y.GetHashCode();
+            }
+        }
     }
 }

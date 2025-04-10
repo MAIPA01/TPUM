@@ -2,10 +2,10 @@
 
 namespace TPUM.Client.Presentation.Model
 {
-    public interface IHeatSensor : INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
+    public interface IHeatSensorModel : INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
     {
         Guid Id { get; }
-        IPosition Position { get; set; }
+        IPositionModel Position { get; set; }
         float Temperature { get; }
     }
 }

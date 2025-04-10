@@ -14,7 +14,7 @@ namespace TPUM.Client.Data
 
         public Guid Id { get; }
 
-        private IPositionData _position;
+        private readonly IPositionData _position;
         public IPositionData Position
         {
             get 
@@ -29,10 +29,8 @@ namespace TPUM.Client.Data
                 lock (_heatSensorLock)
                 {
                     if (_position.Equals(value)) return;
-                    var lastPosition = _position;
-                    _position.PositionChanged -= GetPositionChanged;
-                    _position = value;
-                    _position.PositionChanged += GetPositionChanged;
+                    var lastPosition = new PositionData(_position.X, _position.Y);
+                    _position.SetPosition(value.X, value.Y);
                     PositionChanged?.Invoke(this, lastPosition, _position);
                     _data.UpdateHeatSensor(_roomId, Id, _position.X, _position.Y);
                 }

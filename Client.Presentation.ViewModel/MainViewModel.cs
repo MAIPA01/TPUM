@@ -5,6 +5,8 @@ namespace TPUM.Client.Presentation.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public ViewModelApiBase ViewModelApi { get; }
+
         public static MainViewModel? Instance { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -32,24 +34,26 @@ namespace TPUM.Client.Presentation.ViewModel
                 OnPropertyChanged(nameof(ConnectedString));
             }
         }
-        private const string _connected = "";
-        private const string _notConnected = "There is no connection to the server";
-        public string ConnectedString => IsConnected ? _connected : _notConnected;
+        private const string Connected = "";
+        private const string NotConnected = "There is no connection to the server";
+        public string ConnectedString => IsConnected ? Connected : NotConnected;
 
         public MainViewModel()
         {
+            ViewModelApi = ViewModelApiBase.GetApi("ws://localhost:5000/ws");
+            ViewModelApi.ClientConnected += GetClientConnected;
             Instance = this;
+        }
+
+        private void GetClientConnected(object? source)
+        {
+            IsConnected = true;
         }
 
         public void SetView(Type viewType)
         {
             _currentView = Activator.CreateInstance(viewType);
             OnPropertyChanged(nameof(CurrentView));
-        }
-
-        public void SetConnectionStatus(bool connected)
-        {
-            IsConnected = connected;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? value = null)

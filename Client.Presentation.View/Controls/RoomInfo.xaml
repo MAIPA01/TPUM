@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:TPUM.Client.Presentation.View.Controls"
              xmlns:view="clr-namespace:TPUM.Client.Presentation.View"
              mc:Ignorable="d"
              d:DataContext="{Binding RelativeSource={RelativeSource Self}}"
@@ -21,10 +20,12 @@
             <TextBlock>
                 <Run Text="Width: " FontWeight="Bold"/>
                 <Run Text="{Binding RoomWidth, ElementName=RoomInfoUserControl}"/>
+                <Run Text=" m"/>
             </TextBlock>
             <TextBlock>
                 <Run Text="Height: " FontWeight="Bold"/>
                 <Run Text="{Binding RoomHeight, ElementName=RoomInfoUserControl}"/>
+                <Run Text=" m"/>
             </TextBlock>
             <TextBlock>
                 <Run Text="Heaters: " FontWeight="Bold"/>

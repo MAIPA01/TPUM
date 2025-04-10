@@ -33,12 +33,20 @@ namespace TPUM.Client.Presentation.View.Controls
             set => SetValue(IsOnProperty, value);
         }
 
-        public static readonly DependencyProperty TemperatureProperty =
-            DependencyProperty.Register(nameof(Temperature), typeof(float), typeof(HeaterInfo));
-        public float Temperature
+        public static readonly DependencyProperty CurrentTemperatureProperty =
+            DependencyProperty.Register(nameof(CurrentTemperature), typeof(float), typeof(HeaterInfo));
+        public float CurrentTemperature
         {
-            get => (float)GetValue(TemperatureProperty);
-            set => SetValue(TemperatureProperty, value);
+            get => (float)GetValue(CurrentTemperatureProperty);
+            set => SetValue(CurrentTemperatureProperty, value);
+        }
+
+        public static readonly DependencyProperty DesiredTemperatureProperty =
+            DependencyProperty.Register(nameof(DesiredTemperature), typeof(float), typeof(HeaterInfo));
+        public float DesiredTemperature
+        {
+            get => (float)GetValue(DesiredTemperatureProperty);
+            set => SetValue(DesiredTemperatureProperty, value);
         }
 
         public static readonly DependencyProperty TurnTextProperty =

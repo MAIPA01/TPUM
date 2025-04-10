@@ -55,7 +55,7 @@ namespace TPUM.Client.Presentation.ViewModel
 
         private void AddRoom(object? parameter)
         {
-            ViewModelApi.Instance.AddRoom(_roomName, _roomWidth, _roomHeight);
+            MainViewModel.Instance?.ViewModelApi.AddRoom(_roomName, _roomWidth, _roomHeight);
             WindowManager.CloseLastSubWindow();
         }
 

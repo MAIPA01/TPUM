@@ -1,8 +1,8 @@
 ﻿namespace TPUM.Client.Data.Events
 {
-    public delegate void MessageReceivedEventHandler(object? source, string message);
+    internal delegate void MessageReceivedEventHandler(object? source, string message);
 
-    public interface INotifyMessageReceived
+    internal interface INotifyMessageReceived
     {
         event MessageReceivedEventHandler? MessageReceived;
     }

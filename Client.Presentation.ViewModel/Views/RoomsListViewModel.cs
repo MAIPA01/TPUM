@@ -5,7 +5,7 @@ namespace TPUM.Client.Presentation.ViewModel
 {
     public class RoomsListViewModel : INotifyPropertyChanged
     {
-        public static ReadOnlyObservableCollection<IRoom>? Rooms => ViewModelApi.Instance.Rooms;
+        public static ReadOnlyObservableCollection<IRoom>? Rooms => MainViewModel.Instance?.ViewModelApi.Rooms;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -40,13 +40,13 @@ namespace TPUM.Client.Presentation.ViewModel
                     "Are you sure you want to remove Room of id: '" + (Guid)parameter + "'?",
                     "Room Removal")
                ) return;
-            ViewModelApi.Instance.RemoveRoom((Guid)parameter);
+            MainViewModel.Instance?.ViewModelApi.RemoveRoom((Guid)parameter);
         }
 
         private static void ShowRoom(object? parameter)
         {
             if (parameter is not object[] { Length: 2 } parameters) return;
-            ViewModelApi.Instance.SetCurrentRoom((Guid)parameters[1]);
+            MainViewModel.Instance?.ViewModelApi.SetCurrentRoom((Guid)parameters[1]);
             MainViewModel.Instance?.SetView((Type)parameters[0]);
         }
     }

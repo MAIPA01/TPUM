@@ -40,13 +40,13 @@ namespace TPUM.Client.Presentation.ViewModel
 
         private void AddHeatSensor(object? parameter)
         {
-            ViewModelApi.Instance.CurrentRoom?.AddHeatSensor(_x, _y);
+            MainViewModel.Instance?.ViewModelApi.CurrentRoom?.AddHeatSensor(_x, _y);
             WindowManager.CloseLastSubWindow();
         }
 
         private bool CanAddHeatSensor(object? parameter)
         {
-            var room = ViewModelApi.Instance.CurrentRoom;
+            var room = MainViewModel.Instance?.ViewModelApi.CurrentRoom;
             if (room == null) return true;
             return _x <= room.Width && _x >= 0 && _y <= room.Height && _y >= 0;
         }

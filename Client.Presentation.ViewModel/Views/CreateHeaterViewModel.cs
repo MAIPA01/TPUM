@@ -52,14 +52,14 @@ namespace TPUM.Client.Presentation.ViewModel
 
         private void AddHeater(object? parameter)
         {
-            ViewModelApi.Instance.CurrentRoom?.AddHeater(_x, _y, _temperature);
+            MainViewModel.Instance?.ViewModelApi.CurrentRoom?.AddHeater(_x, _y, _temperature);
             WindowManager.CloseLastSubWindow();
         }
 
         private bool CanAddHeater(object? parameter)
         {
             var temp = _temperature >= 0f;
-            var room = ViewModelApi.Instance.CurrentRoom;
+            var room = MainViewModel.Instance?.ViewModelApi.CurrentRoom;
             if (room == null) return temp;
             return temp && _x <= room.Width && _x >= 0 && _y <= room.Height && _y >= 0;
         }

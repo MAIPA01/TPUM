@@ -8,9 +8,9 @@ namespace TPUM.Server.Presentation
 
         public abstract void Dispose();
 
-        public static PresentationApiBase GetApi(string uriPrefix, string uriBroadcastPrefix, LogicApiBase? logic = null)
+        public static PresentationApiBase GetApi(string uriPrefix, LogicApiBase? logic = null)
         {
-            return new PresentationApi(uriPrefix, uriBroadcastPrefix, logic ?? LogicApiBase.GetApi());
+            return new PresentationApi(uriPrefix, logic ?? LogicApiBase.GetApi());
         }
     }
 
@@ -22,7 +22,7 @@ namespace TPUM.Server.Presentation
 
         private readonly WebSocketServer _server;
 
-        public PresentationApi(string uriPrefix, string uriBroadcastPrefix, LogicApiBase logic)
+        public PresentationApi(string uriPrefix, LogicApiBase logic)
         {
             _logic = logic;
             foreach (var logicRoom in _logic.Rooms)
@@ -31,7 +31,7 @@ namespace TPUM.Server.Presentation
                 SubscribeToRoom(room);
                 _rooms.Add(room);
             }
-            _server = new WebSocketServer(uriPrefix, uriBroadcastPrefix);
+            _server = new WebSocketServer(uriPrefix);
             _server.ClientMessageReceived += HandleClientMessage;
         }
 
@@ -338,7 +338,7 @@ namespace TPUM.Server.Presentation
         {
             if (XmlSerializerHelper.TryDeserialize<AllDataRequest>(message, out var allDataRequest))
             {
-                Console.WriteLine($"Get All Data Request from client: {clientId}");
+                Console.WriteLine($"Get All Data Request from client: {clientId}\n");
 
                 var response = new AllDataRequestResponse();
                 lock (_roomsLock)
@@ -385,11 +385,11 @@ namespace TPUM.Server.Presentation
                 var responseMsg = XmlSerializerHelper.Serialize(response);
                 _ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"All Data send to client: {clientId} \n{responseMsg}");
+                Console.WriteLine($"All Data send to client: {clientId} \n{responseMsg}\n");
             }
             else if (XmlSerializerHelper.TryDeserialize<RoomDataRequest>(message, out var getRoomRequest))
             {
-                Console.WriteLine($"Get Room {getRoomRequest.RoomId} Data Request from client: {clientId}");
+                Console.WriteLine($"Get Room {getRoomRequest.RoomId} Data Request from client: {clientId}\n");
 
                 var room = GetRoom(getRoomRequest.RoomId);
                 var response = new RoomDataRequestResponse
@@ -398,13 +398,13 @@ namespace TPUM.Server.Presentation
                 };
                 if (room == null)
                 {
-                    Console.WriteLine($"Room {getRoomRequest.RoomId} not found");
+                    Console.WriteLine($"Room {getRoomRequest.RoomId} not found\n");
 
                     response.Id = Guid.Empty;
                 }
                 else
                 {
-                    Console.WriteLine($"Room {getRoomRequest.RoomId} founded");
+                    Console.WriteLine($"Room {getRoomRequest.RoomId} founded\n");
 
                     response.Id = room.Id;
                     response.Name = room.Name;
@@ -440,23 +440,24 @@ namespace TPUM.Server.Presentation
                 var responseMsg = XmlSerializerHelper.Serialize(response);
                 _ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Room {getRoomRequest.RoomId} data send to client: {clientId}");
+                Console.WriteLine($"Room {getRoomRequest.RoomId} data send to client: {clientId}\n");
             }
             else if (XmlSerializerHelper.TryDeserialize<HeaterDataRequest>(message, out var getHeaterRequest))
             {
-                Console.WriteLine($"Get Heater {getHeaterRequest.Id} Data from Room {getHeaterRequest.RoomId} Request from client: {clientId}");
+                Console.WriteLine($"Get Heater {getHeaterRequest.Id} Data from Room {getHeaterRequest.RoomId} " +
+                                  $"Request from client: {clientId}\n");
 
                 var response = new HeaterDataRequestResponse();
                 var heater = GetHeater(getHeaterRequest.RoomId, getHeaterRequest.Id);
                 if (heater == null)
                 {
-                    Console.WriteLine($"Heater {getHeaterRequest.Id} in Room {getHeaterRequest.RoomId} not found");
+                    Console.WriteLine($"Heater {getHeaterRequest.Id} in Room {getHeaterRequest.RoomId} not found\n");
 
                     response.Id = Guid.Empty;
                 }
                 else
                 {
-                    Console.WriteLine($"Heater {getHeaterRequest.Id} in Room {getHeaterRequest.RoomId} founded");
+                    Console.WriteLine($"Heater {getHeaterRequest.Id} in Room {getHeaterRequest.RoomId} founded\n");
 
                     response.Id = heater.Id;
                     response.RoomId = getHeaterRequest.RoomId;
@@ -469,23 +470,24 @@ namespace TPUM.Server.Presentation
                 var responseMsg = XmlSerializerHelper.Serialize(response);
                 _ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Heater {getHeaterRequest.Id} data from Room {getHeaterRequest.RoomId} send to client: {clientId}");
+                Console.WriteLine($"Heater {getHeaterRequest.Id} data from Room {getHeaterRequest.RoomId} send to client: {clientId}\n");
             }
             else if (XmlSerializerHelper.TryDeserialize<HeatSensorDataRequest>(message, out var getSensorRequest))
             {
-                Console.WriteLine($"Get Heat Sensor {getSensorRequest.Id} Data from Room {getSensorRequest.RoomId} Request from client: {clientId}");
+                Console.WriteLine($"Get Heat Sensor {getSensorRequest.Id} Data from Room {getSensorRequest.RoomId} " +
+                                  $"Request from client: {clientId}\n");
 
                 var response = new HeatSensorDataRequestResponse();
                 var sensor = GetHeatSensor(getSensorRequest.RoomId, getSensorRequest.Id);
                 if (sensor == null)
                 {
-                    Console.WriteLine($"Heat Sensor {getSensorRequest.Id} in Room {getSensorRequest.RoomId} not found");
+                    Console.WriteLine($"Heat Sensor {getSensorRequest.Id} in Room {getSensorRequest.RoomId} not found\n");
 
                     response.Id = Guid.Empty;
                 }
                 else
                 {
-                    Console.WriteLine($"Heat Sensor {getSensorRequest.Id} in Room {getSensorRequest.RoomId} founded");
+                    Console.WriteLine($"Heat Sensor {getSensorRequest.Id} in Room {getSensorRequest.RoomId} founded\n");
 
                     response.Id = sensor.Id;
                     response.RoomId = getSensorRequest.RoomId;
@@ -497,11 +499,13 @@ namespace TPUM.Server.Presentation
                 var responseMsg = XmlSerializerHelper.Serialize(response);
                 _ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Heat Sensor {getSensorRequest.Id} Data from Room {getSensorRequest.RoomId} send to client: {clientId}");
+                Console.WriteLine($"Heat Sensor {getSensorRequest.Id} Data from Room {getSensorRequest.RoomId} " +
+                                  $"send to client: {clientId}\n");
             }
             else if (XmlSerializerHelper.TryDeserialize<AddRoomRequest>(message, out var addRoomRequest))
             {
-                Console.WriteLine($"Add Room {addRoomRequest.Name} {addRoomRequest.Width}x{addRoomRequest.Height} Request from client: {clientId}");
+                Console.WriteLine($"Add Room {addRoomRequest.Name} {addRoomRequest.Width}x{addRoomRequest.Height} " +
+                                  $"Request from client: {clientId}\n");
 
                 var roomId = AddRoom(addRoomRequest.Name, addRoomRequest.Width, addRoomRequest.Height);
                 var response = new RoomAddedResponse
@@ -509,23 +513,23 @@ namespace TPUM.Server.Presentation
                     Id = roomId
                 };
 
-                Console.WriteLine(response.Success ? $"Room added with id {roomId}" : "Room not added");
+                Console.WriteLine(response.Success ? $"Room added with id {roomId}\n" : "Room not added\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Add Room Result send to client: {clientId}");
+                //Console.WriteLine($"Add Room Result send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Added Room Broadcast to other clients");
+                Console.WriteLine($"Added Room Broadcast to other clients\n");
 
                 BroadcastRoom(roomId, false, false);
             }
             else if (XmlSerializerHelper.TryDeserialize<AddHeaterRequest>(message, out var addHeaterRequest))
             {
                 Console.WriteLine($"Add Heater ({addHeaterRequest.X}, {addHeaterRequest.Y}) {addHeaterRequest.Temperature}\u00b0C " +
-                                  $"to Room {addHeaterRequest.RoomId} Request from client: {clientId}");
+                                  $"to Room {addHeaterRequest.RoomId} Request from client: {clientId}\n");
 
                 var heaterId = AddHeater(addHeaterRequest.RoomId, addHeaterRequest.X, addHeaterRequest.Y,
                     addHeaterRequest.Temperature);
@@ -534,24 +538,24 @@ namespace TPUM.Server.Presentation
                     Id = heaterId
                 };
 
-                Console.WriteLine(response.Success ? $"Heater added to Room {addHeaterRequest.RoomId} with id {heaterId}" 
-                    : $"Heater not added to Room {addHeaterRequest.RoomId}");
+                Console.WriteLine(response.Success ? $"Heater added to Room {addHeaterRequest.RoomId} with id {heaterId}\n" 
+                    : $"Heater not added to Room {addHeaterRequest.RoomId}\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Add Heater to Room {addHeaterRequest.RoomId} result send to client: {clientId}");
+                //Console.WriteLine($"Add Heater to Room {addHeaterRequest.RoomId} result send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Added Heater to Room {addHeaterRequest.RoomId} Broadcast to other clients");
+                Console.WriteLine($"Added Heater to Room {addHeaterRequest.RoomId} Broadcast to other clients\n");
 
                 BroadcastHeater(addHeaterRequest.RoomId, heaterId, false, false);
             }
             else if (XmlSerializerHelper.TryDeserialize<AddHeatSensorRequest>(message, out var addSensorRequest))
             {
                 Console.WriteLine($"Add Heat Sensor ({addSensorRequest.X}, {addSensorRequest.Y}) to Room {addSensorRequest.RoomId} " +
-                                  $"Request from client: {clientId}");
+                                  $"Request from client: {clientId}\n");
 
                 var sensorId = AddHeatSensor(addSensorRequest.RoomId, addSensorRequest.X, addSensorRequest.Y);
                 var response = new HeatSensorAddedResponse
@@ -559,24 +563,24 @@ namespace TPUM.Server.Presentation
                     Id = sensorId
                 };
 
-                Console.WriteLine(response.Success ? $"Heat Sensor added to Room {addSensorRequest.RoomId} with id {sensorId}" 
-                    : $"Heat Sensor not added to Room {addSensorRequest.RoomId}");
+                Console.WriteLine(response.Success ? $"Heat Sensor added to Room {addSensorRequest.RoomId} with id {sensorId}\n" 
+                    : $"Heat Sensor not added to Room {addSensorRequest.RoomId}\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Add Heat Sensor to Room {addSensorRequest.RoomId} result send to client: {clientId}");
+                //Console.WriteLine($"Add Heat Sensor to Room {addSensorRequest.RoomId} result send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Added Heat Sensor to Room {addSensorRequest.RoomId} Broadcast to other clients");
+                Console.WriteLine($"Added Heat Sensor to Room {addSensorRequest.RoomId} Broadcast to other clients\n");
 
                 BroadcastHeatSensor(addSensorRequest.RoomId, sensorId, false, false);
             }
             else if (XmlSerializerHelper.TryDeserialize<UpdateRoomRequest>(message, out var updateRoomRequest))
             {
                 Console.WriteLine($"Update Room {updateRoomRequest.Id} {updateRoomRequest.Name} " +
-                                  $"{updateRoomRequest.Width}x{updateRoomRequest.Height} Request from client: {clientId}");
+                                  $"{updateRoomRequest.Width}x{updateRoomRequest.Height} Request from client: {clientId}\n");
 
                 var response = new RoomUpdatedResponse
                 {
@@ -584,16 +588,17 @@ namespace TPUM.Server.Presentation
                         updateRoomRequest.Height)
                 };
 
-                Console.WriteLine(response.Success ? $"Room {updateRoomRequest.Id} updated" : $"Room {updateRoomRequest.Id} not updated");
+                Console.WriteLine(response.Success ? $"Room {updateRoomRequest.Id} updated\n" 
+                    : $"Room {updateRoomRequest.Id} not updated\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Update Room {updateRoomRequest.Id} result send to client: {clientId}");
+                //Console.WriteLine($"Update Room {updateRoomRequest.Id} result send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Update Room {updateRoomRequest.Id} Broadcast to other clients");
+                Console.WriteLine($"Update Room {updateRoomRequest.Id} Broadcast to other clients\n");
 
                 BroadcastRoom(updateRoomRequest.Id, true, false);
             }
@@ -601,7 +606,7 @@ namespace TPUM.Server.Presentation
             {
                 Console.WriteLine($"Update Heater {updateHeaterRequest.Id} ({updateHeaterRequest.X}, {updateHeaterRequest.Y})" +
                                   $" {updateHeaterRequest.Temperature}\u00b0C On:{updateHeaterRequest.IsOn} in Room " +
-                                  $"{updateHeaterRequest.RoomId} Request from client: {clientId}");
+                                  $"{updateHeaterRequest.RoomId} Request from client: {clientId}\n");
 
                 var response = new HeaterUpdatedResponse
                 {
@@ -609,117 +614,119 @@ namespace TPUM.Server.Presentation
                         updateHeaterRequest.Temperature, updateHeaterRequest.IsOn)
                 };
 
-                Console.WriteLine(response.Success ? $"Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} updated" 
-                    : $"Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} not updated");
+                Console.WriteLine(response.Success ? $"Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} updated\n" 
+                    : $"Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} not updated\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Update Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} result " +
-                                  $"send to client: {clientId}");
+                //Console.WriteLine($"Update Heater {updateHeaterRequest.Id} in Room {updateHeaterRequest.RoomId} result " +
+                //                  $"send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Updated Heater {updateHeaterRequest.Id} from Room {updateHeaterRequest.RoomId} Broadcast to other clients");
+                Console.WriteLine($"Updated Heater {updateHeaterRequest.Id} from Room {updateHeaterRequest.RoomId} " +
+                                  $"Broadcast to other clients\n");
 
                 BroadcastHeater(updateHeaterRequest.RoomId, updateHeaterRequest.Id, true, false);
             }
             else if (XmlSerializerHelper.TryDeserialize<UpdateHeatSensorRequest>(message, out var updateSensorRequest))
             {
                 Console.WriteLine($"Update Heat Sensor {updateSensorRequest.Id} ({updateSensorRequest.X}, {updateSensorRequest.Y})" +
-                                  $" in Room {updateSensorRequest.RoomId} Request from client: {clientId}");
+                                  $" in Room {updateSensorRequest.RoomId} Request from client: {clientId}\n");
 
                 var response = new HeatSensorUpdatedResponse
                 {
                     Success = UpdateHeatSensor(updateSensorRequest.RoomId, updateSensorRequest.Id, updateSensorRequest.X, updateSensorRequest.Y)
                 };
 
-                Console.WriteLine(response.Success ? $"Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} updated"
-                    : $"Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} not updated");
+                Console.WriteLine(response.Success ? $"Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} updated\n"
+                    : $"Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} not updated\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Update Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} result " +
-                                  $"send to client: {clientId}");
+                //Console.WriteLine($"Update Heat Sensor {updateSensorRequest.Id} in Room {updateSensorRequest.RoomId} result " +
+                //                  $"send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
                 Console.WriteLine($"Updated Heat Sensor {updateSensorRequest.Id} from Room {updateSensorRequest.RoomId} " +
-                                  $"Broadcast to other clients");
+                                  $"Broadcast to other clients\n");
 
                 BroadcastHeatSensor(updateSensorRequest.RoomId, updateSensorRequest.Id, true, false);
             }
             else if (XmlSerializerHelper.TryDeserialize<RemoveRoomRequest>(message, out var removeRoomRequest))
             {
-                Console.WriteLine($"Remove Room {removeRoomRequest.Id} Request from client: {clientId}");
+                Console.WriteLine($"Remove Room {removeRoomRequest.Id} Request from client: {clientId}\n");
 
                 var response = new RoomRemovedResponse
                 {
                     Success = RemoveRoom(removeRoomRequest.Id)
                 };
 
-                Console.WriteLine(response.Success ? $"Room {removeRoomRequest.Id} removed" : $"Room {removeRoomRequest.Id} not removed");
+                Console.WriteLine(response.Success ? $"Room {removeRoomRequest.Id} removed\n" : $"Room {removeRoomRequest.Id} not removed\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Remove Room {removeRoomRequest.Id} result send to client: {clientId}");
+                //Console.WriteLine($"Remove Room {removeRoomRequest.Id} result send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Removed Room {removeRoomRequest.Id} Broadcast to other clients");
+                Console.WriteLine($"Removed Room {removeRoomRequest.Id} Broadcast to other clients\n");
 
                 BroadcastRoom(removeRoomRequest.Id, false, true);
             }
             else if (XmlSerializerHelper.TryDeserialize<RemoveHeaterRequest>(message, out var removeHeaterRequest))
             {
                 Console.WriteLine($"Remove Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} " +
-                                  $"Request from client: {clientId}");
+                                  $"Request from client: {clientId}\n");
 
                 var response = new HeaterRemovedResponse
                 {
                     Success = RemoveHeater(removeHeaterRequest.RoomId, removeHeaterRequest.Id)
                 };
 
-                Console.WriteLine(response.Success ? $"Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} removed" 
-                    : $"Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} not removed");
+                Console.WriteLine(response.Success ? $"Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} removed\n" 
+                    : $"Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} not removed\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Remove Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} result " +
-                                  $"send to client: {clientId}");
+                //Console.WriteLine($"Remove Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} result " +
+                //                  $"send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
-                Console.WriteLine($"Removed Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} Broadcast to other clients");
+                Console.WriteLine($"Removed Heater {removeHeaterRequest.Id} from Room {removeHeaterRequest.RoomId} " +
+                                  $"Broadcast to other clients\n");
 
                 BroadcastHeater(removeHeaterRequest.RoomId, removeHeaterRequest.Id, false, true);
             }
             else if (XmlSerializerHelper.TryDeserialize<RemoveHeatSensorRequest>(message, out var removeSensorRequest))
             {
                 Console.WriteLine($"Remove Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} " +
-                                  $"Request from client: {clientId}");
+                                  $"Request from client: {clientId}\n");
 
                 var response = new HeatSensorRemovedResponse
                 {
                     Success = RemoveHeatSensor(removeSensorRequest.RoomId, removeSensorRequest.Id)
                 };
 
-                Console.WriteLine(response.Success ? $"Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} removed" 
-                    : $"Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} not removed");
+                Console.WriteLine(response.Success ? $"Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} removed\n" 
+                    : $"Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} not removed\n");
 
-                var responseMsg = XmlSerializerHelper.Serialize(response);
-                _ = _server.SendAsync(clientId, responseMsg);
+                //var responseMsg = XmlSerializerHelper.Serialize(response);
+                //_ = _server.SendAsync(clientId, responseMsg);
 
-                Console.WriteLine($"Remove Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} result" +
-                                  $" send to client: {clientId}");
+                //Console.WriteLine($"Remove Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} result" +
+                //                  $" send to client: {clientId}\n");
 
                 if (!response.Success) return;
 
                 Console.WriteLine($"Removed Heat Sensor {removeSensorRequest.Id} from Room {removeSensorRequest.RoomId} " +
-                                  $"Broadcast to other clients");
+                                  $"Broadcast to other clients\n");
 
                 BroadcastHeatSensor(removeSensorRequest.RoomId, removeSensorRequest.Id, false, true);
             }

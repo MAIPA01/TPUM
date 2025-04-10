@@ -3,7 +3,7 @@ using TPUM.Client.Presentation.Model.Events;
 
 namespace TPUM.Client.Presentation.Model.Tests
 {
-    internal class DummyRoom : IRoom
+    internal class DummyRoom : IRoomModel
     {
         private readonly IRoomLogic _logic;
         private readonly ModelApiBase _modelApi;
@@ -17,11 +17,11 @@ namespace TPUM.Client.Presentation.Model.Tests
         public float Height { get; set; }
         public float AvgTemperature { get; private set; }
 
-        private readonly List<IHeater> _heaters = [];
-        public IReadOnlyCollection<IHeater> Heaters => _heaters.AsReadOnly();
+        private readonly List<IHeaterModel> _heaters = [];
+        public IReadOnlyCollection<IHeaterModel> Heaters => _heaters.AsReadOnly();
 
-        private readonly List<IHeatSensor> _heatSensors = [];
-        public IReadOnlyCollection<IHeatSensor> HeatSensors => _heatSensors.AsReadOnly();
+        private readonly List<IHeatSensorModel> _heatSensors = [];
+        public IReadOnlyCollection<IHeatSensorModel> HeatSensors => _heatSensors.AsReadOnly();
 
         public DummyRoom(IRoomLogic logic, ModelApiBase api)
         {
@@ -69,31 +69,31 @@ namespace TPUM.Client.Presentation.Model.Tests
             EnableChanged?.Invoke(source, args);
         }
 
-        private void SubscribeToHeatSensor(IHeatSensor sensor)
+        private void SubscribeToHeatSensor(IHeatSensorModel sensor)
         {
             sensor.TemperatureChanged += GetTemperatureChanged;
             sensor.PositionChanged += GetPositionChanged;
         }
 
-        private void UnsubscribeToHeatSensor(IHeatSensor sensor)
+        private void UnsubscribeToHeatSensor(IHeatSensorModel sensor)
         {
             sensor.TemperatureChanged -= GetTemperatureChanged;
             sensor.PositionChanged -= GetPositionChanged;
         }
 
-        public IHeatSensor? AddHeatSensor(float x, float y)
+        public IHeatSensorModel? AddHeatSensor(float x, float y)
         {
             return null;
         }
 
-        internal IHeatSensor AddHeatSensor(IHeatSensor sensor)
+        internal IHeatSensorModel AddHeatSensor(IHeatSensorModel sensor)
         {
             SubscribeToHeatSensor(sensor);
             _heatSensors.Add(sensor);
             return sensor;
         }
 
-        internal IHeatSensor? GetHeatSensor(Guid id)
+        internal IHeatSensorModel? GetHeatSensor(Guid id)
         {
             var sensor = _heatSensors.Find(s => s.Id == id);
             return sensor;
@@ -115,33 +115,33 @@ namespace TPUM.Client.Presentation.Model.Tests
             RemoveHeatSensorFromList(id);
         }
 
-        private void SubscribeToHeater(IHeater heater)
+        private void SubscribeToHeater(IHeaterModel heater)
         {
             heater.TemperatureChanged += GetTemperatureChanged;
             heater.PositionChanged += GetPositionChanged;
             heater.EnableChanged += GetEnabledChanged;
         }
 
-        private void UnsubscribeToHeater(IHeater heater)
+        private void UnsubscribeToHeater(IHeaterModel heater)
         {
             heater.TemperatureChanged -= GetTemperatureChanged;
             heater.PositionChanged -= GetPositionChanged;
             heater.EnableChanged -= GetEnabledChanged;
         }
 
-        public IHeater? AddHeater(float x, float y, float temperature)
+        public IHeaterModel? AddHeater(float x, float y, float temperature)
         {
             return null;
         }
 
-        internal IHeater AddHeater(IHeater heater)
+        internal IHeaterModel AddHeater(IHeaterModel heater)
         {
             SubscribeToHeater(heater);
             _heaters.Add(heater);
             return heater;
         }
 
-        internal IHeater? GetHeater(Guid id)
+        internal IHeaterModel? GetHeater(Guid id)
         {
             var heater = _heaters.Find(h => h.Id == id);
             return heater;

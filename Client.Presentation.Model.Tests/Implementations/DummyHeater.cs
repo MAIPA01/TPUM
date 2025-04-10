@@ -3,7 +3,7 @@ using TPUM.Client.Presentation.Model.Events;
 
 namespace TPUM.Client.Presentation.Model.Tests
 {
-    internal class DummyHeater : IHeater
+    internal class DummyHeater : IHeaterModel
     {
         private readonly IHeaterLogic _logic;
         private readonly ModelApiBase _modelApi;
@@ -13,8 +13,8 @@ namespace TPUM.Client.Presentation.Model.Tests
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
         public Guid Id => _logic.Id;
-        private IPosition _position;
-        public IPosition Position
+        private IPositionModel _position;
+        public IPositionModel Position
         {
             get => _position;
             set

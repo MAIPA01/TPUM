@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:TPUM.Client.Presentation.ViewModel;assembly=Client.Presentation.ViewModel"
-        xmlns:rules="clr-namespace:TPUM.Client.Presentation.ViewModel.Rules;assembly=Client.Presentation.ViewModel"
+        xmlns:rules="clr-namespace:TPUM.Client.Presentation.View.Rules"
         mc:Ignorable="d"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize"
@@ -24,7 +24,7 @@
 
         <TextBlock HorizontalAlignment="Left" Margin="46,119,0,0" 
                    TextWrapping="Wrap" VerticalAlignment="Top" Height="22">
-            <Run Language="pl-pl" Text="Width"/>
+            <Run Language="pl-pl" Text="Width (m)"/>
         </TextBlock>
         <TextBox HorizontalAlignment="Center" Height="56" Margin="0,141,0,0" 
                  TextWrapping="Wrap" VerticalAlignment="Top" Width="246">
@@ -40,7 +40,7 @@
 
         <TextBlock HorizontalAlignment="Left" Margin="46,217,0,0" 
                    TextWrapping="Wrap" VerticalAlignment="Top" Height="22">
-            <Run Language="pl-pl" Text="Height"/>
+            <Run Language="pl-pl" Text="Height (m)"/>
         </TextBlock>
         <TextBox HorizontalAlignment="Center" Height="56" Margin="0,239,0,0" 
                  TextWrapping="Wrap" VerticalAlignment="Top" Width="246">
