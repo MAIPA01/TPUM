@@ -61,7 +61,8 @@ namespace TPUM.Client.Data
         {
             _client = new WebSocketClient();
             _client.ClientConnected += OnClientConnected;
-            _client.MessageReceived += HandleBroadcast;
+            _client.ResponseReceived += HandleResponse;
+            _client.BroadcastReceived += HandleBroadcast;
             _ = _client.ConnectAsync(serverUri);
         }
 

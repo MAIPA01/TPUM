@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System;
+using System.Net.WebSockets;
 using System.Text;
 using TPUM.Client.Data.Events;
 
@@ -10,8 +11,9 @@ namespace TPUM.Client.Data
         private readonly CancellationTokenSource _cts = new();
         private const int ReconnectIntervalInSeconds = 5;
 
-        public event MessageReceivedEventHandler? MessageReceived;
         public event ClientConnectedEventHandler? ClientConnected;
+        public event ResponseReceivedEventHandler? ResponseReceived;
+        public event BroadcastReceivedEventHandler? BroadcastReceived;
 
         public async Task ConnectAsync(string uri)
         {
@@ -46,7 +48,22 @@ namespace TPUM.Client.Data
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
                 if (result.MessageType != WebSocketMessageType.Binary) continue;
                 var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                OnMessageReceived(this, xml);
+                ProccessMessage(xml);
+            }
+        }
+
+        private void ProccessMessage(string message)
+        {
+            if (XmlSerializerHelper.TryDeserialize<Response>(message, out var response))
+            {
+                if (response.ContentType == ResponseType.Client)
+                {
+                    OnResponseReceived((ClientResponseContent)response.Content);
+                }
+                else if (response.ContentType == ResponseType.Broadcast)
+                {
+                    OnBroadcastReceived((BroadcastResponseContent)response.Content);
+                }
             }
         }
 
@@ -67,12 +84,18 @@ namespace TPUM.Client.Data
         public async Task DisconnectAsync()
         {
             await _cts.CancelAsync();
+            _clientId = Guid.Empty;
             await DisconnectSocketAsync(_client);
         }
 
-        private void OnMessageReceived(object? source, string xml)
+        private void OnBroadcastReceived(BroadcastResponseContent broadcast)
         {
-            MessageReceived?.Invoke(source, xml);
+            BroadcastReceived?.Invoke(this, broadcast);
+        }
+
+        private void OnResponseReceived(ClientResponseContent response)
+        {
+            ResponseReceived?.Invoke(this, response);
         }
 
         public void Dispose()

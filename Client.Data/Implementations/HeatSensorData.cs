@@ -68,15 +68,29 @@ namespace TPUM.Client.Data
             Temperature = temperature;
         }
 
+        internal void UpdateDataFromServer(float x, float y, float temperature)
+        {
+            lock (_heatSensorLock)
+            {
+                _position.PositionChanged -= GetPositionChanged;
+                _position.PositionChanged += GetPositionChangedFromServer;
+                _position.SetPosition(x, y);
+                _position.PositionChanged -= GetPositionChangedFromServer;
+                _position.PositionChanged += GetPositionChanged;
+
+                Temperature = temperature;
+            }
+        }
+
+        private void GetPositionChangedFromServer(object? source, IPositionData lastPosition, IPositionData newPosition)
+        {
+            PositionChanged?.Invoke(this, lastPosition, newPosition);
+        }
+
         private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
         {
             PositionChanged?.Invoke(this, lastPosition, newPosition);
             _data.UpdateHeatSensor(_roomId, Id, _position.X, _position.Y);
-        }
-
-        internal void SetTemperature(float temperature)
-        {
-            Temperature = temperature;
         }
 
         public void Dispose()

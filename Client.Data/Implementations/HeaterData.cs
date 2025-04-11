@@ -95,6 +95,37 @@ namespace TPUM.Client.Data
             _isOn = isOn;
         }
 
+        internal void UpdateDataFromServer(float x, float y, float temperature, bool isOn)
+        {
+            lock (_heaterLock)
+            {
+                _position.PositionChanged -= GetPositionChanged;
+                _position.PositionChanged += GetPositionChangedFromServer;
+                _position.SetPosition(x, y);
+                _position.PositionChanged -= GetPositionChangedFromServer;
+                _position.PositionChanged += GetPositionChanged;
+
+                if (_temperature != temperature)
+                {
+                    var lastTemperature = _temperature;
+                    _temperature = temperature;
+                    TemperatureChanged?.Invoke(this, lastTemperature, _temperature);
+                }
+
+                if (_isOn != isOn)
+                {
+                    var lastIsOn = _isOn;
+                    _isOn = isOn;
+                    EnableChanged?.Invoke(this, lastIsOn, _isOn);
+                }
+            }
+        }
+
+        private void GetPositionChangedFromServer(object? source, IPositionData lastPosition, IPositionData newPosition)
+        {
+            PositionChanged?.Invoke(this, lastPosition, newPosition);
+        }
+
         private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
         {
             PositionChanged?.Invoke(this, lastPosition, newPosition);
