@@ -8,12 +8,22 @@ namespace TPUM.Server.Logic.Tests
         public Guid Id { get; } = Guid.NewGuid();
         public bool IsOn { get; set; }
         public float Temperature { get; set; }
-        public IPositionData Position { get; } = new PositionData();
-        IPositionData IHeaterData.Position { get => Position; set => throw new NotImplementedException(); }
+        public IPositionData Position { get; }
 
         public event EnableChangedEventHandler? EnableChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PositionChangedEventHandler? PositionChanged;
+
+        public HeaterData(float x = 0f, float y = 0f, float temperature = 0f)
+        {
+            Position = new PositionData(x, y);
+            Temperature = temperature;
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {
@@ -25,11 +35,20 @@ namespace TPUM.Server.Logic.Tests
     {
         public Guid Id { get; } = Guid.NewGuid();
         public float Temperature { get; set; }
-        public IPositionData Position { get; } = new PositionData();
-        IPositionData IHeatSensorData.Position { get => Position; set => throw new NotImplementedException(); }
+        public IPositionData Position { get; }
 
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PositionChangedEventHandler? PositionChanged;
+
+        public HeatSensorData(float x = 0f, float y = 0f)
+        {
+            Position = new PositionData(x, y);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {
@@ -53,15 +72,12 @@ namespace TPUM.Server.Logic.Tests
         {
             X = x;
             Y = y;
-            PositionChanged?.Invoke(this, this, this);
         }
 
         public void Dispose()
         {
             throw new NotImplementedException();
         }
-
-        public event PositionChangedEventHandler? PositionChanged;
     }
 
     public class RoomData : IRoomData
@@ -84,7 +100,6 @@ namespace TPUM.Server.Logic.Tests
         public IHeaterData AddHeater(float x, float y, float temp)
         {
             var heater = new HeaterData { Temperature = temp };
-            heater.Position.SetPosition(x, y);
             Heaters.Add(heater);
             return heater;
         }
@@ -94,8 +109,7 @@ namespace TPUM.Server.Logic.Tests
 
         public IHeatSensorData AddHeatSensor(float x, float y)
         {
-            var sensor = new HeatSensorData();
-            sensor.Position.SetPosition(x, y);
+            var sensor = new HeatSensorData(x, y);
             HeatSensors.Add(sensor);
             return sensor;
         }

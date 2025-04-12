@@ -14,7 +14,6 @@ namespace TPUM.Server.Logic.Tests
 
         public Guid Id => _data.Id;
 
-        // TODO: jednostki wypisac
         private readonly List<DummyHeaterLogic> _heaters = [];
 
         private readonly object _heatersLock = new();
@@ -204,7 +203,6 @@ namespace TPUM.Server.Logic.Tests
                 }
                 _heaters.Clear();
             }
-            _data.ClearHeaters();
         }
 
         private void SubscribeToHeatSensor(IHeatSensorLogic sensor)
@@ -274,7 +272,6 @@ namespace TPUM.Server.Logic.Tests
                 }
                 _heatSensors.Clear();
             }
-            _data.ClearHeatSensors();
         }
 
         internal void StartSimulation()

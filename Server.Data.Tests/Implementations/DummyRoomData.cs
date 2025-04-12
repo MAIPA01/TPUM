@@ -8,31 +8,31 @@ namespace TPUM.Server.Data.Tests
         public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
 
+        private readonly object _roomLock = new();
+
         public Guid Id { get; }
         public string Name { get; }
         public float Width { get; }
         public float Height { get; }
 
-        private readonly object _heatersLock = new();
         private readonly List<DummyHeaterData> _heaters = [];
         public IReadOnlyCollection<IHeaterData> Heaters
         {
             get
             {
-                lock (_heatersLock)
+                lock (_roomLock)
                 {
                     return _heaters.AsReadOnly();
                 }
             }
         }
 
-        private readonly object _heatSensorsLock = new();
         private readonly List<DummyHeatSensorData> _heatSensors = [];
         public IReadOnlyCollection<IHeatSensorData> HeatSensors
         {
             get
             {
-                lock (_heatSensorsLock)
+                lock (_roomLock)
                 {
                     return _heatSensors.AsReadOnly();
                 }
@@ -78,9 +78,9 @@ namespace TPUM.Server.Data.Tests
 
         public IHeaterData AddHeater(float x, float y, float temperature)
         {
-            var heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(x, y), temperature);
+            var heater = new DummyHeaterData(Guid.NewGuid(), x, y, temperature);
             SubscribeToHeater(heater);
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 _heaters.Add(heater);
             }
@@ -89,7 +89,7 @@ namespace TPUM.Server.Data.Tests
 
         public bool ContainsHeater(Guid id)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 return _heaters.Find(heater => heater.Id == id) != null;
             }
@@ -97,7 +97,7 @@ namespace TPUM.Server.Data.Tests
 
         public IHeaterData? GetHeater(Guid id)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 return _heaters.Find(heater => heater.Id == id);
             }
@@ -105,7 +105,7 @@ namespace TPUM.Server.Data.Tests
 
         public void RemoveHeater(Guid id)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 var heater = _heaters.Find(heater => heater.Id == id);
                 if (heater == null) return;
@@ -116,7 +116,7 @@ namespace TPUM.Server.Data.Tests
 
         public void ClearHeaters()
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 foreach (var heater in _heaters)
                 {
@@ -140,9 +140,9 @@ namespace TPUM.Server.Data.Tests
 
         public IHeatSensorData AddHeatSensor(float x, float y)
         {
-            var sensor = new DummyHeatSensorData(Guid.NewGuid(), new DummyPositionData(x, y));
+            var sensor = new DummyHeatSensorData(Guid.NewGuid(), x, y);
             SubscribeToHeatSensor(sensor);
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 _heatSensors.Add(sensor);
             }
@@ -151,7 +151,7 @@ namespace TPUM.Server.Data.Tests
 
         public bool ContainsHeatSensor(Guid id)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 return _heatSensors.Find(sensor => sensor.Id == id) != null;
             }
@@ -159,7 +159,7 @@ namespace TPUM.Server.Data.Tests
 
         public IHeatSensorData? GetHeatSensor(Guid id)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 return _heatSensors.Find(sensor => sensor.Id == id);
             }
@@ -167,7 +167,7 @@ namespace TPUM.Server.Data.Tests
 
         public void RemoveHeatSensor(Guid id)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 var sensor = _heatSensors.Find(sensor => sensor.Id == id);
                 if (sensor == null) return;
@@ -178,7 +178,7 @@ namespace TPUM.Server.Data.Tests
 
         public void ClearHeatSensors()
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 foreach (var sensor in _heatSensors)
                 {

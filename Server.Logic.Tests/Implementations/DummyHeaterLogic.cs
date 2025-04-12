@@ -15,11 +15,8 @@ namespace TPUM.Server.Logic.Tests
 
         public bool IsOn => _data.IsOn;
 
-        public IPositionLogic Position
-        {
-            get => new DummyPositionLogic(_data.Position);
-            set => _data.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly DummyPositionLogic _position;
+        public IPositionLogic Position => _position;
 
         public float Temperature
         {
@@ -33,6 +30,8 @@ namespace TPUM.Server.Logic.Tests
             _data.PositionChanged += GetPositionChanged;
             _data.TemperatureChanged += GetTemperatureChanged;
             _data.EnableChanged += GetEnableChanged;
+
+            _position = new DummyPositionLogic(_data.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
@@ -48,6 +47,11 @@ namespace TPUM.Server.Logic.Tests
         private void GetEnableChanged(object? source, bool lastEnable, bool newEnable)
         {
             EnableChanged?.Invoke(this, lastEnable, newEnable);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _position.SetPosition(x, y);
         }
 
         public void TurnOn()

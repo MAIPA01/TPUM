@@ -3,67 +3,65 @@
     [TestClass]
     public sealed class HeaterDataTest
     {
-        private IHeaterData _heater = default!;
-        private static readonly Guid _id = Guid.Parse("44465E20-25A1-4FA3-BE1D-0AB7E5C739F4");
-        private const float _x = 2f;
-        private const float _y = 2f;
-        private IPositionData _position = default!;
-        private const float _temp = 21f;
+        private IHeaterData? _heater = null;
+        private static readonly Guid Id = Guid.Parse("44465E20-25A1-4FA3-BE1D-0AB7E5C739F4");
+        private const float X = 2f;
+        private const float Y = 2f;
+        private const float Temp = 21f;
 
         [TestInitialize]
         public void Setup()
         {
-            _position = new DummyPositionData(_x, _y);
-            _heater = new DummyHeaterData(_id, _position, _temp);
+            _heater = new DummyHeaterData(Id, X, Y, Temp);
         }
 
         [TestMethod]
         public void Heater_ShouldInitialize_WithCorrectProperties()
         {
-            Assert.AreEqual(_id, _heater.Id);
-            Assert.AreEqual(_position, _heater.Position);
-            Assert.AreEqual(_x, _heater.Position.X);
-            Assert.AreEqual(_y, _heater.Position.Y);
-            Assert.AreEqual(_temp, _heater.Temperature, 1e-10f);
-            Assert.IsFalse(_heater.IsOn);
+            Assert.AreEqual(Id, _heater!.Id);
+            Assert.AreEqual(X, _heater!.Position.X);
+            Assert.AreEqual(Y, _heater!.Position.Y);
+            Assert.AreEqual(Temp, _heater!.Temperature, 1e-10f);
+            Assert.IsFalse(_heater!.IsOn);
         }
 
         [TestMethod]
         public void SetPosition_ShouldUpdatePositionCorrectly()
         {
-            Assert.AreEqual(_position, _heater.Position);
-            _heater.Position.X += 1f;
-            _position.X += 1f;
-            Assert.AreEqual(_position, _heater.Position);
+            Assert.AreEqual(X, _heater!.Position.X);
+            Assert.AreEqual(Y, _heater!.Position.Y);
+            _heater.SetPosition(X + 1f, Y + 1f);
+            Assert.AreEqual(X + 1f, _heater!.Position.X);
+            Assert.AreEqual(Y + 1f, _heater!.Position.Y);
         }
 
         [TestMethod]
         public void IsOn_ShouldReturnCorrectState_WhenUpdated()
         {
-            Assert.IsFalse(_heater.IsOn);
+            Assert.IsFalse(_heater!.IsOn);
             _heater.IsOn = true;
-            Assert.IsTrue(_heater.IsOn);
+            Assert.IsTrue(_heater!.IsOn);
             _heater.IsOn = false;
-            Assert.IsFalse(_heater.IsOn);
+            Assert.IsFalse(_heater!.IsOn);
         }
 
         [TestMethod]
         public void Temperature_ShouldReturnCorrectValue()
         {
-            Assert.AreEqual(_temp, _heater.Temperature, 1e-10f);
+            Assert.AreEqual(Temp, _heater!.Temperature, 1e-10f);
         }
 
         [TestMethod]
         public void SetTemperature_ShouldUpdateTemperatureCorrectly()
         {
-            _heater.Temperature = _temp + 1f;
-            Assert.AreEqual(_temp + 1f, _heater.Temperature, 1e-10f);
+            _heater!.Temperature = Temp + 1f;
+            Assert.AreEqual(Temp + 1f, _heater!.Temperature, 1e-10f);
         }
 
         [TestMethod]
         public void HeaterData_EnableChangedEvent_IsTriggered()
         {
-            var heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(1, 1), 25.0f);
+            var heater = new DummyHeaterData(Guid.NewGuid(), 1f, 1f, 25.0f);
             bool eventTriggered = false;
 
             heater.EnableChanged += (s, oldV, newV) => eventTriggered = true;
@@ -75,12 +73,12 @@
         [TestMethod]
         public void HeaterData_PositionChangeEvent_IsTriggered()
         {
-            var heater = new DummyHeaterData(Guid.NewGuid(), new DummyPositionData(1, 1), 22.0f);
+            var heater = new DummyHeaterData(Guid.NewGuid(), 1f, 1f, 22.0f);
             bool eventTriggered = false;
 
             heater.PositionChanged += (s, oldPos, newPos) => eventTriggered = true;
 
-            heater.Position = new DummyPositionData(2, 2);
+            heater.SetPosition(2f, 2f);
             Assert.IsTrue(eventTriggered);
         }
     }

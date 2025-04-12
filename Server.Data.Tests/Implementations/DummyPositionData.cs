@@ -1,11 +1,7 @@
-﻿using TPUM.Server.Data.Events;
-
-namespace TPUM.Server.Data.Tests
+﻿namespace TPUM.Server.Data.Tests
 {
     internal class DummyPositionData : IPositionData
     {
-        public event PositionChangedEventHandler? PositionChanged;
-
         private readonly object _posLock = new();
 
         private float _x;
@@ -25,7 +21,6 @@ namespace TPUM.Server.Data.Tests
                     if (Math.Abs(_x - value) < 1e-10f) return;
                     var lastPosition = new DummyPositionData(_x, _y);
                     _x = value;
-                    PositionChanged?.Invoke(this, lastPosition, this);
                 }
             }
         }
@@ -47,7 +42,6 @@ namespace TPUM.Server.Data.Tests
                     if (Math.Abs(_y - value) < 1e-10f) return;
                     var lastPosition = new DummyPositionData(_x, _y);
                     _y = value;
-                    PositionChanged?.Invoke(this, lastPosition, this);
                 }
             }
         }
@@ -66,7 +60,6 @@ namespace TPUM.Server.Data.Tests
                 var lastPosition = new DummyPositionData(_x, _y);
                 _x = x;
                 _y = y;
-                PositionChanged?.Invoke(this, lastPosition, this);
             }
         }
 

@@ -3,7 +3,7 @@
     [TestClass]
     public sealed class LogicAPITest
     {
-        private LogicApiBase _api = default!;
+        private LogicApiBase? _api = null;
 
         [TestInitialize]
         public void Setup()
@@ -20,7 +20,7 @@
         [TestMethod]
         public void LogicApi_Dispose()
         {
-            _api.Dispose();
+            _api!.Dispose();
         }
     }
 }

@@ -4,24 +4,24 @@
     public sealed class RoomDataTest
     {
         private IRoomData _room = default!;
-        private static readonly Guid _id = Guid.Parse("44465E20-25A1-4FA3-BE1D-0AB7E5C739F4");
-        private const string _name = "name";
-        private const float _width = 100f;
-        private const float _height = 100f;
+        private static readonly Guid Id = Guid.Parse("44465E20-25A1-4FA3-BE1D-0AB7E5C739F4");
+        private const string Name = "name";
+        private const float Width = 100f;
+        private const float Height = 100f;
 
         [TestInitialize]
         public void Setup()
         {
-            _room = new DummyRoomData(_id, _name, _width, _height);
+            _room = new DummyRoomData(Id, Name, Width, Height);
         }
 
         [TestMethod]
         public void Room_ShouldInitialize_WithCorrectProperties()
         {
-            Assert.AreEqual(_id, _room.Id);
-            Assert.AreEqual(_name, _room.Name);
-            Assert.AreEqual(_width, _room.Width, 1e-10f);
-            Assert.AreEqual(_height, _room.Height, 1e-10f);
+            Assert.AreEqual(Id, _room.Id);
+            Assert.AreEqual(Name, _room.Name);
+            Assert.AreEqual(Width, _room.Width, 1e-10f);
+            Assert.AreEqual(Height, _room.Height, 1e-10f);
             Assert.AreEqual(0, _room.Heaters.Count);
             Assert.AreEqual(0, _room.HeatSensors.Count);
         }
@@ -29,7 +29,7 @@
         [TestMethod]
         public void AddHeater_ShouldAddHeaterToRoom()
         {
-            IHeaterData heater = _room.AddHeater(5f, 5f, 100f);
+            var heater = _room.AddHeater(5f, 5f, 100f);
 
             Assert.IsNotNull(heater);
             Assert.AreEqual(1, _room.Heaters.Count);
@@ -55,7 +55,7 @@
         [TestMethod]
         public void RemoveHeater_ShouldRemoveHeaterFromRoom()
         {
-            IHeaterData heater = _room.AddHeater(5f, 5f, 100f);
+            var heater = _room.AddHeater(5f, 5f, 100f);
 
             _room.RemoveHeater(heater.Id);
 
@@ -65,7 +65,7 @@
         [TestMethod]
         public void AddHeatSensor_ShouldAddSensorToRoom()
         {
-            IHeatSensorData sensor = _room.AddHeatSensor(5f, 5f);
+            var sensor = _room.AddHeatSensor(5f, 5f);
 
             Assert.IsNotNull(sensor);
             Assert.AreEqual(1, _room.HeatSensors.Count);
@@ -91,30 +91,10 @@
         [TestMethod]
         public void RemoveHeatSensor_ShouldRemoveHeatSensorFromRoom()
         {
-            IHeatSensorData sensor = _room.AddHeatSensor(5f, 5f);
+            var sensor = _room.AddHeatSensor(5f, 5f);
 
             _room.RemoveHeatSensor(sensor.Id);
 
-            Assert.AreEqual(0, _room.HeatSensors.Count);
-        }
-
-        [TestMethod]
-        public void ClearHeaters_ShouldRemoveAllHeaters()
-        {
-            _room.AddHeater(5f, 5f, 100f);
-            Assert.AreEqual(1, _room.Heaters.Count);
-
-            _room.ClearHeaters();
-            Assert.AreEqual(0, _room.Heaters.Count);
-        }
-
-        [TestMethod]
-        public void ClearHeatSensors_ShouldRemoveAllSensors()
-        {
-            _room.AddHeatSensor(5f, 5f);
-            Assert.AreEqual(1, _room.HeatSensors.Count);
-
-            _room.ClearHeatSensors();
             Assert.AreEqual(0, _room.HeatSensors.Count);
         }
 
@@ -201,7 +181,7 @@
             room.PositionChanged += (s, oldP, newP) => eventTriggered = true;
 
             var sensor = room.AddHeatSensor(2, 2);
-            ((DummyPositionData)sensor.Position).X = 3;
+            sensor.SetPosition(3f, 3f);
 
             Assert.IsTrue(eventTriggered);
         }

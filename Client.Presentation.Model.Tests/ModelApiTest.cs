@@ -3,7 +3,7 @@
     [TestClass]
     public sealed class ModelApiTest
     {
-        private ModelApiBase _modelApi = default!;
+        private ModelApiBase? _modelApi = null;
 
         [TestInitialize]
         public void Setup()
@@ -21,7 +21,7 @@
         [TestMethod]
         public void ModelApi_Dispose()
         {
-            _modelApi.Dispose();
+            _modelApi!.Dispose();
             Assert.AreEqual(0, _modelApi.Rooms.Count);
         }
     }

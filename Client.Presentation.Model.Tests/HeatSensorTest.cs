@@ -4,17 +4,10 @@
     public sealed class HeatSensorTest
     {
         [TestMethod]
-        public void HeatSensor_UpdateTemperature_ShouldTriggerEvent()
+        public void HeatSensor_GetTemperature_ShouldReturnProperTemperature()
         {
-            var logic = new TestHeatSensorLogic(19f);
-            var sensor = new DummyHeatSensor(logic);
-
-            bool eventTriggered = false;
-            sensor.TemperatureChanged += (s, e) => eventTriggered = true;
-
-            sensor.UpdateData(1, 1, 22f);
-
-            Assert.IsTrue(eventTriggered);
+            var sensor = new DummyHeatSensorModel(new TestHeatSensorLogic(0f, 0f, 19f));
+            Assert.AreEqual(19f, sensor.Temperature, 1e-10f);
         }
     }
 }

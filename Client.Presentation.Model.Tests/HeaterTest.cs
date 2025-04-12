@@ -5,41 +5,22 @@ namespace TPUM.Client.Presentation.Model.Tests
     [TestClass]
     public sealed class HeaterTest
     {
-        private ModelApiBase _modelApi = default!;
-
-        [TestInitialize]
-        public void Setup()
-        {
-            _modelApi = ModelApiBase.GetApi("ws://localhost:5000/ws");
-        }
-
 
         [TestMethod]
-        public void Heater_TemperatureChange_ShouldTriggerEvent()
+        public void Heater_GetTemperature_ShouldReturnProperTemperature()
         {
             var logic = new TestHeaterLogic(20f);
-            var heater = new DummyHeater(logic, _modelApi);
-
-            bool eventTriggered = false;
-            heater.TemperatureChanged += (s, e) => eventTriggered = true;
-
-            heater.Temperature = 25f;
-
-            Assert.IsTrue(eventTriggered);
+            var heater = new DummyHeater(logic);
+            Assert.AreEqual(20f, heater.Temperature, 1e-10f);
         }
 
         [TestMethod]
-        public void Heater_PositionChange_ShouldTriggerEvent()
+        public void Heater_GetPosition_ShouldReturnProperPosition()
         {
-            var logic = new TestHeaterLogic();
-            var heater = new DummyHeater(logic, _modelApi);
-
-            bool eventTriggered = false;
-            heater.PositionChanged += (s, e) => eventTriggered = true;
-
-            heater.Position = new DummyPosition(new TestPositionLogic(3, 4));
-
-            Assert.IsTrue(eventTriggered);
+            var logic = new TestHeaterLogic(0f, 0f);
+            var heater = new DummyHeater(logic);
+            Assert.AreEqual(0f, heater.Position.X, 1e-10f);
+            Assert.AreEqual(0f, heater.Position.Y, 1e-10f);
         }
     }
 }

@@ -10,11 +10,8 @@ namespace TPUM.Server.Logic.Tests
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public Guid Id => _data.Id;
-        public IPositionLogic Position
-        {
-            get => new DummyPositionLogic(_data.Position);
-            set => _data.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly DummyPositionLogic _position;
+        public IPositionLogic Position => _position;
         public float Temperature => _data.Temperature;
 
         public DummyHeatSensorLogic(IHeatSensorData data)
@@ -22,6 +19,13 @@ namespace TPUM.Server.Logic.Tests
             _data = data;
             _data.PositionChanged += GetPositionChanged;
             _data.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new DummyPositionLogic(_data.Position);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _position.SetPosition(x, y);
         }
 
         internal void SetTemperature(float temperature)

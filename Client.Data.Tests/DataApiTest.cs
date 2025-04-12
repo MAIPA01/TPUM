@@ -3,7 +3,7 @@
     [TestClass]
     public sealed class DataApiTest
     {
-        private DataApiBase _api = default!;
+        private DataApiBase? _api = null;
 
         [TestInitialize]
         public void Setup()
@@ -20,7 +20,7 @@
         [TestMethod]
         public void DataApi_Dispose()
         {
-            _api.Dispose();
+            _api!.Dispose();
         }
     }
 }

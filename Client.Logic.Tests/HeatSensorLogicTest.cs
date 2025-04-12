@@ -3,44 +3,35 @@
     [TestClass]
     public sealed class HeatSensorLogicTest
     {
-        private IHeatSensorLogic _sensor = default!;
-        private const float _x = 2f;
-        private const float _y = 2f;
+        private IHeatSensorLogic? _sensor = null;
 
         [TestInitialize]
         public void Setup()
         {
-            _sensor = new DummyHeatSensorLogic(new TestHeatSensorData
-            {
-                Position = new TestPositionData { X = _x, Y = _y },
-                Temperature = 18.3f
-            });
+            _sensor = new DummyHeatSensorLogic(new TestHeatSensorData());
         }
 
         [TestMethod]
         public void Constructor_ShouldInitializeProperties()
         {
-            Assert.AreEqual(_x, _sensor.Position.X);
-            Assert.AreEqual(_y, _sensor.Position.Y);
-            Assert.AreEqual(18.3f, _sensor.Temperature, 1e-10f);
+            Assert.AreEqual(0f, _sensor!.Position.X);
+            Assert.AreEqual(0f, _sensor!.Position.Y);
+            Assert.AreEqual(0f, _sensor.Temperature, 1e-10f);
         }
 
         [TestMethod]
         public void HeatSensorLogic_ShouldReturnCorrectTemperature()
         {
-            var data = new TestHeatSensorData
-            {
-                Temperature = 18.3f
-            };
+            var data = new TestHeatSensorData();
             var logic = new DummyHeatSensorLogic(data);
 
-            Assert.AreEqual(18.3f, logic.Temperature);
+            Assert.AreEqual(0f, logic.Temperature);
         }
 
         [TestMethod]
         public void HashCode_ShouldReturnConsistentValue()
         {
-            var hash = 3 * _sensor.Position.GetHashCode() + 5 * _sensor.Temperature.GetHashCode();
+            var hash = 3 * _sensor!.Position.GetHashCode() + 5 * _sensor!.Temperature.GetHashCode();
             Assert.AreEqual(hash, _sensor.GetHashCode(), 1);
         }
     }

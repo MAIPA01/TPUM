@@ -3,32 +3,13 @@
     [TestClass]
     public sealed class HeaterLogicTest
     {
-        private IHeaterLogic _heater = default!;
-        private IPositionLogic _position = default!;
-
-        public class TestPositionData : Data.IPositionData
-        {
-            public float X { get; set; }
-            public float Y { get; set; }
-        }
-
-        public class TestHeaterData : Data.IHeaterData
-        {
-            public Guid Id { get; set; } = Guid.NewGuid();
-            public Data.IPositionData Position { get; set; } = new TestPositionData();
-            private float _temperature = 0.0f;
-            public float Temperature { get; set; }
-            public bool IsOn { get; set; }
-        }
+        private IHeaterLogic? _heater = null;
 
         [TestInitialize]
         public void Setup()
         {
-            var _posData = new TestPositionData { X = 1.0f, Y = 2.0f };
-            _position = new DummyPositionLogic(_posData);
             _heater = new DummyHeaterLogic(new TestHeaterData
             {
-                Position = _posData,
                 Temperature = 22.5f,
                 IsOn = false
             });
@@ -37,28 +18,20 @@
         [TestMethod]
         public void Heater_ShouldInitialize_WithCorrectProperties()
         {
-            Assert.AreEqual(_position.X, _heater.Position.X);
-            Assert.AreEqual(_position.Y, _heater.Position.Y);
-            Assert.IsFalse(_heater.IsOn);
-            Assert.AreEqual(0f, _heater.Temperature, 1e-10f);
+            Assert.AreEqual(0f, _heater!.Position.X);
+            Assert.AreEqual(0f, _heater!.Position.Y);
+            Assert.IsFalse(_heater!.IsOn);
+            Assert.AreEqual(22.5f, _heater!.Temperature, 1e-10f);
         }
 
         [TestMethod]
-        public void SetPosition_ShouldUpdatePositionXCorrectly()
+        public void SetPosition_ShouldUpdatePositionCorrectly()
         {
-            Assert.AreEqual(_position.X, _heater.Position.X);
-            _heater.Position.X += 1f;
-            _position.X += 1f;
-            Assert.AreEqual(_position.X, _heater.Position.X);
-        }
-
-        [TestMethod]
-        public void SetPosition_ShouldUpdatePositionYCorrectly()
-        {
-            Assert.AreEqual(_position.Y, _heater.Position.Y);
-            _heater.Position.Y += 1f;
-            _position.Y += 1f;
-            Assert.AreEqual(_position.Y, _heater.Position.Y);
+            Assert.AreEqual(0f, _heater!.Position.X);
+            Assert.AreEqual(0f, _heater!.Position.Y);
+            _heater!.SetPosition(1f, 1f);
+            Assert.AreEqual(1f, _heater!.Position.X);
+            Assert.AreEqual(1f, _heater!.Position.Y);
         }
 
         [TestMethod]
@@ -75,7 +48,7 @@
         }
 
         [TestMethod]
-        public void HeaterLogic_ShouldReturnZeroTemperature_IfOff()
+        public void HeaterLogic_ShouldReturnTemperature_IfOff()
         {
             var data = new TestHeaterData
             {
@@ -84,7 +57,7 @@
             };
             var logic = new DummyHeaterLogic(data);
 
-            Assert.AreEqual(0f, logic.Temperature);
+            Assert.AreEqual(22.5f, logic.Temperature);
         }
     }
 }
