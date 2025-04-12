@@ -14,7 +14,7 @@ namespace TPUM.Client.Data
 
         public Guid Id { get; }
 
-        private readonly IPositionData _position;
+        private readonly PositionData _position;
         public IPositionData Position
         {
             get 
@@ -22,17 +22,6 @@ namespace TPUM.Client.Data
                 lock (_heatSensorLock)
                 {
                     return _position;
-                }
-            }
-            set
-            {
-                lock (_heatSensorLock)
-                {
-                    if (_position.Equals(value)) return;
-                    var lastPosition = new PositionData(_position.X, _position.Y);
-                    _position.SetPosition(value.X, value.Y);
-                    PositionChanged?.Invoke(this, lastPosition, _position);
-                    _data.UpdateHeatSensor(_roomId, Id, _position.X, _position.Y);
                 }
             }
         }
@@ -46,56 +35,48 @@ namespace TPUM.Client.Data
                     return _temperature;
                 }
             }
-            private set
-            {
-                lock (_heatSensorLock)
-                {
-                    if (MathF.Abs(_temperature - value) < 1e-10f) return;
-                    var lastTemperature = _temperature;
-                    _temperature = value;
-                    TemperatureChanged?.Invoke(this, lastTemperature, _temperature);
-                }
-            }
         }
 
-        public HeatSensorData(DataApi data, Guid roomId, Guid id, IPositionData position, float temperature = 0.0f)
+        public HeatSensorData(DataApi data, Guid roomId, Guid id, PositionData position, float temperature = 0.0f)
         {
             _data = data;
             _roomId = roomId;
             Id = id;
             _position = position;
-            _position.PositionChanged += GetPositionChanged;
-            Temperature = temperature;
+            _temperature = temperature;
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            lock (_heatSensorLock)
+            {
+                if (MathF.Abs(_position.X - x) < 1e-10f && MathF.Abs(_position.Y - y) < 1e-10f) return;
+                _data.UpdateHeatSensor(_roomId, Id, x, y);
+            }
         }
 
         internal void UpdateDataFromServer(float x, float y, float temperature)
         {
             lock (_heatSensorLock)
             {
-                _position.PositionChanged -= GetPositionChanged;
-                _position.PositionChanged += GetPositionChangedFromServer;
-                _position.SetPosition(x, y);
-                _position.PositionChanged -= GetPositionChangedFromServer;
-                _position.PositionChanged += GetPositionChanged;
+                if (MathF.Abs(_position.X - x) > 1e-10f || MathF.Abs(_position.Y - y) > 1e-10f)
+                {
+                    var lastPosition = new PositionData(_position.X, _position.Y);
+                    _position.SetPosition(x, y);
+                    PositionChanged?.Invoke(this, lastPosition, _position);
+                }
 
-                Temperature = temperature;
+                if (MathF.Abs(_temperature - temperature) > 1e-10f)
+                {
+                    var lastTemperature = _temperature;
+                    _temperature = temperature;
+                    TemperatureChanged?.Invoke(this, lastTemperature, _temperature);
+                }
             }
-        }
-
-        private void GetPositionChangedFromServer(object? source, IPositionData lastPosition, IPositionData newPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
-        }
-
-        private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
-            _data.UpdateHeatSensor(_roomId, Id, _position.X, _position.Y);
         }
 
         public void Dispose()
         {
-            _position.PositionChanged -= GetPositionChanged;
             GC.SuppressFinalize(this);
         }
     }

@@ -12,12 +12,12 @@ namespace TPUM.Client.Data
         IReadOnlyCollection<IHeaterData> Heaters { get; }
         IReadOnlyCollection<IHeatSensorData> HeatSensors { get; }
         void AddHeater(float x, float y, float temperature);
-        bool ContainsHeater(Guid id);
-        IHeaterData? GetHeater(Guid id);
-        void RemoveHeater(Guid id);
+        bool ContainsHeater(Guid heaterId);
+        IHeaterData? GetHeater(Guid heaterId);
+        void RemoveHeater(Guid heaterId);
         void AddHeatSensor(float x, float y);
-        bool ContainsHeatSensor(Guid id);
-        IHeatSensorData? GetHeatSensor(Guid id);
-        void RemoveHeatSensor(Guid id);
+        bool ContainsHeatSensor(Guid sensorId);
+        IHeatSensorData? GetHeatSensor(Guid sensorId);
+        void RemoveHeatSensor(Guid sensorId);
     }
 }

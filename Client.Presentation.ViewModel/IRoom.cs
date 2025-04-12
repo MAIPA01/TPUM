@@ -17,8 +17,8 @@ namespace TPUM.Client.Presentation.ViewModel
         ReadOnlyObservableCollection<IHeatSensor> HeatSensors { get; }
 
         void AddHeater(float x, float y, float temperature);
-        void RemoveHeater(Guid id);
+        void RemoveHeater(Guid heaterId);
         void AddHeatSensor(float x, float y);
-        void RemoveHeatSensor(Guid id);
+        void RemoveHeatSensor(Guid sensorId);
     }
 }

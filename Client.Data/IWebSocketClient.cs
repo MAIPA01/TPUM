@@ -6,7 +6,7 @@ namespace TPUM.Client.Data
     {
         Task ConnectAsync(string uri);
 
-        Task SendAsync(string xml);
+        Task SendAsync(string request);
 
         Task DisconnectAsync();
     }

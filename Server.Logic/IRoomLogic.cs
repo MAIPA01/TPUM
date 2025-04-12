@@ -5,30 +5,26 @@ namespace TPUM.Server.Logic
     public interface IRoomLogic : INotifyTemperatureChanged, INotifyEnableChanged, INotifyPositionChanged, IDisposable
     {
         Guid Id { get; }
-        IReadOnlyCollection<IHeaterLogic> Heaters { get; }
-        IReadOnlyCollection<IHeatSensorLogic> HeatSensors { get; }
         string Name { get; }
         float Width { get; }
         float Height { get; }
+        IReadOnlyCollection<IHeaterLogic> Heaters { get; }
+        IReadOnlyCollection<IHeatSensorLogic> HeatSensors { get; }
 
         IHeaterLogic AddHeater(float x, float y, float temperature);
 
-        bool ContainsHeater(Guid id);
+        bool ContainsHeater(Guid heaterId);
 
-        IHeaterLogic? GetHeater(Guid id);
+        IHeaterLogic? GetHeater(Guid heaterId);
 
-        void RemoveHeater(Guid id);
-
-        void ClearHeaters();
+        void RemoveHeater(Guid heaterId);
 
         IHeatSensorLogic AddHeatSensor(float x, float y);
 
-        bool ContainsHeatSensor(Guid id);
+        bool ContainsHeatSensor(Guid sensorId);
 
-        IHeatSensorLogic? GetHeatSensor(Guid id);
+        IHeatSensorLogic? GetHeatSensor(Guid sensorId);
 
-        void RemoveHeatSensor(Guid id);
-
-        void ClearHeatSensors();
+        void RemoveHeatSensor(Guid sensorId);
     }
 }

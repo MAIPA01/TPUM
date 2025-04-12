@@ -1,11 +1,7 @@
-﻿using TPUM.Server.Data.Events;
-
-namespace TPUM.Server.Data
+﻿namespace TPUM.Server.Data
 {
     internal class PositionData : IPositionData
     {
-        public event PositionChangedEventHandler? PositionChanged;
-
         private readonly object _posLock = new();
 
         private float _x;
@@ -16,16 +12,6 @@ namespace TPUM.Server.Data
                 lock (_posLock)
                 {
                     return _x;
-                }
-            }
-            set
-            {
-                lock (_posLock)
-                {
-                    if (Math.Abs(_x - value) < 1e-10f) return;
-                    var lastPosition = new PositionData(_x, _y);
-                    _x = value;
-                    PositionChanged?.Invoke(this, lastPosition, this);
                 }
             }
         }
@@ -40,16 +26,6 @@ namespace TPUM.Server.Data
                     return _y;
                 }
             }
-            set
-            {
-                lock (_posLock)
-                {
-                    if (Math.Abs(_y - value) < 1e-10f) return;
-                    var lastPosition = new PositionData(_x, _y);
-                    _y = value;
-                    PositionChanged?.Invoke(this, lastPosition, this);
-                }
-            }
         }
 
         public PositionData(float x, float y)
@@ -58,15 +34,13 @@ namespace TPUM.Server.Data
             _y = y;
         }
 
-        public void SetPosition(float x, float y)
+        internal void SetPosition(float x, float y)
         {
             lock (_posLock)
             {
                 if (Math.Abs(_x - x) < 1e-10f && Math.Abs(_y - y) < 1e-10f) return;
-                var lastPosition = new PositionData(_x, _y);
                 _x = x;
                 _y = y;
-                PositionChanged?.Invoke(this, lastPosition, this);
             }
         }
 

@@ -25,7 +25,6 @@ namespace TPUM.Client.Data
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Blad polaczenia: {ex.Message}. Ponawiam probe za {ReconnectIntervalInSeconds} sekund...");
                     await Task.Delay(ReconnectIntervalInSeconds * 1000);
                 }
             }
@@ -34,9 +33,9 @@ namespace TPUM.Client.Data
             _ = Task.Run(ReceiveLoop);
         }
 
-        public async Task SendAsync(string xml)
+        public async Task SendAsync(string request)
         {
-            var bytes = Encoding.UTF8.GetBytes(xml);
+            var bytes = Encoding.UTF8.GetBytes(request);
             await _client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
@@ -48,22 +47,24 @@ namespace TPUM.Client.Data
                 var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
                 if (result.MessageType != WebSocketMessageType.Binary) continue;
                 var xml = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                ProccessMessage(xml);
+                ProcessMessage(xml);
             }
         }
 
-        private void ProccessMessage(string message)
+        private void ProcessMessage(string message)
         {
-            if (XmlSerializerHelper.TryDeserialize<Response>(message, out var response))
+            if (!XmlSerializerHelper.TryDeserialize<Response>(message, out var response)) return;
+
+            switch (response.ContentType)
             {
-                if (response.ContentType == ResponseType.Client)
-                {
+                case ResponseType.Client:
                     OnResponseReceived((ClientResponseContent)response.Content);
-                }
-                else if (response.ContentType == ResponseType.Broadcast)
-                {
+                    break;
+                case ResponseType.Broadcast:
                     OnBroadcastReceived((BroadcastResponseContent)response.Content);
-                }
+                    break;
+                default:
+                    return;
             }
         }
 
@@ -84,7 +85,6 @@ namespace TPUM.Client.Data
         public async Task DisconnectAsync()
         {
             await _cts.CancelAsync();
-            _clientId = Guid.Empty;
             await DisconnectSocketAsync(_client);
         }
 

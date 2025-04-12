@@ -1,12 +1,8 @@
-﻿using TPUM.Server.Data.Events;
-
-namespace TPUM.Server.Data
+﻿namespace TPUM.Server.Data
 {
-    public interface IPositionData : INotifyPositionChanged, IDisposable
+    public interface IPositionData : IDisposable
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-
-        void SetPosition(float x, float y);
+        public float X { get; }
+        public float Y { get; }
     }
 }

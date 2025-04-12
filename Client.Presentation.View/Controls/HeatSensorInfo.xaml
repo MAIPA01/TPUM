@@ -15,9 +15,9 @@
             <TextBlock>
                 <Run Text="Pos: " FontWeight="Bold"/>
                 <Run Text="x: "/>
-                <Run Text="{Binding Position.X, ElementName=HeatSensorInfoUserControl}"/>
+                <Run Text="{Binding Position.X, Mode=OneWay, ElementName=HeatSensorInfoUserControl}"/>
                 <Run Text="y: "/>
-                <Run Text="{Binding Position.Y, ElementName=HeatSensorInfoUserControl}"/>
+                <Run Text="{Binding Position.Y, Mode=OneWay, ElementName=HeatSensorInfoUserControl}"/>
             </TextBlock>
             <TextBlock>
                 <Run Text="Temp: " FontWeight="Bold"/>

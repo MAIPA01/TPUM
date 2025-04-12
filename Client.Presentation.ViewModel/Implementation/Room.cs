@@ -3,16 +3,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Threading;
 using TPUM.Client.Presentation.Model;
-using TPUM.Client.Presentation.ViewModel.Conteners;
-using System.Diagnostics.Metrics;
 
 namespace TPUM.Client.Presentation.ViewModel
 {
     internal class Room : IRoom
     {
-        private readonly Model.IRoomModel _model;
+        private readonly IRoomModel _model;
 
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event PositionChangedEventHandler? PositionChanged;
@@ -32,16 +29,7 @@ namespace TPUM.Client.Presentation.ViewModel
         public float Width => _model.Width;
         public float Height => _model.Height;
 
-        public float AvgTemperature
-        {
-            get
-            {
-                lock (_roomLock)
-                {
-                    return _heatSensors.Count > 0 ? _heatSensors.Average(sensor => sensor.Temperature) : 0f;
-                }
-            }
-        }
+        public float AvgTemperature { get; private set; } = 0f;
 
         private readonly ObservableCollection<IHeater> _heaters = [];
         private readonly ReadOnlyObservableCollection<IHeater> _readOnlyHeaters;
@@ -99,6 +87,12 @@ namespace TPUM.Client.Presentation.ViewModel
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
+
+            lock (_roomLock)
+            {
+                AvgTemperature = _heatSensors.Count > 0 ? _heatSensors.Average(sensor => sensor.Temperature) : 0f;
+            }
+
             OnPropertyChange(nameof(Heaters));
             OnPropertyChange(nameof(HeatSensors));
             OnPropertyChange(nameof(AvgTemperature));
@@ -123,7 +117,7 @@ namespace TPUM.Client.Presentation.ViewModel
             {
                 var heater = new Heater(heaterModel);
                 SubscribeToHeater(heater);
-                Application.Current.Dispatcher.Invoke(() => _heaters.Add(heater));
+                Application.Current.Dispatcher.InvokeAsync(() => _heaters.Add(heater));
                 HeaterAdded?.Invoke(this, heater);
             }
         }
@@ -136,7 +130,7 @@ namespace TPUM.Client.Presentation.ViewModel
                 {
                     var heater = _heaters.First(heater => heater.Id == heaterId);
                     UnsubscribeFromHeater(heater);
-                    Application.Current.Dispatcher.Invoke(() => _heaters.Remove(heater));
+                    Application.Current.Dispatcher.InvokeAsync(() => _heaters.Remove(heater));
                 }
                 HeaterRemoved?.Invoke(this, heaterId);
             }
@@ -148,7 +142,7 @@ namespace TPUM.Client.Presentation.ViewModel
             {
                 var sensor = new HeatSensor(sensorModel);
                 SubscribeToHeatSensor(sensor);
-                Application.Current.Dispatcher.Invoke(() => _heatSensors.Add(sensor));
+                _ = Application.Current.Dispatcher.InvokeAsync(() => _heatSensors.Add(sensor));
                 HeatSensorAdded?.Invoke(this, sensor);
             }
         }
@@ -161,7 +155,7 @@ namespace TPUM.Client.Presentation.ViewModel
                 {
                     var sensor = _heatSensors.First(sensor => sensor.Id == sensorId);
                     UnsubscribeFromHeatSensor(sensor);
-                    Application.Current.Dispatcher.Invoke(() => _heatSensors.Remove(sensor));
+                    Application.Current.Dispatcher.InvokeAsync(() => _heatSensors.Remove(sensor));
                 }
                 HeatSensorRemoved?.Invoke(this, sensorId);
             }

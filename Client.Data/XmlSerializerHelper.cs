@@ -1,6 +1,4 @@
 ﻿using System.Xml.Serialization;
-using TPUM.Client.Data.Events;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TPUM.Client.Data
 {
@@ -96,7 +94,7 @@ namespace TPUM.Client.Data
         }
 
         #region GET_REQUESTS
-        private static Request CreateGetRequest(GetRequestType type, GetRequestData data)
+        private static Request CreateGetRequest(GetRequestType type, GetRequestData? data)
         {
             return CreateRequest(RequestType.Get, new GetRequestContent
             {
@@ -107,7 +105,7 @@ namespace TPUM.Client.Data
 
         public static Request CreateGetAllDataRequest()
         {
-            return CreateGetRequest(GetRequestType.All, new GetAllRequestData());
+            return CreateGetRequest(GetRequestType.All, null);
         }
 
         public static Request CreateGetRoomDataRequest(Guid roomId)
@@ -306,14 +304,15 @@ namespace TPUM.Client.Data
             });
         }
 
-        public static Response CreateAddHeatSensorBroadcastResponse(Guid roomId, Guid sensorId, float x, float y)
+        public static Response CreateAddHeatSensorBroadcastResponse(Guid roomId, Guid sensorId, float x, float y, float temperature)
         {
             return CreateAddBroadcastResponse(AddBroadcastType.HeatSensor, new AddHeatSensorBroadcastData
             {
                 RoomId = roomId,
                 HeatSensorId = sensorId,
                 X = x,
-                Y = y
+                Y = y,
+                Temperature = temperature
             });
         }
         #endregion ADD_BROADCAST_RESPONSES
@@ -328,7 +327,7 @@ namespace TPUM.Client.Data
             });
         }
 
-        public static Response CreateUpdateHeaterBroadcastResponse(Guid roomId, Guid heaterId, float x, float y, float temperature, 
+        public static Response CreateUpdateHeaterBroadcastResponse(Guid roomId, Guid heaterId, float x, float y, float temperature,
             bool isOn)
         {
             return CreateUpdateBroadcastResponse(UpdateBroadcastType.Heater, new UpdateHeaterBroadcastData
@@ -422,7 +421,7 @@ namespace TPUM.Client.Data
             });
         }
 
-        public static Response CreateGetRoomSuccessClientResponse(Guid roomId, string name, float height, float width, 
+        public static Response CreateGetRoomSuccessClientResponse(Guid roomId, string name, float height, float width,
             List<HeaterDataContract> heaters, List<HeatSensorDataContract> sensors)
         {
             return CreateGetClientResponse(GetClientType.Room, new GetRoomClientData
@@ -448,7 +447,7 @@ namespace TPUM.Client.Data
             });
         }
 
-        public static Response CreateGetHeaterSuccessClientResponse(Guid roomId, Guid heaterId, float x, float y, float temperature, 
+        public static Response CreateGetHeaterSuccessClientResponse(Guid roomId, Guid heaterId, float x, float y, float temperature,
             bool isOn)
         {
             return CreateGetClientResponse(GetClientType.Heater, new GetHeaterClientData
@@ -502,40 +501,66 @@ namespace TPUM.Client.Data
         #endregion GET_CLIENT_RESPONSES
 
         #region ADD_CLIENT_RESPONSES
-        private static Response CreateAddClientResponse(AddClientType type, bool success, AddClientData data)
+
+        private static Response CreateAddSuccessClientResponse(AddClientType type, AddClientData data)
         {
             return CreateClientResponse(ClientResponseType.Add, new AddClientResponseData
             {
                 DataType = type,
-                Success = success,
+                Success = true,
                 Data = data
             });
         }
 
-        public static Response CreateAddRoomClientResponse(Guid roomId, bool success)
+        private static Response CreateAddFailedClientResponse(AddClientType type)
         {
-            return CreateAddClientResponse(AddClientType.Room, success, new AddRoomClientData
+            return CreateClientResponse(ClientResponseType.Add, new AddClientResponseData
+            {
+                DataType = type,
+                Success = false,
+                Data = null
+            });
+        }
+
+        public static Response CreateAddRoomSuccessClientResponse(Guid roomId)
+        {
+            return CreateAddSuccessClientResponse(AddClientType.Room, new AddRoomClientData
             {
                 RoomId = roomId
             });
         }
 
-        public static Response CreateAddHeaterClientResponse(Guid roomId, Guid heaterId, bool success)
+        public static Response CreateAddRoomFailedClientResponse()
         {
-            return CreateAddClientResponse(AddClientType.Heater, success, new AddHeaterClientData
+            return CreateAddFailedClientResponse(AddClientType.Room);
+        }
+
+        public static Response CreateAddHeaterSuccessClientResponse(Guid roomId, Guid heaterId)
+        {
+            return CreateAddSuccessClientResponse(AddClientType.Heater, new AddHeaterClientData
             {
                 RoomId = roomId,
                 HeaterId = heaterId
             });
         }
 
-        public static Response CreateAddHeatSensorClientResponse(Guid roomId, Guid heatSensorId, bool success)
+        public static Response CreateAddHeaterFailedClientResponse()
         {
-            return CreateAddClientResponse(AddClientType.HeatSensor, success, new AddHeatSensorClientData
+            return CreateAddFailedClientResponse(AddClientType.Heater);
+        }
+
+        public static Response CreateAddHeatSensorSuccessClientResponse(Guid roomId, Guid heatSensorId)
+        {
+            return CreateAddSuccessClientResponse(AddClientType.HeatSensor, new AddHeatSensorClientData
             {
                 RoomId = roomId,
                 HeatSensorId = heatSensorId
             });
+        }
+
+        public static Response CreateAddHeatSensorFailedClientResponse()
+        {
+            return CreateAddFailedClientResponse(AddClientType.HeatSensor);
         }
         #endregion ADD_CLIENT_RESPONSES
 
@@ -580,14 +605,29 @@ namespace TPUM.Client.Data
             });
         }
 
-        public static Response CreateRemoveRoomClientResponse(Guid roomId)
+        public static Response CreateRemoveRoomClientResponse(Guid roomId, bool success)
         {
-            return CreateRemoveClientResponse(AddBroadcastType.Room, new AddRoomBroadcastData
+            return CreateRemoveClientResponse(RemoveClientType.Room, success, new RemoveRoomClientData
+            {
+                RoomId = roomId
+            });
+        }
+
+        public static Response CreateRemoveHeaterClientResponse(Guid roomId, Guid heaterId, bool success)
+        {
+            return CreateRemoveClientResponse(RemoveClientType.Heater, success, new RemoveHeaterClientData
             {
                 RoomId = roomId,
-                Name = name,
-                Width = width,
-                Height = height
+                HeaterId = heaterId
+            });
+        }
+
+        public static Response CreateRemoveHeatSensorClientResponse(Guid roomId, Guid sensorId, bool success)
+        {
+            return CreateRemoveClientResponse(RemoveClientType.HeatSensor, success, new RemoveHeatSensorClientData
+            {
+                RoomId = roomId,
+                HeatSensorId = sensorId
             });
         }
         #endregion REMOVE_CLIENT_RESPONSES
@@ -671,20 +711,16 @@ namespace TPUM.Client.Data
     {
         public GetRequestType DataType { get; set; }
 
-        [XmlElement("AllData", typeof(GetAllRequestData))]
         [XmlElement("RoomData", typeof(GetRoomRequestData))]
         [XmlElement("HeaterData", typeof(GetHeaterRequestData))]
         [XmlElement("HeatSensorData", typeof(GetHeatSensorRequestData))]
-        public GetRequestData Data { get; set; }
+        public GetRequestData? Data { get; set; }
     }
 
-    [XmlInclude(typeof(GetAllRequestData))]
     [XmlInclude(typeof(GetRoomRequestData))]
     [XmlInclude(typeof(GetHeaterRequestData))]
     [XmlInclude(typeof(GetHeatSensorRequestData))]
     public abstract class GetRequestData { }
-
-    public class GetAllRequestData : GetRequestData { }
 
     public class GetRoomRequestData : GetRequestData
     {
@@ -799,7 +835,7 @@ namespace TPUM.Client.Data
 
     public class RemoveRequestContent : RequestContent
     {
-        public RemoveRequestType DataType {  get; set; }
+        public RemoveRequestType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(RemoveRoomRequestData))]
         [XmlElement("HeaterData", typeof(RemoveHeaterRequestData))]
@@ -922,6 +958,7 @@ namespace TPUM.Client.Data
         public Guid HeatSensorId { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
+        public float Temperature { get; set; }
     }
     #endregion ADD_BROADCAST_RESPONSE
 
@@ -1002,7 +1039,7 @@ namespace TPUM.Client.Data
     public class RemoveHeatSensorBroadcastData : RemoveBroadcastData
     {
         public Guid RoomId { get; set; }
-        public Guid HeatSensorId { get; set; } 
+        public Guid HeatSensorId { get; set; }
     }
     #endregion REMOVE_BROADCAST_RESPONSE
 
@@ -1021,9 +1058,17 @@ namespace TPUM.Client.Data
     {
         public ClientResponseType DataType { get; set; }
 
+        [XmlElement("GetData", typeof(GetClientResponseData))]
+        [XmlElement("AddData", typeof(AddClientResponseData))]
+        [XmlElement("UpdateData", typeof(UpdateClientResponseData))]
+        [XmlElement("RemoveData", typeof(RemoveClientResponseData))]
         public ClientResponseData Data { get; set; }
     }
 
+    [XmlInclude(typeof(GetClientResponseData))]
+    [XmlInclude(typeof(AddClientResponseData))]
+    [XmlInclude(typeof(UpdateClientResponseData))]
+    [XmlInclude(typeof(RemoveClientResponseData))]
     public abstract class ClientResponseData { }
 
     #region GET_CLIENT_RESPONSE
@@ -1140,7 +1185,7 @@ namespace TPUM.Client.Data
         [XmlElement("RoomData", typeof(AddRoomClientData))]
         [XmlElement("HeaterData", typeof(AddHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(AddHeatSensorClientData))]
-        public AddClientData Data { get; set; }
+        public AddClientData? Data { get; set; }
     }
 
     [XmlInclude(typeof(AddRoomClientData))]
@@ -1218,7 +1263,7 @@ namespace TPUM.Client.Data
         [XmlElement("RoomData", typeof(RemoveRoomClientData))]
         [XmlElement("HeaterData", typeof(RemoveHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(RemoveHeatSensorClientData))]
-        public RemoveClientData Data { get; set;}
+        public RemoveClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(RemoveRoomClientData))]

@@ -14,10 +14,12 @@ namespace TPUM.Client.Presentation.Model
         IReadOnlyCollection<IHeatSensorModel> HeatSensors { get; }
 
         void AddHeater(float x, float y, float temperature);
-        public IHeaterModel? GetHeater(Guid id);
-        void RemoveHeater(Guid id);
+        public bool ContainsHeater(Guid heaterId);
+        public IHeaterModel? GetHeater(Guid heaterId);
+        void RemoveHeater(Guid heaterId);
         void AddHeatSensor(float x, float y);
-        public IHeatSensorModel? GetHeatSensor(Guid id);
-        void RemoveHeatSensor(Guid id);
+        public bool ContainsHeatSensor(Guid sensorId);
+        public IHeatSensorModel? GetHeatSensor(Guid sensorId);
+        void RemoveHeatSensor(Guid sensorId);
     }
 }

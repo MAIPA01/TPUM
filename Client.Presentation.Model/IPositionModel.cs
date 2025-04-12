@@ -1,12 +1,8 @@
-﻿using TPUM.Client.Presentation.Model.Events;
-
-namespace TPUM.Client.Presentation.Model
+﻿namespace TPUM.Client.Presentation.Model
 {
-    public interface IPositionModel : INotifyPositionChanged, IDisposable
+    public interface IPositionModel : IDisposable
     {
-        float X { get; set; }
-        float Y { get; set; }
-
-        void SetPosition(float x, float y);
+        float X { get; }
+        float Y { get; }
     }
 }

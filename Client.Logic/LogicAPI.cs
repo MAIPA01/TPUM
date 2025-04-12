@@ -13,20 +13,25 @@ namespace TPUM.Client.Logic
 
         public abstract void AddRoom(string name, float width, float height);
 
-        public abstract IRoomLogic? GetRoom(Guid id);
+        public abstract bool ContainsRoom(Guid roomId);
 
-        public abstract void RemoveRoom(Guid id);
+        public abstract IRoomLogic? GetRoom(Guid roomId);
+
+        public abstract void RemoveRoom(Guid roomId);
+
+        public abstract void Refresh();
 
         public abstract void Dispose();
 
+        private static LogicApiBase? _instance = null;
+
         public static LogicApiBase GetApi(DataApiBase data)
         {
-            return new LogicApi(data);
+            return _instance ??= new LogicApi(data);
         }
 
         public static LogicApiBase GetApi(string serverUri)
         {
-            // TODO: zrobić singletone?
             return GetApi(DataApiBase.GetApi(serverUri));
         }
     }
@@ -36,8 +41,18 @@ namespace TPUM.Client.Logic
         private readonly DataApiBase _data;
 
         private readonly object _roomsLock = new();
-        private readonly List<IRoomLogic> _rooms = [];
-        public override IReadOnlyCollection<IRoomLogic> Rooms => _rooms;
+        private readonly List<RoomLogic> _rooms = [];
+
+        public override IReadOnlyCollection<IRoomLogic> Rooms
+        {
+            get
+            {
+                lock (_roomsLock)
+                {
+                    return _rooms.AsReadOnly();
+                }
+            }
+        }
 
         public override event ClientConnectedEventHandler? ClientConnected;
         public override event RoomAddedEventHandler? RoomAdded;
@@ -86,14 +101,38 @@ namespace TPUM.Client.Logic
             _data.AddRoom(name, width, height);
         }
 
-        public override IRoomLogic? GetRoom(Guid id)
+        public override bool ContainsRoom(Guid roomId)
         {
-            return _rooms.Find(room => room.Id == id);
+            lock (_roomsLock)
+            {
+                return _rooms.Any(room => room.Id == roomId);
+            }
+        }
+
+        public override IRoomLogic? GetRoom(Guid roomId)
+        {
+            lock (_roomsLock)
+            {
+                var room = _rooms.Find(room => room.Id == roomId);
+                if (room != null) return room;
+
+                var dataRoom = _data.GetRoom(roomId);
+                if (dataRoom == null) return null;
+
+                room = new RoomLogic(dataRoom);
+                _rooms.Add(room);
+                return room;
+            }
         }
 
         public override void RemoveRoom(Guid id)
         {
             _data.RemoveRoom(id);
+        }
+
+        public override void Refresh()
+        {
+            _data.Refresh();
         }
 
         public override void Dispose()
@@ -103,8 +142,6 @@ namespace TPUM.Client.Logic
             _data.RoomRemoved -= GetRoomRemoved;
 
             _rooms.Clear();
-
-            _data.Dispose();
             GC.SuppressFinalize(this);
         }
     }

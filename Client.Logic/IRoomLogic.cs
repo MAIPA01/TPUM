@@ -13,12 +13,12 @@ namespace TPUM.Client.Logic
         IReadOnlyCollection<IHeatSensorLogic> HeatSensors { get; }
 
         void AddHeater(float x, float y, float temperature);
-        bool ContainsHeater(Guid id);
-        IHeaterLogic? GetHeater(Guid id);
-        void RemoveHeater(Guid id);
+        bool ContainsHeater(Guid heaterId);
+        IHeaterLogic? GetHeater(Guid heaterId);
+        void RemoveHeater(Guid heaterId);
         void AddHeatSensor(float x, float y);
-        bool ContainsHeatSensor(Guid id);
-        IHeatSensorLogic? GetHeatSensor(Guid id);
-        void RemoveHeatSensor(Guid id);
+        bool ContainsHeatSensor(Guid sensorId);
+        IHeatSensorLogic? GetHeatSensor(Guid sensorId);
+        void RemoveHeatSensor(Guid sensorId);
     }
 }

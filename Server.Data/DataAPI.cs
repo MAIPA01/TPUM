@@ -6,19 +6,19 @@
 
         public abstract IRoomData AddRoom(string name, float width, float height);
 
-        public abstract bool ContainsRoom(Guid id);
+        public abstract bool ContainsRoom(Guid roomId);
 
-        public abstract IRoomData? GetRoom(Guid id);
+        public abstract IRoomData? GetRoom(Guid roomId);
 
-        public abstract void RemoveRoom(Guid id);
-
-        public abstract void ClearRooms();
+        public abstract void RemoveRoom(Guid roomId);
 
         public abstract void Dispose();
 
+        private static DataApiBase? _instance = null;
+
         public static DataApiBase GetApi()
         {
-            return new DataApi();
+            return _instance ??= new DataApi();
         }
     }
 
@@ -47,32 +47,32 @@
             return room;
         }
 
-        public override bool ContainsRoom(Guid id)
+        public override bool ContainsRoom(Guid roomId)
         {
             lock (_roomsLock)
             {
-                return _rooms.Find(room => room.Id == id) != null;
+                return _rooms.Any(room => room.Id == roomId);
             }
         }
 
-        public override IRoomData? GetRoom(Guid id)
+        public override IRoomData? GetRoom(Guid roomId)
         {
             lock (_roomsLock)
             {
-                return _rooms.Find(room => room.Id == id);
+                return _rooms.Find(room => room.Id == roomId);
             }
         }
 
-        public override void RemoveRoom(Guid id)
+        public override void RemoveRoom(Guid roomId)
         {
             lock (_roomsLock)
             {
-                var room = _rooms.Find(room => room.Id == id);
+                var room = _rooms.Find(room => room.Id == roomId);
                 if (room != null) _rooms.Remove(room);
             }
         }
 
-        public override void ClearRooms()
+        private void ClearRooms()
         {
             lock (_roomsLock)
             {

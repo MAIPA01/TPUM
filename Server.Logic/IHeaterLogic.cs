@@ -6,8 +6,10 @@ namespace TPUM.Server.Logic
     {
         Guid Id { get; }
         bool IsOn { get; }
-        IPositionLogic Position { get; set; }
+        IPositionLogic Position { get; }
         float Temperature { get; set; }
+
+        void SetPosition(float x, float y);
         void TurnOn();
         void TurnOff();
     }

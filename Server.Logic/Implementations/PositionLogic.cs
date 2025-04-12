@@ -1,5 +1,4 @@
 ﻿using TPUM.Server.Data;
-using TPUM.Server.Logic.Events;
 
 namespace TPUM.Server.Logic
 {
@@ -7,34 +6,13 @@ namespace TPUM.Server.Logic
     {
         private readonly IPositionData _data;
 
-        public event PositionChangedEventHandler? PositionChanged;
+        public float X => _data.X;
 
-        public float X
-        {
-            get => _data.X;
-            set => _data.X = value;
-        }
-
-        public float Y
-        {
-            get => _data.Y;
-            set => _data.Y = value;
-        }
+        public float Y => _data.Y;
 
         public PositionLogic(IPositionData data)
         {
             _data = data;
-            _data.PositionChanged += GetPositionChange;
-        }
-
-        private void GetPositionChange(object? source, IPositionData lastPosition, IPositionData newPosition)
-        {
-            PositionChanged?.Invoke(this, new PositionLogic(lastPosition), new PositionLogic(newPosition));
-        }
-
-        public void SetPosition(float x, float y)
-        {
-            _data.SetPosition(x, y);
         }
 
         public override bool Equals(object? obj)
@@ -54,7 +32,6 @@ namespace TPUM.Server.Logic
 
         public void Dispose()
         {
-            _data.PositionChanged -= GetPositionChange;
             GC.SuppressFinalize(this);
         }
     }

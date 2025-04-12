@@ -13,13 +13,22 @@ namespace TPUM.Client.Presentation.Model
         public abstract event RoomRemovedEventHandler? RoomRemoved;
 
         public abstract void AddRoom(string name, float width, float height);
-        public abstract IRoomModel? GetRoom(Guid id);
-        public abstract void RemoveRoom(Guid id);
+
+        public abstract bool ContainsRoom(Guid roomId);
+
+        public abstract IRoomModel? GetRoom(Guid roomId);
+
+        public abstract void RemoveRoom(Guid roomId);
+
+        public abstract void Refresh();
+
         public abstract void Dispose();
+
+        private static ModelApiBase? _instance = null;
 
         public static ModelApiBase GetApi(LogicApiBase logic)
         {
-            return new ModelApi(logic);
+            return _instance ??= new ModelApi(logic);
         }
 
         public static ModelApiBase GetApi(string serverUri)
@@ -38,7 +47,7 @@ namespace TPUM.Client.Presentation.Model
         public override event RoomRemovedEventHandler? RoomRemoved;
 
         private readonly object _roomsLock = new();
-        private readonly List<IRoomModel> _rooms = [];
+        private readonly List<RoomModel> _rooms = [];
         public override IReadOnlyCollection<IRoomModel> Rooms
         {
             get
@@ -93,17 +102,38 @@ namespace TPUM.Client.Presentation.Model
             _logic.AddRoom(name, width, height);
         }
 
-        public override IRoomModel? GetRoom(Guid id)
+        public override bool ContainsRoom(Guid roomId)
         {
             lock (_roomsLock)
             {
-                return _rooms.Find(r => r.Id == id);
+                return _rooms.Any(room => room.Id == roomId);
+            }
+        }
+
+        public override IRoomModel? GetRoom(Guid roomId)
+        {
+            lock (_roomsLock)
+            {
+                var room = _rooms.Find(room => room.Id == roomId);
+                if (room != null) return room;
+
+                var logicRoom = _logic.GetRoom(roomId);
+                if (logicRoom == null) return null;
+
+                room = new RoomModel(logicRoom);
+                _rooms.Add(room);
+                return room;
             }
         }
 
         public override void RemoveRoom(Guid id)
         {
             _logic.RemoveRoom(id);
+        }
+
+        public override void Refresh()
+        {
+            _logic.Refresh();
         }
 
         public override void Dispose()

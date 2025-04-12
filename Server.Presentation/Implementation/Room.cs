@@ -3,7 +3,7 @@ using TPUM.Server.Presentation.Events;
 
 namespace TPUM.Server.Presentation
 {
-    internal class RoomPresentation : IRoomPresentation
+    internal class Room : IRoom
     {
         public event TemperatureChangedEventHandler? TemperatureChanged;
         public event EnableChangedEventHandler? EnableChanged;
@@ -11,59 +11,56 @@ namespace TPUM.Server.Presentation
 
         private readonly IRoomLogic _logic;
 
-        public Guid Id => _logic.Id;
-        
-        private readonly object _heatersLock = new();
-        private readonly List<HeaterPresentation> _heaters = [];
+        private readonly object _roomLock = new();
 
-        public IReadOnlyCollection<IHeaterPresentation> Heaters
+        public Guid Id => _logic.Id;
+        public string Name => _logic.Name;
+        public float Width => _logic.Width;
+        public float Height => _logic.Height;
+
+        private readonly List<Heater> _heaters = [];
+        public IReadOnlyCollection<IHeater> Heaters
         {
             get
             {
-                lock (_heatersLock)
+                lock (_roomLock)
                 {
                     return _heaters.AsReadOnly();
                 }
             }
         }
 
-        private readonly object _heatSensorsLock = new();
-        private readonly List<HeatSensorPresentation> _heatSensors = [];
-
-        public IReadOnlyCollection<IHeatSensorPresentation> HeatSensors
+        private readonly List<HeatSensor> _heatSensors = [];
+        public IReadOnlyCollection<IHeatSensor> HeatSensors
         {
             get
             {
-                lock (_heatSensorsLock)
+                lock (_roomLock)
                 {
                     return _heatSensors.AsReadOnly();
                 }
             }
         }
-        
-        public string Name => _logic.Name;
-        public float Width => _logic.Width;
-        public float Height => _logic.Height;
 
-        public RoomPresentation(IRoomLogic logic)
+        public Room(IRoomLogic logic)
         {
             _logic = logic;
             foreach (var logicHeater in _logic.Heaters)
             {
-                var heater = new HeaterPresentation(logicHeater);
+                var heater = new Heater(logicHeater);
                 SubscribeToHeater(heater);
                 _heaters.Add(heater);
             }
 
             foreach (var logicHeatSensor in _logic.HeatSensors)
             {
-                var sensor = new HeatSensorPresentation(logicHeatSensor);
+                var sensor = new HeatSensor(logicHeatSensor);
                 SubscribeToHeatSensor(sensor);
                 _heatSensors.Add(sensor);
             }
         }
 
-        private void GetPositionChanged(Guid roomId, object? source, IPositionPresentation lastPosition, IPositionPresentation newPosition)
+        private void GetPositionChanged(Guid roomId, object? source, IPosition lastPosition, IPosition newPosition)
         {
             PositionChanged?.Invoke(Id, source, lastPosition, newPosition);
         }
@@ -78,64 +75,73 @@ namespace TPUM.Server.Presentation
             EnableChanged?.Invoke(Id,source, lastEnable, newEnable);
         }
 
-        private void SubscribeToHeater(IHeaterPresentation heater)
+        private void SubscribeToHeater(Heater heater)
         {
             heater.PositionChanged += GetPositionChanged;
             heater.TemperatureChanged += GetTemperatureChanged;
             heater.EnableChanged += GetEnableChanged;
         }
 
-        private void UnsubscribeFromHeater(IHeaterPresentation heater)
+        private void UnsubscribeFromHeater(Heater heater)
         {
             heater.PositionChanged -= GetPositionChanged;
             heater.TemperatureChanged -= GetTemperatureChanged;
             heater.EnableChanged -= GetEnableChanged;
         }
 
-        public IHeaterPresentation AddHeater(float x, float y, float temperature)
+        public IHeater AddHeater(float x, float y, float temperature)
         {
-            var heater = new HeaterPresentation(_logic.AddHeater(x, y, temperature));
+            var heater = new Heater(_logic.AddHeater(x, y, temperature));
             SubscribeToHeater(heater);
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 _heaters.Add(heater);
             }
             return heater;
         }
 
-        public bool ContainsHeater(Guid id)
+        public bool ContainsHeater(Guid heaterId)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
-                return _heaters.Find(heater => heater.Id == id) != null;
+                return _heaters.Any(heater => heater.Id == heaterId);
             }
         }
 
-        public IHeaterPresentation? GetHeater(Guid id)
+        public IHeater? GetHeater(Guid heaterId)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
-                return _heaters.Find(heater => heater.Id == id);
+                var heater = _heaters.Find(heater => heater.Id == heaterId);
+                if (heater != null) return heater;
+
+                var logicHeater = _logic.GetHeater(heaterId);
+                if (logicHeater == null) return null;
+
+                heater = new Heater(logicHeater);
+                SubscribeToHeater(heater);
+                _heaters.Add(heater);
+                return heater;
             }
         }
 
-        public void RemoveHeater(Guid id)
+        public void RemoveHeater(Guid heaterId)
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
-                var heater = _heaters.Find(heater => heater.Id == id);
+                var heater = _heaters.Find(heater => heater.Id == heaterId);
                 if (heater != null)
                 {
                     UnsubscribeFromHeater(heater);
                     _heaters.Remove(heater);
                 }
             }
-            _logic.RemoveHeater(id);
+            _logic.RemoveHeater(heaterId);
         }
 
-        public void ClearHeaters()
+        private void ClearHeaters()
         {
-            lock (_heatersLock)
+            lock (_roomLock)
             {
                 foreach (var heater in _heaters)
                 {
@@ -143,65 +149,73 @@ namespace TPUM.Server.Presentation
                 }
                 _heaters.Clear();
             }
-            _logic.ClearHeaters();
         }
 
-        private void SubscribeToHeatSensor(IHeatSensorPresentation sensor)
+        private void SubscribeToHeatSensor(HeatSensor sensor)
         {
             sensor.PositionChanged += GetPositionChanged;
             sensor.TemperatureChanged += GetTemperatureChanged;
         }
 
-        private void UnsubscribeFromHeatSensor(IHeatSensorPresentation sensor)
+        private void UnsubscribeFromHeatSensor(HeatSensor sensor)
         {
             sensor.PositionChanged -= GetPositionChanged;
             sensor.TemperatureChanged -= GetTemperatureChanged;
         }
 
-        public IHeatSensorPresentation AddHeatSensor(float x, float y)
+        public IHeatSensor AddHeatSensor(float x, float y)
         {
-            var sensor = new HeatSensorPresentation(_logic.AddHeatSensor(x, y));
+            var sensor = new HeatSensor(_logic.AddHeatSensor(x, y));
             SubscribeToHeatSensor(sensor);
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 _heatSensors.Add(sensor);
             }
             return sensor;
         }
 
-        public bool ContainsHeatSensor(Guid id)
+        public bool ContainsHeatSensor(Guid sensorId)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
-                return _heatSensors.Find(sensor => sensor.Id == id) != null;
+                return _heatSensors.Any(sensor => sensor.Id == sensorId);
             }
         }
 
-        public IHeatSensorPresentation? GetHeatSensor(Guid id)
+        public IHeatSensor? GetHeatSensor(Guid sensorId)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
-                return _heatSensors.Find(sensor => sensor.Id == id);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
+                if (sensor != null) return sensor;
+
+                var logicSensor = _logic.GetHeatSensor(sensorId);
+                if (logicSensor == null) return null;
+
+                sensor = new HeatSensor(logicSensor);
+                SubscribeToHeatSensor(sensor);
+                _heatSensors.Add(sensor);
+                return sensor;
             }
         }
 
-        public void RemoveHeatSensor(Guid id)
+        public void RemoveHeatSensor(Guid sensorId)
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
-                var sensor = _heatSensors.Find(sensor => sensor.Id == id);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
                 if (sensor != null)
                 {
                     UnsubscribeFromHeatSensor(sensor);
                     _heatSensors.Remove(sensor);
                 }
             }
-            _logic.RemoveHeatSensor(id);
+            _logic.RemoveHeatSensor(sensorId);
         }
 
-        public void ClearHeatSensors()
+        private void ClearHeatSensors()
         {
-            lock (_heatSensorsLock)
+            lock (_roomLock)
             {
                 foreach (var sensor in _heatSensors)
                 {
@@ -209,7 +223,6 @@ namespace TPUM.Server.Presentation
                 }
                 _heatSensors.Clear();
             }
-            _logic.ClearHeatSensors();
         }
 
         public void Dispose()

@@ -12,11 +12,9 @@ namespace TPUM.Client.Presentation.Model
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
         public Guid Id => _logic.Id;
-        public IPositionModel Position
-        {
-            get => new PositionModel(_logic.Position);
-            set => _logic.Position.SetPosition(value.X, value.Y);
-        }
+
+        private readonly PositionModel _position;
+        public IPositionModel Position => _position;
 
         public float Temperature
         {
@@ -32,6 +30,8 @@ namespace TPUM.Client.Presentation.Model
             _logic.PositionChanged += GetPositionChanged;
             _logic.TemperatureChanged += GetTemperatureChanged;
             _logic.EnableChanged += GetEnableChanged;
+
+            _position = new PositionModel(_logic.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
@@ -47,6 +47,11 @@ namespace TPUM.Client.Presentation.Model
         private void GetEnableChanged(object? source, bool lastEnable, bool newEnable)
         {
             EnableChanged?.Invoke(this, lastEnable, newEnable);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _logic.SetPosition(x, y);
         }
 
         public void TurnOn()

@@ -12,11 +12,8 @@ namespace TPUM.Client.Presentation.Model
 
         public Guid Id => _logic.Id;
 
-        public IPositionModel Position
-        {
-            get => new PositionModel(_logic.Position);
-            set => _logic.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly PositionModel _position;
+        public IPositionModel Position => _position;
 
         public float Temperature => _logic.Temperature;
 
@@ -25,6 +22,8 @@ namespace TPUM.Client.Presentation.Model
             _logic = logic;
             _logic.PositionChanged += GetPositionChanged;
             _logic.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new PositionModel(_logic.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
@@ -35,6 +34,11 @@ namespace TPUM.Client.Presentation.Model
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _logic.SetPosition(x, y);
         }
 
         public void Dispose()

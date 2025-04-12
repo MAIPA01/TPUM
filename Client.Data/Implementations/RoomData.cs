@@ -48,10 +48,6 @@ namespace TPUM.Client.Data
         public RoomData(DataApi data, Guid id, string name, float width, float height)
         {
             _data = data;
-            _data.HeaterAdded += GetHeaterAdded;
-            _data.HeaterRemoved += GetHeaterRemoved;
-            _data.HeatSensorAdded += GetHeatSensorAdded;
-            _data.HeatSensorRemoved += GetHeatSensorRemoved;
             Id = id;
             Name = name;
             Width = width;
@@ -87,9 +83,8 @@ namespace TPUM.Client.Data
             heater.EnableChanged -= GetEnableChanged;
         }
 
-        private void GetHeaterAdded(object? source, Guid roomId, IHeaterData heater)
+        internal void OnHeaterAdded(IHeaterData heater)
         {
-            if (roomId != Id) return;
             lock (_roomLock)
             {
                 SubscribeToHeater(heater);
@@ -103,25 +98,28 @@ namespace TPUM.Client.Data
             _data.AddHeater(Id, x, y, temperature);
         }
 
-        public bool ContainsHeater(Guid id)
+        public bool ContainsHeater(Guid heaterId)
         {
             lock (_roomLock)
             {
-                return _heaters.Find(heater => heater.Id == id) != null;
+                return _heaters.Any(heater => heater.Id == heaterId);
             }
         }
 
-        public IHeaterData? GetHeater(Guid id)
+        public IHeaterData? GetHeater(Guid heaterId)
         {
             lock (_roomLock)
             {
-                return _heaters.Find(heater => heater.Id == id);
+                var heater = _heaters.Find(heater => heater.Id == heaterId);
+                if (heater != null) return heater;
+
+                _data.GetHeater(Id, heaterId);
+                return null;
             }
         }
 
-        private void GetHeaterRemoved(object? source, Guid roomId, Guid heaterId)
+        internal void OnHeaterRemoved(Guid heaterId)
         {
-            if (roomId != Id) return;
             lock (_roomLock)
             {
                 var heater = _heaters.Find(heater => heater.Id == heaterId);
@@ -134,9 +132,9 @@ namespace TPUM.Client.Data
             }
         }
 
-        public void RemoveHeater(Guid id)
+        public void RemoveHeater(Guid heaterId)
         {
-            _data.RemoveHeater(Id, id);
+            _data.RemoveHeater(Id, heaterId);
         }
 
         private void ClearHeaters()
@@ -163,9 +161,8 @@ namespace TPUM.Client.Data
             sensor.TemperatureChanged -= GetTemperatureChanged;
         }
 
-        private void GetHeatSensorAdded(object? source, Guid roomId, IHeatSensorData sensor)
+        internal void OnHeatSensorAdded(IHeatSensorData sensor)
         {
-            if (roomId != Id) return;
             lock (_roomLock)
             {
                 SubscribeToHeatSensor(sensor);
@@ -179,25 +176,28 @@ namespace TPUM.Client.Data
             _data.AddHeatSensor(Id, x, y);
         }
 
-        public bool ContainsHeatSensor(Guid id)
+        public bool ContainsHeatSensor(Guid sensorId)
         {
             lock (_roomLock)
             {
-                return _heatSensors.Find(sensor => sensor.Id == id) != null;
+                return _heatSensors.Any(sensor => sensor.Id == sensorId);
             }
         }
 
-        public IHeatSensorData? GetHeatSensor(Guid id)
+        public IHeatSensorData? GetHeatSensor(Guid sensorId)
         {
             lock (_roomLock)
             {
-                return _heatSensors.Find(sensor => sensor.Id == id);
+                var sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
+                if (sensor != null) return sensor;
+
+                _data.GetHeatSensor(Id, sensorId);
+                return null;
             }
         }
 
-        private void GetHeatSensorRemoved(object? source, Guid roomId, Guid sensorId)
+        internal void OnHeatSensorRemoved(Guid sensorId)
         {
-            if (Id != roomId) return;
             lock (_roomLock)
             {
                 var sensor = _heatSensors.Find(sensor => sensor.Id == sensorId);
@@ -210,9 +210,9 @@ namespace TPUM.Client.Data
             }
         }
 
-        public void RemoveHeatSensor(Guid id)
+        public void RemoveHeatSensor(Guid sensorId)
         {
-            _data.RemoveHeatSensor(Id, id);
+            _data.RemoveHeatSensor(Id, sensorId);
         }
 
         private void ClearHeatSensors()
@@ -229,10 +229,6 @@ namespace TPUM.Client.Data
 
         public void Dispose()
         {
-            _data.HeaterAdded -= GetHeaterAdded;
-            _data.HeaterRemoved -= GetHeaterRemoved;
-            _data.HeatSensorAdded -= GetHeatSensorAdded;
-            _data.HeatSensorRemoved -= GetHeatSensorRemoved;
             ClearHeaters();
             ClearHeatSensors();
             GC.SuppressFinalize(this);

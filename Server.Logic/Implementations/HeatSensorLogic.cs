@@ -9,12 +9,11 @@ namespace TPUM.Server.Logic
 
         public event PositionChangedEventHandler? PositionChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
+
         public Guid Id => _data.Id;
-        public IPositionLogic Position
-        {
-            get => new PositionLogic(_data.Position);
-            set => _data.Position.SetPosition(value.X, value.Y);
-        }
+
+        private readonly PositionLogic _position;
+        public IPositionLogic Position => _position;
         public float Temperature => _data.Temperature;
 
         public HeatSensorLogic(IHeatSensorData data)
@@ -22,6 +21,8 @@ namespace TPUM.Server.Logic
             _data = data;
             _data.PositionChanged += GetPositionChanged;
             _data.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new PositionLogic(_data.Position);
         }
 
         internal void SetTemperature(float temperature)
@@ -39,16 +40,21 @@ namespace TPUM.Server.Logic
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
         }
 
-        public void Dispose()
+        public void SetPosition(float x, float y)
         {
-            _data.PositionChanged -= GetPositionChanged;
-            _data.TemperatureChanged -= GetTemperatureChanged;
-            GC.SuppressFinalize(this);
+            _data.SetPosition(x, y);
         }
 
         public override int GetHashCode()
         {
             return 3 * Position.GetHashCode() + 5 * Temperature.GetHashCode();
+        }
+
+        public void Dispose()
+        {
+            _data.PositionChanged -= GetPositionChanged;
+            _data.TemperatureChanged -= GetTemperatureChanged;
+            GC.SuppressFinalize(this);
         }
     }
 }

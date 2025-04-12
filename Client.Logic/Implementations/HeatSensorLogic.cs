@@ -12,11 +12,8 @@ namespace TPUM.Client.Logic
 
         public Guid Id => _data.Id;
 
-        public IPositionLogic Position
-        {
-            get => new PositionLogic(_data.Position);
-            set => _data.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly PositionLogic _position;
+        public IPositionLogic Position => _position;
 
         public float Temperature => _data.Temperature;
 
@@ -25,6 +22,8 @@ namespace TPUM.Client.Logic
             _data = data;
             _data.PositionChanged += GetPositionChanged;
             _data.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new PositionLogic(_data.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
@@ -35,6 +34,11 @@ namespace TPUM.Client.Logic
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _data.SetPosition(x, y);
         }
 
         public void Dispose()

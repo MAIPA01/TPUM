@@ -6,7 +6,9 @@ namespace TPUM.Client.Data
     {
         Guid Id { get; }
         bool IsOn { get; set; }
-        IPositionData Position { get; set; }
+        IPositionData Position { get; }
         float Temperature { get; set; }
+
+        void SetPosition(float x, float y);
     }
 }

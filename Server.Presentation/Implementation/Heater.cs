@@ -3,7 +3,7 @@ using TPUM.Server.Presentation.Events;
 
 namespace TPUM.Server.Presentation
 {
-    internal class HeaterPresentation : IHeaterPresentation
+    internal class Heater : IHeater
     {
         public event EnableChangedEventHandler? EnableChanged;
         public event PositionChangedEventHandler? PositionChanged;
@@ -13,11 +13,8 @@ namespace TPUM.Server.Presentation
         public Guid Id => _logic.Id;
         public bool IsOn => _logic.IsOn;
 
-        public IPositionPresentation Position
-        {
-            get => new PositionPresentation(_logic.Position);
-            set => _logic.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly Position _position;
+        public IPosition Position => _position;
 
         public float Temperature
         {
@@ -25,17 +22,19 @@ namespace TPUM.Server.Presentation
             set => _logic.Temperature = value;
         }
 
-        public HeaterPresentation(IHeaterLogic logic)
+        public Heater(IHeaterLogic logic)
         {
             _logic = logic;
             _logic.PositionChanged += GetPositionChanged;
             _logic.EnableChanged += GetEnableChanged;
             _logic.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new Position(_logic.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
         {
-            PositionChanged?.Invoke(Guid.Empty, this, new PositionPresentation(lastPosition), new PositionPresentation(newPosition));
+            PositionChanged?.Invoke(Guid.Empty, this, new Position(lastPosition), new Position(newPosition));
         }
 
         private void GetEnableChanged(object? source, bool lastEnabled, bool newEnabled)
@@ -46,6 +45,11 @@ namespace TPUM.Server.Presentation
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
             TemperatureChanged?.Invoke(Guid.Empty, this, lastTemperature, newTemperature);
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _logic.SetPosition(x, y);
         }
 
         public void TurnOn()

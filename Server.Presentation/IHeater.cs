@@ -2,12 +2,14 @@
 
 namespace TPUM.Server.Presentation
 {
-    public interface IHeaterPresentation : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
+    public interface IHeater : INotifyEnableChanged, INotifyPositionChanged, INotifyTemperatureChanged, IDisposable
     {
         Guid Id { get; }
         bool IsOn { get; }
-        IPositionPresentation Position { get; set; }
+        IPosition Position { get; }
         float Temperature { get; set; }
+
+        void SetPosition(float x, float y);
         void TurnOn();
         void TurnOff();
     }

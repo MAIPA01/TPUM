@@ -16,11 +16,8 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public Guid Id => _model.Id;
 
-        public IPosition Position
-        {
-            get => new Position(_model.Position);
-            set => _model.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly Position _position;
+        public IPosition Position => _position;
 
         public float CurrentTemperature => IsOn ? _model.Temperature : 0f;
 
@@ -44,6 +41,8 @@ namespace TPUM.Client.Presentation.ViewModel
             _model.PositionChanged += GetPositionChanged;
             _model.TemperatureChanged += GetTemperatureChanged;
             _model.EnableChanged += GetEnableChanged;
+
+            _position = new Position(_model.Position);
 
             _turnOffCommand = new CustomCommand(_ => _model.TurnOff());
             _turnOnCommand = new CustomCommand(_ => _model.TurnOn());
@@ -70,6 +69,11 @@ namespace TPUM.Client.Presentation.ViewModel
             OnPropertyChange(nameof(DesiredTemperature));
             OnPropertyChange(nameof(TurnText));
             OnPropertyChange(nameof(TurnCommand));
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _model.SetPosition(x, y);
         }
 
         public void Dispose()

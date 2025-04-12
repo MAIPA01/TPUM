@@ -15,11 +15,8 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public Guid Id => _model.Id;
 
-        public IPosition Position
-        {
-            get => new Position(_model.Position);
-            set => _model.Position.SetPosition(value.X, value.Y);
-        }
+        private readonly Position _position;
+        public IPosition Position => _position;
 
         public float Temperature => _model.Temperature;
 
@@ -28,6 +25,8 @@ namespace TPUM.Client.Presentation.ViewModel
             _model = model;
             _model.PositionChanged += GetPositionChanged;
             _model.TemperatureChanged += GetTemperatureChanged;
+
+            _position = new Position(_model.Position);
         }
 
         private void GetPositionChanged(object? source, IPositionModel lastPosition, IPositionModel newPosition)
@@ -41,6 +40,11 @@ namespace TPUM.Client.Presentation.ViewModel
         {
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
             OnPropertyChange(nameof(Temperature));
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            _model.SetPosition(x, y);
         }
 
         public void Dispose()

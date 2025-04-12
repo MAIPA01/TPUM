@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using TPUM.Client.Presentation.Model;
-using TPUM.Client.Presentation.ViewModel.Conteners;
 using TPUM.Client.Presentation.ViewModel.Events;
 
 namespace TPUM.Client.Presentation.ViewModel
@@ -18,9 +17,15 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public abstract void AddRoom(string name, float width, float height);
 
+        public abstract bool ContainsRoom(Guid roomId);
+
+        public abstract IRoom? GetRoom(Guid roomId);
+
         public abstract void RemoveRoom(Guid id);
 
         public abstract void SetCurrentRoom(Guid roomId);
+
+        public abstract void Refresh();
 
         public abstract void Dispose();
 
@@ -32,7 +37,7 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public static ViewModelApiBase GetApi(string? serverUri = null)
         {
-            return _instance ??= new ViewModelApi(ModelApiBase.GetApi(serverUri ?? "ws://localhost:5000/ws"));
+            return _instance ??= GetApi(ModelApiBase.GetApi(serverUri ?? "ws://localhost:5000/ws"));
         }
     }
 
@@ -98,6 +103,30 @@ namespace TPUM.Client.Presentation.ViewModel
             _model.AddRoom(name, width, height);
         }
 
+        public override bool ContainsRoom(Guid roomId)
+        {
+            lock (_roomsLock)
+            {
+                return _rooms.Any(room => room.Id == roomId);
+            }
+        }
+
+        public override IRoom? GetRoom(Guid roomId)
+        {
+            lock (_roomsLock)
+            {
+                var room = _rooms.FirstOrDefault(room => room.Id == roomId);
+                if (room != null) return room;
+
+                var modelRoom = _model.GetRoom(roomId);
+                if (modelRoom == null) return null;
+
+                room = new Room(modelRoom);
+                Application.Current.Dispatcher.Invoke(() => _rooms.Add(room));
+                return room;
+            }
+        }
+
         public override void RemoveRoom(Guid id)
         {
             _model.RemoveRoom(id);
@@ -107,9 +136,13 @@ namespace TPUM.Client.Presentation.ViewModel
         {
             lock (_roomsLock)
             {
-                var room = _rooms.First(room => room.Id == roomId);
-                _currentRoom = room;
+                _currentRoom = _rooms.FirstOrDefault(room => room.Id == roomId);
             }
+        }
+
+        public override void Refresh()
+        {
+            _model.Refresh();
         }
 
         public override void Dispose()

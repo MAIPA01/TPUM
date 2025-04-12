@@ -30,15 +30,12 @@ namespace TPUM.Client.Data
                 lock (_heaterLock)
                 {
                     if (_isOn == value) return;
-                    var lastIsOn = _isOn;
-                    _isOn = value;
-                    EnableChanged?.Invoke(this, lastIsOn, _isOn);
-                    _data.UpdateHeater(_roomId, Id, _position.X, _position.Y, _temperature, _isOn);
+                    _data.UpdateHeater(_roomId, Id, _position.X, _position.Y, _temperature, value);
                 }
             }
         }
 
-        private readonly IPositionData _position;
+        private readonly PositionData _position;
         public IPositionData Position
         {
             get
@@ -46,17 +43,6 @@ namespace TPUM.Client.Data
                 lock (_heaterLock)
                 {
                     return _position;
-                }
-            }
-            set
-            {
-                lock (_heaterLock)
-                {
-                    if (_position.Equals(value)) return;
-                    var lastPosition = new PositionData(_position.X, _position.Y);
-                    _position.SetPosition(value.X, value.Y);
-                    PositionChanged?.Invoke(this, lastPosition, _position);
-                    _data.UpdateHeater(_roomId, Id, _position.X, _position.Y, _temperature, _isOn);
                 }
             }
         }
@@ -76,36 +62,42 @@ namespace TPUM.Client.Data
                 lock (_heaterLock)
                 {
                     if (MathF.Abs(_temperature - value) < 1e-10f) return;
-                    var lastTemperature = _temperature;
-                    _temperature = value;
-                    TemperatureChanged?.Invoke(this, lastTemperature, _temperature);
-                    _data.UpdateHeater(_roomId, Id, _position.X, _position.Y, _temperature, _isOn);
+                    _data.UpdateHeater(_roomId, Id, _position.X, _position.Y, value, _isOn);
                 }
             }
         }
 
-        public HeaterData(DataApi data, Guid roomId, Guid id, IPositionData position, float temperature, bool isOn = false)
+        public HeaterData(DataApi data, Guid roomId, Guid id, PositionData position, float temperature, bool isOn = false)
         {
             _data = data;
             _roomId = roomId;
             Id = id;
             _position = position;
-            _position.PositionChanged += GetPositionChanged;
             _temperature = temperature;
             _isOn = isOn;
+        }
+
+        public void SetPosition(float x, float y)
+        {
+            lock (_heaterLock)
+            {
+                if (MathF.Abs(_position.X - x) < 1e-10f && MathF.Abs(_position.Y - y) < 1e-10f) return;
+                _data.UpdateHeater(_roomId, Id, x, y, _temperature, _isOn);
+            }
         }
 
         internal void UpdateDataFromServer(float x, float y, float temperature, bool isOn)
         {
             lock (_heaterLock)
             {
-                _position.PositionChanged -= GetPositionChanged;
-                _position.PositionChanged += GetPositionChangedFromServer;
-                _position.SetPosition(x, y);
-                _position.PositionChanged -= GetPositionChangedFromServer;
-                _position.PositionChanged += GetPositionChanged;
+                if (MathF.Abs(_position.X - x) > 1e-10f || MathF.Abs(_position.Y - y) > 1e-10f)
+                {
+                    var lastPosition = new PositionData(_position.X, _position.Y);
+                    _position.SetPosition(x, y);
+                    PositionChanged?.Invoke(this, lastPosition, _position);
+                }
 
-                if (_temperature != temperature)
+                if (Math.Abs(_temperature - temperature) > 1e-10f)
                 {
                     var lastTemperature = _temperature;
                     _temperature = temperature;
@@ -121,20 +113,8 @@ namespace TPUM.Client.Data
             }
         }
 
-        private void GetPositionChangedFromServer(object? source, IPositionData lastPosition, IPositionData newPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
-        }
-
-        private void GetPositionChanged(object? source, IPositionData lastPosition, IPositionData newPosition)
-        {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
-            _data.UpdateHeater(_roomId, Id, Position.X, Position.Y, Temperature, IsOn);
-        }
-
         public void Dispose()
         {
-            _position.PositionChanged -= GetPositionChanged;
             GC.SuppressFinalize(this);
         }
     }

@@ -1,40 +1,18 @@
 ﻿using TPUM.Client.Logic;
-using TPUM.Client.Presentation.Model.Events;
 
 namespace TPUM.Client.Presentation.Model
 {
     internal class PositionModel : IPositionModel
     {
-        public event PositionChangedEventHandler? PositionChanged;
-
         private readonly IPositionLogic _logic;
 
-        public float X
-        {
-            get => _logic.X;
-            set => _logic.X = value;
-        }
+        public float X => _logic.X;
 
-        public float Y
-        {
-            get => _logic.Y;
-            set => _logic.Y = value;
-        }
+        public float Y => _logic.Y;
 
         public PositionModel(IPositionLogic logic)
         {
             _logic = logic;
-            _logic.PositionChanged += GetPositionChanged;
-        }
-
-        private void GetPositionChanged(object? source, IPositionLogic lastPosition, IPositionLogic newPosition)
-        {
-            PositionChanged?.Invoke(this, new PositionModel(lastPosition), new PositionModel(newPosition));
-        }
-
-        public void SetPosition(float x, float y)
-        {
-            _logic.SetPosition(x, y);
         }
 
         public override bool Equals(object? obj)
@@ -54,7 +32,6 @@ namespace TPUM.Client.Presentation.Model
 
         public void Dispose()
         {
-            _logic.PositionChanged -= GetPositionChanged;
             GC.SuppressFinalize(this);
         }
     }

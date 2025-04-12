@@ -6,9 +6,9 @@ using TPUM.Server.Presentation.Events;
 
 namespace TPUM.Server.Presentation
 {
-    internal class WebSocketServer : INotifyOnClientMessageReceived
+    internal class WebSocketServer : IWebSocketServer
     {
-        public event ClientMessageReceivedEventHandler? ClientMessageReceived;
+        public event ClientRequestReceivedEventHandler? ClientRequestReceived;
 
         private readonly HttpListener _httpListener = new();
         private readonly string _uriPrefix;
@@ -25,7 +25,7 @@ namespace TPUM.Server.Presentation
             _httpListener.Prefixes.Add(_uriPrefix);
             _httpListener.Start();
 
-            Console.WriteLine($"✅ WebSocket Server started on {_uriPrefix}\n");
+            Console.WriteLine($"-> WebSocket Server started on \"{_uriPrefix}\"");
 
             while (true)
             {
@@ -38,7 +38,7 @@ namespace TPUM.Server.Presentation
 
                     _clients.TryAdd(clientId, wsContext.WebSocket);
 
-                    Console.WriteLine($"⚫ Client {clientId} connected.\n");
+                    Console.WriteLine($"-> Client [{clientId}] connected.");
 
                     // Obsługa klienta w tle
                     _ = Task.Run(() => HandleClientAsync(clientId, wsContext.WebSocket));
@@ -63,14 +63,15 @@ namespace TPUM.Server.Presentation
                         break;
 
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    Console.WriteLine($"📨 Received from {clientId}:\n{message}\n");
+                    //Console.WriteLine($"-> Received from {clientId}:\n{message}\n");
 
-                    OnClientMessageReceived(clientId, message);
+                    if (!XmlSerializerHelper.TryDeserialize<Request>(message, out var request)) continue;
+                    OnClientRequestReceived(clientId, request);
                 }
             }
             catch (WebSocketException wse)
             {
-                Console.WriteLine($"⚠️ Client {clientId} error:\n{wse.Message}\n");
+                Console.WriteLine($"-> Client [{clientId}] error:\n\"{wse.Message}\"");
             }
             finally
             {
@@ -79,7 +80,7 @@ namespace TPUM.Server.Presentation
                 {
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Bye!", CancellationToken.None);
                     webSocket.Dispose();
-                    Console.WriteLine($"❌ Client {clientId} disconnected.\n");
+                    Console.WriteLine($"-> Client [{clientId}] disconnected.");
                 }
             }
         }
@@ -88,7 +89,7 @@ namespace TPUM.Server.Presentation
         {
             if (!_clients.TryGetValue(clientId, out var socket))
             {
-                Console.WriteLine($"⚠️ Client {clientId} could not be found.\n");
+                Console.WriteLine($"-> Client [{clientId}] could not be found.");
                 return;
             }
 
@@ -110,9 +111,9 @@ namespace TPUM.Server.Presentation
             }
         }
 
-        private void OnClientMessageReceived(Guid clientId, string message)
+        private void OnClientRequestReceived(Guid clientId, Request request)
         {
-            ClientMessageReceived?.Invoke(this, clientId, message);
+            ClientRequestReceived?.Invoke(this, clientId, request);
         }
     }
 }

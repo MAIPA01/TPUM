@@ -8,23 +8,23 @@ namespace TPUM.Server.Data
         public event EnableChangedEventHandler? EnableChanged;
         public event TemperatureChangedEventHandler? TemperatureChanged;
 
+        private readonly object _heaterLock = new();
+
         public Guid Id { get; }
 
         private bool _isOn;
-        private readonly object _isOnLock = new();
-
         public bool IsOn
         {
             get
             {
-                lock (_isOnLock)
+                lock (_heaterLock)
                 {
                     return _isOn;
                 }
             }
             set
             {
-                lock (_isOnLock)
+                lock (_heaterLock)
                 {
                     if (_isOn == value) return;
                     var lastEnable = _isOn;
@@ -34,47 +34,31 @@ namespace TPUM.Server.Data
             }
         }
 
-        private IPositionData _position;
-        private readonly object _positionLock = new();
-
+        private readonly PositionData _position;
         public IPositionData Position
         {
             get
             {
-                lock (_positionLock)
+                lock (_heaterLock)
                 {
                     return _position;
-                }
-            }
-            set
-            {
-                lock (_positionLock)
-                {
-                    if (_position.Equals(value)) return;
-                    var lastPosition = _position;
-                    _position.PositionChanged -= GetPositionChange;
-                    _position = value;
-                    _position.PositionChanged += GetPositionChange;
-                    PositionChanged?.Invoke(this, lastPosition, _position);
                 }
             }
         }
 
         private float _temperature;
-        private readonly object _temperatureLock = new();
-
         public float Temperature
         {
             get
             {
-                lock (_temperatureLock)
+                lock (_heaterLock)
                 {
                     return _temperature;
                 }
             }
             set
             {
-                lock (_temperatureLock)
+                lock (_heaterLock)
                 {
                     if (Math.Abs(_temperature - value) < 1e-10f) return;
                     var lastTemperature = _temperature;
@@ -84,23 +68,27 @@ namespace TPUM.Server.Data
             }
         }
 
-        public HeaterData(Guid id, IPositionData position, float temperature, bool isOn = false)
+        public HeaterData(Guid id, PositionData position, float temperature, bool isOn = false)
         {
             Id = id;
             _position = position;
-            _position.PositionChanged += GetPositionChange;
             _temperature = temperature;
             _isOn = isOn;
         }
 
-        private void GetPositionChange(object? source, IPositionData lastPosition, IPositionData newPosition)
+        public void SetPosition(float x, float y)
         {
-            PositionChanged?.Invoke(this, lastPosition, newPosition);
+            lock (_heaterLock)
+            {
+                if (Math.Abs(_position.X - x) < 1e-10f && Math.Abs(_position.Y - y) < 1e-10f) return;
+                var lastPosition = new PositionData(_position.X, _position.Y);
+                _position.SetPosition(x, y);
+                PositionChanged?.Invoke(this, lastPosition, _position);
+            }
         }
 
         public void Dispose()
         {
-            _position.PositionChanged -= GetPositionChange;
             GC.SuppressFinalize(this);
         }
     }
