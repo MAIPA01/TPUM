@@ -2,6 +2,7 @@
 
 namespace TPUM.XmlShared.Response.Broadcast
 {
+#nullable disable
     public enum BroadcastResponseType
     {
         Add = 0,
@@ -11,12 +12,13 @@ namespace TPUM.XmlShared.Response.Broadcast
 
     public class BroadcastResponseContent : ResponseContent
     {
+        [XmlAttribute]
         public BroadcastResponseType BroadcastType { get; set; }
 
         [XmlElement("AddBroadcast", typeof(AddBroadcastResponse))]
         [XmlElement("UpdateBroadcast", typeof(UpdateBroadcastResponse))]
         [XmlElement("RemoveBroadcast", typeof(RemoveBroadcastResponse))]
-        public required BroadcastResponseData Broadcast { get; set; }
+        public BroadcastResponseData Broadcast { get; set; }
     }
 
     [XmlInclude(typeof(AddBroadcastResponse))]

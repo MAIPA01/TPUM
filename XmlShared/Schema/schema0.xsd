@@ -1,0 +1,966 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://microsoft.com/wsdl/types/" />
+  <xs:element name="ResponseType" type="ResponseType" />
+  <xs:simpleType name="ResponseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Broadcast" />
+      <xs:enumeration value="Client" />
+      <xs:enumeration value="Subscribe" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Response" nillable="true" type="Response" />
+  <xs:complexType name="Response">
+    <xs:sequence>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element minOccurs="0" maxOccurs="1" name="Broadcast" type="BroadcastResponseContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="Client" type="ClientResponseContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="Subscribe" type="SubscribeResponseContent" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="ContentType" type="ResponseType" use="required" />
+  </xs:complexType>
+  <xs:complexType name="BroadcastResponseContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ResponseContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="AddBroadcast" type="AddBroadcastResponse" />
+            <xs:element minOccurs="0" maxOccurs="1" name="UpdateBroadcast" type="UpdateBroadcastResponse" />
+            <xs:element minOccurs="0" maxOccurs="1" name="RemoveBroadcast" type="RemoveBroadcastResponse" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="BroadcastType" type="BroadcastResponseType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ResponseContent" abstract="true" />
+  <xs:complexType name="SubscribeResponseContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ResponseContent">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="RoomTemperatureData" type="RoomTemperatureSubscribeData" />
+        </xs:sequence>
+        <xs:attribute name="DataType" type="SubscribeResponseType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RoomTemperatureSubscribeData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="SubscribeResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q1="http://microsoft.com/wsdl/types/" type="q1:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q2="http://microsoft.com/wsdl/types/" type="q2:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubscribeResponseData" abstract="true" />
+  <xs:simpleType name="SubscribeResponseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RoomTemperature" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ClientResponseContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ResponseContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="GetData" type="GetClientResponseData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="AddData" type="AddClientResponseData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="UpdateData" type="UpdateClientResponseData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="RemoveData" type="RemoveClientResponseData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="SubscribeData" type="SubscribeClientResponseData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="UnsubscribeData" type="UnsubscribeClientResponseData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="ClientResponseType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="AllData" type="GetAllClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="GetRoomClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="GetHeaterClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="GetHeatSensorClientData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="GetClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ClientResponseData" abstract="true" />
+  <xs:complexType name="UnsubscribeClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="Success" type="xs:boolean" />
+          <xs:element minOccurs="0" maxOccurs="1" name="RoomTemperatureData" type="UnsubscribeRoomTemperatureClientData" />
+        </xs:sequence>
+        <xs:attribute name="DataType" type="UnsubscribeClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UnsubscribeRoomTemperatureClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UnsubscribeClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q3="http://microsoft.com/wsdl/types/" type="q3:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UnsubscribeClientData" abstract="true" />
+  <xs:simpleType name="UnsubscribeClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RoomTemperature" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SubscribeClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="Success" type="xs:boolean" />
+          <xs:element minOccurs="0" maxOccurs="1" name="RoomTemperatureData" type="SubscribeRoomTemperatureClientData" />
+        </xs:sequence>
+        <xs:attribute name="DataType" type="SubscribeClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubscribeRoomTemperatureClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="SubscribeClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q4="http://microsoft.com/wsdl/types/" type="q4:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubscribeClientData" abstract="true" />
+  <xs:simpleType name="SubscribeClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RoomTemperature" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RemoveClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="Success" type="xs:boolean" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="RemoveRoomClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="RemoveHeaterClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="RemoveHeatSensorClientData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="RemoveClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveRoomClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q5="http://microsoft.com/wsdl/types/" type="q5:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveClientData" abstract="true" />
+  <xs:complexType name="RemoveHeatSensorClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q6="http://microsoft.com/wsdl/types/" type="q6:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q7="http://microsoft.com/wsdl/types/" type="q7:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveHeaterClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q8="http://microsoft.com/wsdl/types/" type="q8:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q9="http://microsoft.com/wsdl/types/" type="q9:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RemoveClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="UpdateClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="Success" type="xs:boolean" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="UpdateHeaterClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="UpdateHeatSensorClientData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="UpdateClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateHeaterClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q10="http://microsoft.com/wsdl/types/" type="q10:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q11="http://microsoft.com/wsdl/types/" type="q11:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateClientData" abstract="true" />
+  <xs:complexType name="UpdateHeatSensorClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q12="http://microsoft.com/wsdl/types/" type="q12:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q13="http://microsoft.com/wsdl/types/" type="q13:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="UpdateClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AddClientResponseData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="ClientResponseData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="Success" type="xs:boolean" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="AddRoomClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="AddHeaterClientData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="AddHeatSensorClientData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="AddClientType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddRoomClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q14="http://microsoft.com/wsdl/types/" type="q14:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddClientData" abstract="true" />
+  <xs:complexType name="AddHeatSensorClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q15="http://microsoft.com/wsdl/types/" type="q15:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q16="http://microsoft.com/wsdl/types/" type="q16:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddHeaterClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q17="http://microsoft.com/wsdl/types/" type="q17:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q18="http://microsoft.com/wsdl/types/" type="q18:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="AddClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="GetAllClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetClientData">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="Rooms" type="ArrayOfRoomDataContract" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetClientData" abstract="true" />
+  <xs:complexType name="GetHeatSensorClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q19="http://microsoft.com/wsdl/types/" type="q19:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q20="http://microsoft.com/wsdl/types/" type="q20:guid" />
+          <xs:element minOccurs="0" maxOccurs="1" name="Result" type="GetHeatSensorClientDataResult" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetHeatSensorClientDataResult">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="GetHeaterClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q21="http://microsoft.com/wsdl/types/" type="q21:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q22="http://microsoft.com/wsdl/types/" type="q22:guid" />
+          <xs:element minOccurs="0" maxOccurs="1" name="Result" type="GetHeaterClientDataResult" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetHeaterClientDataResult">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="IsOn" type="xs:boolean" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="GetRoomClientData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetClientData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q23="http://microsoft.com/wsdl/types/" type="q23:guid" />
+          <xs:element minOccurs="0" maxOccurs="1" name="Result" type="GetRoomClientDataResult" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetRoomClientDataResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Width" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Height" type="xs:float" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Heaters" type="ArrayOfHeaterDataContract" />
+      <xs:element minOccurs="0" maxOccurs="1" name="HeatSensors" type="ArrayOfHeatSensorDataContract" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfHeaterDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Heater" nillable="true" type="HeaterDataContract" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="HeaterDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q24="http://microsoft.com/wsdl/types/" type="q24:guid" />
+      <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="IsOn" type="xs:boolean" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfHeatSensorDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="HeatSensor" nillable="true" type="HeatSensorDataContract" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="HeatSensorDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q25="http://microsoft.com/wsdl/types/" type="q25:guid" />
+      <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfRoomDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Room" nillable="true" type="RoomDataContract" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RoomDataContract">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q26="http://microsoft.com/wsdl/types/" type="q26:guid" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Width" type="xs:float" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Height" type="xs:float" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Heaters" type="ArrayOfHeaterDataContract" />
+      <xs:element minOccurs="0" maxOccurs="1" name="HeatSensors" type="ArrayOfHeatSensorDataContract" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="GetClientType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="All" />
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ClientResponseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Get" />
+      <xs:enumeration value="Add" />
+      <xs:enumeration value="Update" />
+      <xs:enumeration value="Remove" />
+      <xs:enumeration value="Subscribe" />
+      <xs:enumeration value="Unsubscribe" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AddBroadcastResponse">
+    <xs:complexContent mixed="false">
+      <xs:extension base="BroadcastResponseData">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="AddRoomBroadcastData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="AddHeaterBroadcastData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="AddHeatSensorBroadcastData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="AddBroadcastType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="BroadcastResponseData" abstract="true" />
+  <xs:complexType name="RemoveBroadcastResponse">
+    <xs:complexContent mixed="false">
+      <xs:extension base="BroadcastResponseData">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="RemoveRoomBroadcastData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="RemoveHeaterBroadcastData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="RemoveHeatSensorBroadcastData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="RemoveBroadcastType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveRoomBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q27="http://microsoft.com/wsdl/types/" type="q27:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveBroadcastData" abstract="true" />
+  <xs:complexType name="RemoveHeatSensorBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q28="http://microsoft.com/wsdl/types/" type="q28:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q29="http://microsoft.com/wsdl/types/" type="q29:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveHeaterBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q30="http://microsoft.com/wsdl/types/" type="q30:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q31="http://microsoft.com/wsdl/types/" type="q31:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RemoveBroadcastType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="UpdateBroadcastResponse">
+    <xs:complexContent mixed="false">
+      <xs:extension base="BroadcastResponseData">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="UpdateHeaterBroadcastData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="UpdateHeatSensorBroadcastData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="UpdateBroadcastType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateHeaterBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q32="http://microsoft.com/wsdl/types/" type="q32:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q33="http://microsoft.com/wsdl/types/" type="q33:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="IsOn" type="xs:boolean" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateBroadcastData" abstract="true" />
+  <xs:complexType name="UpdateHeatSensorBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q34="http://microsoft.com/wsdl/types/" type="q34:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q35="http://microsoft.com/wsdl/types/" type="q35:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="UpdateBroadcastType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AddRoomBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q36="http://microsoft.com/wsdl/types/" type="q36:guid" />
+          <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Width" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Height" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddBroadcastData" abstract="true" />
+  <xs:complexType name="AddHeatSensorBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q37="http://microsoft.com/wsdl/types/" type="q37:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q38="http://microsoft.com/wsdl/types/" type="q38:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddHeaterBroadcastData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddBroadcastData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q39="http://microsoft.com/wsdl/types/" type="q39:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q40="http://microsoft.com/wsdl/types/" type="q40:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="AddBroadcastType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BroadcastResponseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Add" />
+      <xs:enumeration value="Update" />
+      <xs:enumeration value="Remove" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ResponseContent" nillable="true" type="ResponseContent" />
+  <xs:element name="SubscribeResponseType" type="SubscribeResponseType" />
+  <xs:element name="SubscribeResponseContent" nillable="true" type="SubscribeResponseContent" />
+  <xs:element name="SubscribeResponseData" nillable="true" type="SubscribeResponseData" />
+  <xs:element name="RoomTemperatureSubscribeData" nillable="true" type="RoomTemperatureSubscribeData" />
+  <xs:element name="ClientResponseType" type="ClientResponseType" />
+  <xs:element name="ClientResponseContent" nillable="true" type="ClientResponseContent" />
+  <xs:element name="ClientResponseData" nillable="true" type="ClientResponseData" />
+  <xs:element name="GetClientType" type="GetClientType" />
+  <xs:element name="GetClientResponseData" nillable="true" type="GetClientResponseData" />
+  <xs:element name="GetClientData" nillable="true" type="GetClientData" />
+  <xs:element name="GetAllClientData" nillable="true" type="GetAllClientData" />
+  <xs:element name="GetRoomClientData" nillable="true" type="GetRoomClientData" />
+  <xs:element name="GetRoomClientDataResult" nillable="true" type="GetRoomClientDataResult" />
+  <xs:element name="GetHeaterClientData" nillable="true" type="GetHeaterClientData" />
+  <xs:element name="GetHeaterClientDataResult" nillable="true" type="GetHeaterClientDataResult" />
+  <xs:element name="GetHeatSensorClientData" nillable="true" type="GetHeatSensorClientData" />
+  <xs:element name="GetHeatSensorClientDataResult" nillable="true" type="GetHeatSensorClientDataResult" />
+  <xs:element name="AddClientType" type="AddClientType" />
+  <xs:element name="AddClientResponseData" nillable="true" type="AddClientResponseData" />
+  <xs:element name="AddClientData" nillable="true" type="AddClientData" />
+  <xs:element name="AddRoomClientData" nillable="true" type="AddRoomClientData" />
+  <xs:element name="AddHeaterClientData" nillable="true" type="AddHeaterClientData" />
+  <xs:element name="AddHeatSensorClientData" nillable="true" type="AddHeatSensorClientData" />
+  <xs:element name="UpdateClientType" type="UpdateClientType" />
+  <xs:element name="UpdateClientResponseData" nillable="true" type="UpdateClientResponseData" />
+  <xs:element name="UpdateClientData" nillable="true" type="UpdateClientData" />
+  <xs:element name="UpdateHeaterClientData" nillable="true" type="UpdateHeaterClientData" />
+  <xs:element name="UpdateHeatSensorClientData" nillable="true" type="UpdateHeatSensorClientData" />
+  <xs:element name="RemoveClientType" type="RemoveClientType" />
+  <xs:element name="RemoveClientResponseData" nillable="true" type="RemoveClientResponseData" />
+  <xs:element name="RemoveClientData" nillable="true" type="RemoveClientData" />
+  <xs:element name="RemoveRoomClientData" nillable="true" type="RemoveRoomClientData" />
+  <xs:element name="RemoveHeaterClientData" nillable="true" type="RemoveHeaterClientData" />
+  <xs:element name="RemoveHeatSensorClientData" nillable="true" type="RemoveHeatSensorClientData" />
+  <xs:element name="SubscribeClientType" type="SubscribeClientType" />
+  <xs:element name="SubscribeClientResponseData" nillable="true" type="SubscribeClientResponseData" />
+  <xs:element name="SubscribeClientData" nillable="true" type="SubscribeClientData" />
+  <xs:element name="SubscribeRoomTemperatureClientData" nillable="true" type="SubscribeRoomTemperatureClientData" />
+  <xs:element name="UnsubscribeClientType" type="UnsubscribeClientType" />
+  <xs:element name="UnsubscribeClientResponseData" nillable="true" type="UnsubscribeClientResponseData" />
+  <xs:element name="UnsubscribeClientData" nillable="true" type="UnsubscribeClientData" />
+  <xs:element name="UnsubscribeRoomTemperatureClientData" nillable="true" type="UnsubscribeRoomTemperatureClientData" />
+  <xs:element name="BroadcastResponseType" type="BroadcastResponseType" />
+  <xs:element name="BroadcastResponseContent" nillable="true" type="BroadcastResponseContent" />
+  <xs:element name="BroadcastResponseData" nillable="true" type="BroadcastResponseData" />
+  <xs:element name="AddBroadcastType" type="AddBroadcastType" />
+  <xs:element name="AddBroadcastResponse" nillable="true" type="AddBroadcastResponse" />
+  <xs:element name="AddBroadcastData" nillable="true" type="AddBroadcastData" />
+  <xs:element name="AddRoomBroadcastData" nillable="true" type="AddRoomBroadcastData" />
+  <xs:element name="AddHeaterBroadcastData" nillable="true" type="AddHeaterBroadcastData" />
+  <xs:element name="AddHeatSensorBroadcastData" nillable="true" type="AddHeatSensorBroadcastData" />
+  <xs:element name="UpdateBroadcastType" type="UpdateBroadcastType" />
+  <xs:element name="UpdateBroadcastResponse" nillable="true" type="UpdateBroadcastResponse" />
+  <xs:element name="UpdateBroadcastData" nillable="true" type="UpdateBroadcastData" />
+  <xs:element name="UpdateHeaterBroadcastData" nillable="true" type="UpdateHeaterBroadcastData" />
+  <xs:element name="UpdateHeatSensorBroadcastData" nillable="true" type="UpdateHeatSensorBroadcastData" />
+  <xs:element name="RemoveBroadcastType" type="RemoveBroadcastType" />
+  <xs:element name="RemoveBroadcastResponse" nillable="true" type="RemoveBroadcastResponse" />
+  <xs:element name="RemoveBroadcastData" nillable="true" type="RemoveBroadcastData" />
+  <xs:element name="RemoveRoomBroadcastData" nillable="true" type="RemoveRoomBroadcastData" />
+  <xs:element name="RemoveHeaterBroadcastData" nillable="true" type="RemoveHeaterBroadcastData" />
+  <xs:element name="RemoveHeatSensorBroadcastData" nillable="true" type="RemoveHeatSensorBroadcastData" />
+  <xs:element name="RequestType" type="RequestType" />
+  <xs:simpleType name="RequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Get" />
+      <xs:enumeration value="Add" />
+      <xs:enumeration value="Update" />
+      <xs:enumeration value="Remove" />
+      <xs:enumeration value="Subscribe" />
+      <xs:enumeration value="Unsubscribe" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Request" nillable="true" type="Request" />
+  <xs:complexType name="Request">
+    <xs:sequence>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element minOccurs="0" maxOccurs="1" name="GetContent" type="GetRequestContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="AddContent" type="AddRequestContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="UpdateContent" type="UpdateRequestContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="RemoveContent" type="RemoveRequestContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="SubscribeContent" type="SubscribeRequestContent" />
+        <xs:element minOccurs="0" maxOccurs="1" name="UnsubscribeContent" type="UnsubscribeRequestContent" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="ContentType" type="RequestType" use="required" />
+  </xs:complexType>
+  <xs:complexType name="GetRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="GetRoomRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="GetHeaterRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="GetHeatSensorRequestData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="GetRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RequestContent" abstract="true" />
+  <xs:complexType name="UnsubscribeRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="RoomTemperatureData" type="UnsubscribeRoomTemperatureRequestData" />
+        </xs:sequence>
+        <xs:attribute name="DataType" type="UnsubscribeRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UnsubscribeRoomTemperatureRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UnsubscribeRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q41="http://microsoft.com/wsdl/types/" type="q41:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UnsubscribeRequestData" abstract="true" />
+  <xs:simpleType name="UnsubscribeRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RoomTemperature" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SubscribeRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="RoomTemperatureData" type="SubscribeRoomTemperatureRequestData" />
+        </xs:sequence>
+        <xs:attribute name="DataType" type="SubscribeRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubscribeRoomTemperatureRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="SubscribeRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q42="http://microsoft.com/wsdl/types/" type="q42:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SubscribeRequestData" abstract="true" />
+  <xs:simpleType name="SubscribeRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RoomTemperature" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RemoveRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="RemoveRoomRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="RemoveHeaterRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="RemoveHeatSensorRequestData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="RemoveRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveRoomRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q43="http://microsoft.com/wsdl/types/" type="q43:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveRequestData" abstract="true" />
+  <xs:complexType name="RemoveHeatSensorRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q44="http://microsoft.com/wsdl/types/" type="q44:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q45="http://microsoft.com/wsdl/types/" type="q45:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RemoveHeaterRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RemoveRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q46="http://microsoft.com/wsdl/types/" type="q46:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q47="http://microsoft.com/wsdl/types/" type="q47:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RemoveRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="UpdateRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="UpdateHeaterRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="UpdateHeatSensorRequestData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="UpdateRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateHeaterRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q48="http://microsoft.com/wsdl/types/" type="q48:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q49="http://microsoft.com/wsdl/types/" type="q49:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="IsOn" type="xs:boolean" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UpdateRequestData" abstract="true" />
+  <xs:complexType name="UpdateHeatSensorRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="UpdateRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q50="http://microsoft.com/wsdl/types/" type="q50:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q51="http://microsoft.com/wsdl/types/" type="q51:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="UpdateRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AddRequestContent">
+    <xs:complexContent mixed="false">
+      <xs:extension base="RequestContent">
+        <xs:sequence>
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="RoomData" type="AddRoomRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeaterData" type="AddHeaterRequestData" />
+            <xs:element minOccurs="0" maxOccurs="1" name="HeatSensorData" type="AddHeatSensorRequestData" />
+          </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="DataType" type="AddRequestType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddRoomRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="Name" type="xs:string" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Width" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Height" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddRequestData" abstract="true" />
+  <xs:complexType name="AddHeatSensorRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q52="http://microsoft.com/wsdl/types/" type="q52:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AddHeaterRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="AddRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q53="http://microsoft.com/wsdl/types/" type="q53:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="X" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Y" type="xs:float" />
+          <xs:element minOccurs="1" maxOccurs="1" name="Temperature" type="xs:float" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="AddRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="GetRoomRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q54="http://microsoft.com/wsdl/types/" type="q54:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetRequestData" abstract="true" />
+  <xs:complexType name="GetHeatSensorRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q55="http://microsoft.com/wsdl/types/" type="q55:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeatSensorId" xmlns:q56="http://microsoft.com/wsdl/types/" type="q56:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="GetHeaterRequestData">
+    <xs:complexContent mixed="false">
+      <xs:extension base="GetRequestData">
+        <xs:sequence>
+          <xs:element minOccurs="1" maxOccurs="1" name="RoomId" xmlns:q57="http://microsoft.com/wsdl/types/" type="q57:guid" />
+          <xs:element minOccurs="1" maxOccurs="1" name="HeaterId" xmlns:q58="http://microsoft.com/wsdl/types/" type="q58:guid" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="GetRequestType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="All" />
+      <xs:enumeration value="Room" />
+      <xs:enumeration value="Heater" />
+      <xs:enumeration value="HeatSensor" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="RequestContent" nillable="true" type="RequestContent" />
+  <xs:element name="GetRequestType" type="GetRequestType" />
+  <xs:element name="GetRequestContent" nillable="true" type="GetRequestContent" />
+  <xs:element name="GetRequestData" nillable="true" type="GetRequestData" />
+  <xs:element name="GetRoomRequestData" nillable="true" type="GetRoomRequestData" />
+  <xs:element name="GetHeaterRequestData" nillable="true" type="GetHeaterRequestData" />
+  <xs:element name="GetHeatSensorRequestData" nillable="true" type="GetHeatSensorRequestData" />
+  <xs:element name="AddRequestType" type="AddRequestType" />
+  <xs:element name="AddRequestContent" nillable="true" type="AddRequestContent" />
+  <xs:element name="AddRequestData" nillable="true" type="AddRequestData" />
+  <xs:element name="AddRoomRequestData" nillable="true" type="AddRoomRequestData" />
+  <xs:element name="AddHeaterRequestData" nillable="true" type="AddHeaterRequestData" />
+  <xs:element name="AddHeatSensorRequestData" nillable="true" type="AddHeatSensorRequestData" />
+  <xs:element name="UpdateRequestType" type="UpdateRequestType" />
+  <xs:element name="UpdateRequestContent" nillable="true" type="UpdateRequestContent" />
+  <xs:element name="UpdateRequestData" nillable="true" type="UpdateRequestData" />
+  <xs:element name="UpdateHeaterRequestData" nillable="true" type="UpdateHeaterRequestData" />
+  <xs:element name="UpdateHeatSensorRequestData" nillable="true" type="UpdateHeatSensorRequestData" />
+  <xs:element name="RemoveRequestType" type="RemoveRequestType" />
+  <xs:element name="RemoveRequestContent" nillable="true" type="RemoveRequestContent" />
+  <xs:element name="RemoveRequestData" nillable="true" type="RemoveRequestData" />
+  <xs:element name="RemoveRoomRequestData" nillable="true" type="RemoveRoomRequestData" />
+  <xs:element name="RemoveHeaterRequestData" nillable="true" type="RemoveHeaterRequestData" />
+  <xs:element name="RemoveHeatSensorRequestData" nillable="true" type="RemoveHeatSensorRequestData" />
+  <xs:element name="SubscribeRequestType" type="SubscribeRequestType" />
+  <xs:element name="SubscribeRequestContent" nillable="true" type="SubscribeRequestContent" />
+  <xs:element name="SubscribeRequestData" nillable="true" type="SubscribeRequestData" />
+  <xs:element name="SubscribeRoomTemperatureRequestData" nillable="true" type="SubscribeRoomTemperatureRequestData" />
+  <xs:element name="UnsubscribeRequestType" type="UnsubscribeRequestType" />
+  <xs:element name="UnsubscribeRequestContent" nillable="true" type="UnsubscribeRequestContent" />
+  <xs:element name="UnsubscribeRequestData" nillable="true" type="UnsubscribeRequestData" />
+  <xs:element name="UnsubscribeRoomTemperatureRequestData" nillable="true" type="UnsubscribeRoomTemperatureRequestData" />
+  <xs:element name="HeaterDataContract" nillable="true" type="HeaterDataContract" />
+  <xs:element name="HeatSensorDataContract" nillable="true" type="HeatSensorDataContract" />
+  <xs:element name="RoomDataContract" nillable="true" type="RoomDataContract" />
+</xs:schema>

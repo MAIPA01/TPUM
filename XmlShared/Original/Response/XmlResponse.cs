@@ -5,6 +5,7 @@ using TPUM.XmlShared.Response.Subscribe;
 
 namespace TPUM.XmlShared.Response
 {
+#nullable disable
     public enum ResponseType
     {
         Broadcast = 0,
@@ -15,12 +16,13 @@ namespace TPUM.XmlShared.Response
     [XmlRoot("Response")]
     public class Response
     {
+        [XmlAttribute]
         public ResponseType ContentType { get; set; }
 
         [XmlElement("Broadcast", typeof(BroadcastResponseContent))]
         [XmlElement("Client", typeof(ClientResponseContent))]
         [XmlElement("Subscribe", typeof(SubscribeResponseContent))]
-        public required ResponseContent Content { get; set; }
+        public ResponseContent Content { get; set; }
     }
 
     [XmlInclude(typeof(BroadcastResponseContent))]

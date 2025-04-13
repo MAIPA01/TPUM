@@ -1,8 +1,10 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
-namespace TPUM.XmlShared
+namespace TPUM.XmlShared.Dto
 {
-    #region DTO
+#nullable disable
     public class HeaterDataContract
     {
         public Guid HeaterId { get; set; }
@@ -23,7 +25,7 @@ namespace TPUM.XmlShared
     public class RoomDataContract
     {
         public Guid RoomId { get; set; }
-        public string Name { get; set; } = "Temp Name";
+        public string Name { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
 
@@ -35,5 +37,4 @@ namespace TPUM.XmlShared
         [XmlArrayItem("HeatSensor")]
         public List<HeatSensorDataContract> HeatSensors { get; set; } = [];
     }
-    #endregion DTO
 }

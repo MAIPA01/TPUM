@@ -1,7 +1,11 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Serialization;
+using TPUM.XmlShared.Dto;
 
 namespace TPUM.XmlShared.Response.Client
 {
+#nullable disable
     #region GET_CLIENT_RESPONSE
     public enum GetClientType
     {
@@ -13,13 +17,14 @@ namespace TPUM.XmlShared.Response.Client
 
     public class GetClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public GetClientType DataType { get; set; }
 
         [XmlElement("AllData", typeof(GetAllClientData))]
         [XmlElement("RoomData", typeof(GetRoomClientData))]
         [XmlElement("HeaterData", typeof(GetHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(GetHeatSensorClientData))]
-        public required GetClientData Data { get; set; }
+        public GetClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(GetAllClientData))]
@@ -39,7 +44,9 @@ namespace TPUM.XmlShared.Response.Client
     {
         public Guid RoomId { get; set; }
 
+#nullable enable
         public GetRoomClientDataResult? Result { get; set; } = null;
+#nullable disable
 
         [XmlIgnore]
         public bool Success => Result != null;
@@ -47,7 +54,7 @@ namespace TPUM.XmlShared.Response.Client
 
     public class GetRoomClientDataResult
     {
-        public required string Name { get; set; }
+        public string Name { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
 
@@ -66,7 +73,9 @@ namespace TPUM.XmlShared.Response.Client
 
         public Guid HeaterId { get; set; }
 
+#nullable enable
         public GetHeaterClientDataResult? Result { get; set; } = null;
+#nullable disable
 
         [XmlIgnore]
         public bool Success => Result != null;
@@ -85,7 +94,9 @@ namespace TPUM.XmlShared.Response.Client
         public Guid RoomId { get; set; }
         public Guid HeatSensorId { get; set; }
 
+#nullable enable
         public GetHeatSensorClientDataResult? Result { get; set; } = null;
+#nullable disable
 
         [XmlIgnore]
         public bool Success => Result != null;
@@ -109,6 +120,7 @@ namespace TPUM.XmlShared.Response.Client
 
     public class AddClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public AddClientType DataType { get; set; }
 
         public bool Success { get; set; }
@@ -116,7 +128,9 @@ namespace TPUM.XmlShared.Response.Client
         [XmlElement("RoomData", typeof(AddRoomClientData))]
         [XmlElement("HeaterData", typeof(AddHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(AddHeatSensorClientData))]
+#nullable enable
         public AddClientData? Data { get; set; }
+#nullable disable
     }
 
     [XmlInclude(typeof(AddRoomClientData))]
@@ -151,13 +165,14 @@ namespace TPUM.XmlShared.Response.Client
 
     public class UpdateClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public UpdateClientType DataType { get; set; }
 
         public bool Success { get; set; }
 
         [XmlElement("HeaterData", typeof(UpdateHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(UpdateHeatSensorClientData))]
-        public required UpdateClientData Data { get; set; }
+        public UpdateClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(UpdateHeaterClientData))]
@@ -187,6 +202,7 @@ namespace TPUM.XmlShared.Response.Client
 
     public class RemoveClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public RemoveClientType DataType { get; set; }
 
         public bool Success { get; set; }
@@ -194,7 +210,7 @@ namespace TPUM.XmlShared.Response.Client
         [XmlElement("RoomData", typeof(RemoveRoomClientData))]
         [XmlElement("HeaterData", typeof(RemoveHeaterClientData))]
         [XmlElement("HeatSensorData", typeof(RemoveHeatSensorClientData))]
-        public required RemoveClientData Data { get; set; }
+        public RemoveClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(RemoveRoomClientData))]
@@ -228,12 +244,13 @@ namespace TPUM.XmlShared.Response.Client
 
     public class SubscribeClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public SubscribeClientType DataType { get; set; }
 
         public bool Success { get; set; }
 
         [XmlElement("RoomTemperatureData", typeof(SubscribeRoomTemperatureClientData))]
-        public required SubscribeClientData Data { get; set; }
+        public SubscribeClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(SubscribeRoomTemperatureClientData))]
@@ -253,12 +270,13 @@ namespace TPUM.XmlShared.Response.Client
 
     public class UnsubscribeClientResponseData : ClientResponseData
     {
+        [XmlAttribute]
         public UnsubscribeClientType DataType { get; set; }
 
         public bool Success { get; set; }
 
         [XmlElement("RoomTemperatureData", typeof(UnsubscribeRoomTemperatureClientData))]
-        public required UnsubscribeClientData Data { get; set; }
+        public UnsubscribeClientData Data { get; set; }
     }
 
     [XmlInclude(typeof(UnsubscribeRoomTemperatureClientData))]

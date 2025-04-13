@@ -2,6 +2,7 @@
 
 namespace TPUM.XmlShared.Response.Subscribe
 {
+#nullable disable
     public enum SubscribeResponseType
     {
         RoomTemperature = 0
@@ -9,10 +10,11 @@ namespace TPUM.XmlShared.Response.Subscribe
 
     public class SubscribeResponseContent : ResponseContent
     {
+        [XmlAttribute]
         public SubscribeResponseType DataType { get; set; }
 
         [XmlElement("RoomTemperatureData", typeof(RoomTemperatureSubscribeData))]
-        public required SubscribeResponseData Data { get; set; }
+        public SubscribeResponseData Data { get; set; }
     }
 
     [XmlInclude(typeof(RoomTemperatureSubscribeData))]

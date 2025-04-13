@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Generated\" />
+    <Folder Include="Schema\" />
+  </ItemGroup>
+
 </Project>

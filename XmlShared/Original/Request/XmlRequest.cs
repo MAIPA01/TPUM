@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace TPUM.XmlShared.Request
 {
@@ -15,6 +16,7 @@ namespace TPUM.XmlShared.Request
     [XmlRoot("Request")]
     public class Request
     {
+        [XmlAttribute]
         public RequestType ContentType { get; set; }
 
         [XmlElement("GetContent", typeof(GetRequestContent))]
@@ -23,7 +25,9 @@ namespace TPUM.XmlShared.Request
         [XmlElement("RemoveContent", typeof(RemoveRequestContent))]
         [XmlElement("SubscribeContent", typeof(SubscribeRequestContent))]
         [XmlElement("UnsubscribeContent", typeof(UnsubscribeRequestContent))]
-        public required RequestContent Content { get; set; }
+#nullable disable
+        public RequestContent Content { get; set; }
+#nullable restore
     }
 
     [XmlInclude(typeof(GetRequestContent))]

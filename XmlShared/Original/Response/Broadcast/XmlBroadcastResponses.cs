@@ -1,7 +1,9 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace TPUM.XmlShared.Response.Broadcast
 {
+#nullable disable
     #region ADD_BROADCAST_RESPONSE
     public enum AddBroadcastType
     {
@@ -12,12 +14,13 @@ namespace TPUM.XmlShared.Response.Broadcast
 
     public class AddBroadcastResponse : BroadcastResponseData
     {
+        [XmlAttribute]
         public AddBroadcastType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(AddRoomBroadcastData))]
         [XmlElement("HeaterData", typeof(AddHeaterBroadcastData))]
         [XmlElement("HeatSensorData", typeof(AddHeatSensorBroadcastData))]
-        public required AddBroadcastData Data { get; set; }
+        public AddBroadcastData Data { get; set; }
     }
 
     [XmlInclude(typeof(AddRoomBroadcastData))]
@@ -28,7 +31,7 @@ namespace TPUM.XmlShared.Response.Broadcast
     public class AddRoomBroadcastData : AddBroadcastData
     {
         public Guid RoomId { get; set; }
-        public string Name { get; set; } = "Temp Name";
+        public string Name { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
     }
@@ -61,11 +64,12 @@ namespace TPUM.XmlShared.Response.Broadcast
 
     public class UpdateBroadcastResponse : BroadcastResponseData
     {
+        [XmlAttribute]
         public UpdateBroadcastType DataType { get; set; }
 
         [XmlElement("HeaterData", typeof(UpdateHeaterBroadcastData))]
         [XmlElement("HeatSensorData", typeof(UpdateHeatSensorBroadcastData))]
-        public required UpdateBroadcastData Data { get; set; }
+        public UpdateBroadcastData Data { get; set; }
     }
 
     [XmlInclude(typeof(UpdateHeaterBroadcastData))]
@@ -102,12 +106,13 @@ namespace TPUM.XmlShared.Response.Broadcast
 
     public class RemoveBroadcastResponse : BroadcastResponseData
     {
+        [XmlAttribute]
         public RemoveBroadcastType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(RemoveRoomBroadcastData))]
         [XmlElement("HeaterData", typeof(RemoveHeaterBroadcastData))]
         [XmlElement("HeatSensorData", typeof(RemoveHeatSensorBroadcastData))]
-        public required RemoveBroadcastData Data { get; set; }
+        public RemoveBroadcastData Data { get; set; }
     }
 
     [XmlInclude(typeof(RemoveRoomBroadcastData))]

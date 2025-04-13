@@ -2,6 +2,7 @@
 
 namespace TPUM.XmlShared.Response.Client
 {
+#nullable disable
     public enum ClientResponseType
     {
         Get = 0,
@@ -14,6 +15,7 @@ namespace TPUM.XmlShared.Response.Client
 
     public class ClientResponseContent : ResponseContent
     {
+        [XmlAttribute]
         public ClientResponseType DataType { get; set; }
 
         [XmlElement("GetData", typeof(GetClientResponseData))]
@@ -22,7 +24,7 @@ namespace TPUM.XmlShared.Response.Client
         [XmlElement("RemoveData", typeof(RemoveClientResponseData))]
         [XmlElement("SubscribeData", typeof(SubscribeClientResponseData))]
         [XmlElement("UnsubscribeData", typeof(UnsubscribeClientResponseData))]
-        public required ClientResponseData Data { get; set; }
+        public ClientResponseData Data { get; set; }
     }
 
     [XmlInclude(typeof(GetClientResponseData))]

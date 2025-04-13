@@ -1,4 +1,6 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Serialization;
 
 namespace TPUM.XmlShared.Request
 {
@@ -13,12 +15,15 @@ namespace TPUM.XmlShared.Request
 
     public class GetRequestContent : RequestContent
     {
+        [XmlAttribute]
         public GetRequestType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(GetRoomRequestData))]
         [XmlElement("HeaterData", typeof(GetHeaterRequestData))]
         [XmlElement("HeatSensorData", typeof(GetHeatSensorRequestData))]
+#nullable enable
         public GetRequestData? Data { get; set; }
+#nullable disable
     }
 
     [XmlInclude(typeof(GetRoomRequestData))]
@@ -54,12 +59,13 @@ namespace TPUM.XmlShared.Request
 
     public class AddRequestContent : RequestContent
     {
+        [XmlAttribute]
         public AddRequestType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(AddRoomRequestData))]
         [XmlElement("HeaterData", typeof(AddHeaterRequestData))]
         [XmlElement("HeatSensorData", typeof(AddHeatSensorRequestData))]
-        public required AddRequestData Data { get; set; }
+        public AddRequestData Data { get; set; }
     }
 
     [XmlInclude(typeof(AddRoomRequestData))]
@@ -69,7 +75,7 @@ namespace TPUM.XmlShared.Request
 
     public class AddRoomRequestData : AddRequestData
     {
-        public string Name { get; set; } = "Temp Name";
+        public string Name { get; set; }
         public float Width { get; set; }
         public float Height { get; set; }
     }
@@ -99,11 +105,12 @@ namespace TPUM.XmlShared.Request
 
     public class UpdateRequestContent : RequestContent
     {
+        [XmlAttribute]
         public UpdateRequestType DataType { get; set; }
 
         [XmlElement("HeaterData", typeof(UpdateHeaterRequestData))]
         [XmlElement("HeatSensorData", typeof(UpdateHeatSensorRequestData))]
-        public required UpdateRequestData Data { get; set; }
+        public UpdateRequestData Data { get; set; }
     }
 
     [XmlInclude(typeof(UpdateHeaterRequestData))]
@@ -139,12 +146,13 @@ namespace TPUM.XmlShared.Request
 
     public class RemoveRequestContent : RequestContent
     {
+        [XmlAttribute]
         public RemoveRequestType DataType { get; set; }
 
         [XmlElement("RoomData", typeof(RemoveRoomRequestData))]
         [XmlElement("HeaterData", typeof(RemoveHeaterRequestData))]
         [XmlElement("HeatSensorData", typeof(RemoveHeatSensorRequestData))]
-        public required RemoveRequestData Data { get; set; }
+        public RemoveRequestData Data { get; set; }
     }
 
     [XmlInclude(typeof(RemoveRoomRequestData))]
@@ -178,10 +186,11 @@ namespace TPUM.XmlShared.Request
 
     public class SubscribeRequestContent : RequestContent
     {
+        [XmlAttribute]
         public SubscribeRequestType DataType { get; set; }
 
         [XmlElement("RoomTemperatureData", typeof(SubscribeRoomTemperatureRequestData))]
-        public required SubscribeRequestData Data { get; set; }
+        public SubscribeRequestData Data { get; set; }
     }
 
     [XmlInclude(typeof(SubscribeRoomTemperatureRequestData))]
@@ -201,10 +210,11 @@ namespace TPUM.XmlShared.Request
 
     public class UnsubscribeRequestContent : RequestContent
     {
+        [XmlAttribute]
         public UnsubscribeRequestType DataType { get; set; }
 
         [XmlElement("RoomTemperatureData", typeof(UnsubscribeRoomTemperatureRequestData))]
-        public required UnsubscribeRequestData Data { get; set; }
+        public UnsubscribeRequestData Data { get; set; }
     }
 
     [XmlInclude(typeof(UnsubscribeRoomTemperatureRequestData))]

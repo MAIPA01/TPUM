@@ -1,4 +1,4 @@
-﻿namespace TPUM.XmlShared
+﻿namespace TPUM.XmlShared.Dto
 {
     public static class XmlDtoFactory
     {
