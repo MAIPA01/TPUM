@@ -49,6 +49,7 @@ namespace TPUM.Server.Logic
         private CancellationTokenSource? _cts;
 
         private const float TemperatureDecayFactor = 0.5f;
+        private const float RoomCeilingToFloorDistance = 3f;
 
         public RoomLogic(IRoomData data)
         {
@@ -120,7 +121,7 @@ namespace TPUM.Server.Logic
 
                 var temp = MathF.Max(sensorsTemp, heatersTemp);
 
-                return temp > 0 ? temp : _roomTemperature;
+                return temp > 0 ? MathF.Min(temp, _roomTemperature) : _roomTemperature;
             }
         }
 
@@ -316,14 +317,18 @@ namespace TPUM.Server.Logic
             lock (_roomLock)
             {
                 var onHeaters = _heaters.FindAll(heater => heater.IsOn);
-                _roomTemperature -= TemperatureDecayFactor * deltaTime;
                 if (onHeaters.Count != 0)
                 {
                     foreach (var heater in onHeaters)
                     {
-                        _roomTemperature += (heater.Temperature * TemperatureDecayFactor * deltaTime) / (Width * Height);
+                        _roomTemperature += (heater.Temperature * TemperatureDecayFactor * deltaTime) / 
+                                            (Width * Height * RoomCeilingToFloorDistance);
                     }
                     _roomTemperature = MathF.Min(_roomTemperature, onHeaters.Max(heater => heater.Temperature));
+                }
+                else
+                {
+                    _roomTemperature -= TemperatureDecayFactor * deltaTime;
                 }
                 _roomTemperature = MathF.Max(_roomTemperature, 0f);
 

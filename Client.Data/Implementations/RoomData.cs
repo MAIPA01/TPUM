@@ -168,6 +168,7 @@ namespace TPUM.Client.Data
                 SubscribeToHeatSensor(sensor);
                 _heatSensors.Add(sensor);
                 HeatSensorAdded?.Invoke(this, sensor);
+                if (_heatSensors.Count == 1) _data.SubscribeToRoomTemperature(Id);
             }
         }
 
@@ -207,6 +208,7 @@ namespace TPUM.Client.Data
                     _heatSensors.Remove(sensor);
                 }
                 HeatSensorRemoved?.Invoke(this, sensorId);
+                if (_heatSensors.Count == 0) _data.UnsubscribeFromRoomTemperature(Id);
             }
         }
 

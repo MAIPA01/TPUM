@@ -1,4 +1,6 @@
-﻿namespace TPUM.Server.Presentation.Events
+﻿using TPUM.XmlShared.Request;
+
+namespace TPUM.Server.Presentation.Events
 {
     internal delegate void ClientRequestReceivedEventHandler(object? source, Guid clientId, Request request);
 

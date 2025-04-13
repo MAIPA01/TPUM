@@ -2,7 +2,8 @@
 
 namespace TPUM.Client.Data
 {
-    internal interface IWebSocketClient : INotifyResponseReceived, INotifyBroadcastReceived, INotifyClientConnected, IDisposable
+    internal interface IWebSocketClient : INotifyResponseReceived, INotifySubscribeReceived, INotifyBroadcastReceived,
+        INotifyClientConnected, IDisposable
     {
         Task ConnectAsync(string uri);
 

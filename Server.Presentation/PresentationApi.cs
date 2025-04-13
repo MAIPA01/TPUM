@@ -1,4 +1,9 @@
 ﻿using TPUM.Server.Logic;
+using TPUM.XmlShared;
+using TPUM.XmlShared.Request;
+using TPUM.XmlShared.Response.Broadcast;
+using TPUM.XmlShared.Response.Client;
+using TPUM.XmlShared.Response.Subscribe;
 
 namespace TPUM.Server.Presentation
 {
@@ -21,6 +26,7 @@ namespace TPUM.Server.Presentation
         private readonly LogicApiBase _logic;
 
         private readonly WebSocketServer _server;
+        private readonly Dictionary<Guid, List<Guid>> _roomTemperatureSubscribers = []; // roomId -> List of ClientIds
 
         private readonly object _roomsLock = new();
         private readonly List<Room> _rooms = [];
@@ -36,6 +42,7 @@ namespace TPUM.Server.Presentation
             }
             _server = new WebSocketServer(uriPrefix);
             _server.ClientRequestReceived += HandleClientRequest;
+            _server.ClientDisconnected += GetClientDisconnected;
         }
 
         public override Task StartServer()
@@ -47,6 +54,12 @@ namespace TPUM.Server.Presentation
         {
             var message = XmlSerializerHelper.Serialize(response);
             _ = _server.SendAsync(clientId, message);
+        }
+
+        private void SendToClientsResponse<TResponse>(List<Guid> clientsIds, TResponse response)
+        {
+            var message = XmlSerializerHelper.Serialize(response);
+            _ = _server.SendToClientsAsync(clientsIds, message);
         }
 
         private void SendBroadcastResponse<TResponse>(TResponse response)
@@ -79,8 +92,8 @@ namespace TPUM.Server.Presentation
                     SendHeaterUpdatedBroadcast(roomId, heater.Id);
                     break;
                 case IHeatSensor sensor:
-                    Console.WriteLine($"-> Temperature Changed in Heat Sensor [{sensor.Id}]. Change Broadcasted to clients");
-                    SendHeatSensorUpdatedBroadcast(roomId, sensor.Id);
+                    Console.WriteLine($"-> Temperature Changed in Heat Sensor [{sensor.Id}]. Change Broadcasted to subscribed clients");
+                    SendHeatSensorUpdatedToSubscribers(roomId, sensor.Id);
                     break;
             }
         }
@@ -93,6 +106,14 @@ namespace TPUM.Server.Presentation
                     Console.WriteLine($"-> Enable Changed in Heater [{heater.Id}]. Change Broadcasted to clients");
                     SendHeaterUpdatedBroadcast(roomId, heater.Id);
                     break;
+            }
+        }
+
+        private void GetClientDisconnected(object? source, Guid clientId)
+        {
+            foreach (var (roomId, clientsIds) in _roomTemperatureSubscribers)
+            {
+                clientsIds.Remove(clientId);
             }
         }
 
@@ -146,6 +167,7 @@ namespace TPUM.Server.Presentation
                 {
                     UnsubscribeFromRoom(room);
                     _rooms.Remove(room);
+                    _roomTemperatureSubscribers.Remove(roomId);
                 }
             }
             _logic.RemoveRoom(roomId);
@@ -170,7 +192,7 @@ namespace TPUM.Server.Presentation
             {
                 var room = GetRoom(roomId);
                 if (room == null) return;
-                SendBroadcastResponse(XmlResponseFactory.CreateAddRoomBroadcastResponse(roomId, room.Name, room.Width, room.Height));
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddRoomBroadcastResponse(roomId, room.Name, room.Width, room.Height));
             }
         }
 
@@ -178,7 +200,7 @@ namespace TPUM.Server.Presentation
         {
             lock (_roomsLock)
             {
-                SendBroadcastResponse(XmlResponseFactory.CreateRemoveRoomBroadcastResponse(roomId));
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateRemoveRoomBroadcastResponse(roomId));
             }
         }
 
@@ -243,7 +265,7 @@ namespace TPUM.Server.Presentation
             {
                 var heater = GetHeater(roomId, heaterId);
                 if (heater == null) return;
-                SendBroadcastResponse(XmlResponseFactory.CreateAddHeaterBroadcastResponse(roomId, heaterId, heater.Position.X, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeaterBroadcastResponse(roomId, heaterId, heater.Position.X, 
                     heater.Position.Y, heater.Temperature));
             }
         }
@@ -254,7 +276,7 @@ namespace TPUM.Server.Presentation
             {
                 var heater = GetHeater(roomId, heaterId);
                 if (heater == null) return;
-                SendBroadcastResponse(XmlResponseFactory.CreateUpdateHeaterBroadcastResponse(roomId, heaterId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeaterBroadcastResponse(roomId, heaterId, 
                     heater.Position.X, heater.Position.Y, heater.Temperature, heater.IsOn));
             }
         }
@@ -263,7 +285,7 @@ namespace TPUM.Server.Presentation
         {
             lock (_roomsLock)
             {
-                SendBroadcastResponse(XmlResponseFactory.CreateRemoveHeaterBroadcastResponse(roomId, heaterId));
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateRemoveHeaterBroadcastResponse(roomId, heaterId));
             }
         }
 
@@ -317,7 +339,7 @@ namespace TPUM.Server.Presentation
             {
                 var sensor = GetHeatSensor(roomId, sensorId);
                 if (sensor == null) return;
-                SendBroadcastResponse(XmlResponseFactory.CreateAddHeatSensorBroadcastResponse(roomId, sensorId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeatSensorBroadcastResponse(roomId, sensorId, 
                     sensor.Position.X, sensor.Position.Y, sensor.Temperature));
             }
         }
@@ -328,8 +350,19 @@ namespace TPUM.Server.Presentation
             {
                 var sensor = GetHeatSensor(roomId, sensorId);
                 if (sensor == null) return;
-                SendBroadcastResponse(XmlResponseFactory.CreateUpdateHeatSensorBroadcastResponse(roomId, sensorId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeatSensorBroadcastResponse(roomId, sensorId, 
                     sensor.Position.X, sensor.Position.Y, sensor.Temperature));
+            }
+        }
+
+        private void SendHeatSensorUpdatedToSubscribers(Guid roomId, Guid sensorId)
+        {
+            lock (_roomsLock)
+            {
+                var sensor = GetHeatSensor(roomId, sensorId);
+                if (sensor == null) return;
+                SendToClientsResponse(_roomTemperatureSubscribers[roomId], 
+                    XmlSubscribeResponseFactory.CreateRoomTemperatureSubscribeResponse(roomId, sensorId, sensor.Temperature));
             }
         }
 
@@ -337,7 +370,7 @@ namespace TPUM.Server.Presentation
         {
             lock (_roomsLock)
             {
-                SendBroadcastResponse(XmlResponseFactory.CreateRemoveHeatSensorBroadcastResponse(roomId, sensorId));
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateRemoveHeatSensorBroadcastResponse(roomId, sensorId));
             }
         }
 
@@ -400,7 +433,7 @@ namespace TPUM.Server.Presentation
                         }
                     }
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateGetAllClientResponse(roomsDto));
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateGetAllClientResponse(roomsDto));
 
                     Console.WriteLine($"-> All Data send to client: [{clientId}]");
                 }
@@ -415,7 +448,7 @@ namespace TPUM.Server.Presentation
                     if (room == null)
                     {
                         Console.WriteLine($"-> Room [{getRoomRequest.RoomId} not found");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateGetRoomFailedClientResponse(getRoomRequest.RoomId));
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateGetRoomFailedClientResponse(getRoomRequest.RoomId));
                         Console.WriteLine($"-> Room [{getRoomRequest.RoomId}] Not Found sent to client: [{clientId}]");
                         return;
                     }
@@ -450,7 +483,7 @@ namespace TPUM.Server.Presentation
                     }
 
                     SendClientResponse(clientId, 
-                        XmlResponseFactory.CreateGetRoomSuccessClientResponse(
+                        XmlClientResponseFactory.CreateGetRoomSuccessClientResponse(
                             room.Id, room.Name, room.Height, room.Width, heatersDto, heatSensorsDto
                             )
                         );
@@ -470,7 +503,7 @@ namespace TPUM.Server.Presentation
                     {
                         Console.WriteLine($"-> Heater [{getHeaterRequest.HeaterId}] in Room [{getHeaterRequest.RoomId}] not found");
                         SendClientResponse(clientId,
-                            XmlResponseFactory.CreateGetHeaterFailedClientResponse(getHeaterRequest.RoomId, getHeaterRequest.HeaterId));
+                            XmlClientResponseFactory.CreateGetHeaterFailedClientResponse(getHeaterRequest.RoomId, getHeaterRequest.HeaterId));
                         Console.WriteLine($"-> Heater [{getHeaterRequest.HeaterId}] in Room [{getHeaterRequest.RoomId}] " +
                                           $"Not Found sent to client: [{clientId}]");
                         return;
@@ -479,7 +512,7 @@ namespace TPUM.Server.Presentation
                     Console.WriteLine($"-> Heater [{getHeaterRequest.HeaterId}] in Room [{getHeaterRequest.RoomId}] founded");
 
                     SendClientResponse(clientId,
-                        XmlResponseFactory.CreateGetHeaterSuccessClientResponse(getHeaterRequest.RoomId, heater.Id,
+                        XmlClientResponseFactory.CreateGetHeaterSuccessClientResponse(getHeaterRequest.RoomId, heater.Id,
                             heater.Position.X, heater.Position.Y, heater.Temperature, heater.IsOn));
 
                     Console.WriteLine($"-> Heater [{getHeaterRequest.HeaterId}] data from Room [{getHeaterRequest.RoomId}] " +
@@ -499,7 +532,7 @@ namespace TPUM.Server.Presentation
                         Console.WriteLine(
                             $"-> Heat Sensor [{getSensorRequest.HeatSensorId}] in Room [{getSensorRequest.RoomId}] not found");
                         SendClientResponse(clientId,
-                            XmlResponseFactory.CreateGetHeatSensorFailedClientResponse(getSensorRequest.RoomId,
+                            XmlClientResponseFactory.CreateGetHeatSensorFailedClientResponse(getSensorRequest.RoomId,
                                 getSensorRequest.HeatSensorId));
                         Console.WriteLine($"-> Heat Sensor [{getSensorRequest.HeatSensorId}] in Room [{getSensorRequest.RoomId}] " +
                                           $"Not Found sent to client: [{clientId}]");
@@ -509,7 +542,7 @@ namespace TPUM.Server.Presentation
                     Console.WriteLine($"-> Heat Sensor [{getSensorRequest.HeatSensorId}] in Room [{getSensorRequest.RoomId}] founded");
 
                     SendClientResponse(clientId,
-                        XmlResponseFactory.CreateGetHeatSensorSuccessClientResponse(getSensorRequest.RoomId, sensor.Id,
+                        XmlClientResponseFactory.CreateGetHeatSensorSuccessClientResponse(getSensorRequest.RoomId, sensor.Id,
                             sensor.Position.X, sensor.Position.Y, sensor.Temperature));
 
                     Console.WriteLine($"-> Heat Sensor [{getSensorRequest.HeatSensorId}] Data from Room [{getSensorRequest.RoomId}] " +
@@ -532,14 +565,14 @@ namespace TPUM.Server.Presentation
                     if (roomId == Guid.Empty)
                     {
                         Console.WriteLine($"-> Room \"{addRoomRequest.Name}\" not added");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateAddRoomFailedClientResponse());
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateAddRoomFailedClientResponse());
                         Console.WriteLine($"-> Room \"{addRoomRequest.Name}\" not added send to client: [{clientId}]");
                         return;
                     }
 
                     Console.WriteLine($"-> Room added with id [{roomId}]");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateAddRoomSuccessClientResponse(roomId));
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateAddRoomSuccessClientResponse(roomId));
 
                     Console.WriteLine($"-> Add Room [{roomId}] Result send to client: [{clientId}]");
 
@@ -560,14 +593,14 @@ namespace TPUM.Server.Presentation
                     if (heaterId == Guid.Empty)
                     {
                         Console.WriteLine($"-> Heater not added to Room [{addHeaterRequest.RoomId}]");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateAddHeaterFailedClientResponse());
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateAddHeaterFailedClientResponse());
                         Console.WriteLine($"-> Heater not added to Room [{addHeaterRequest.RoomId}] send to client: [{clientId}]");
                         return;
                     }
 
                     Console.WriteLine($"-> Heater added to Room [{addHeaterRequest.RoomId}] with id [{heaterId}]");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateAddHeaterSuccessClientResponse(addHeaterRequest.RoomId, heaterId));
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateAddHeaterSuccessClientResponse(addHeaterRequest.RoomId, heaterId));
 
                     Console.WriteLine($"-> Add Heater [{heaterId}] to Room [{addHeaterRequest.RoomId}] result send to client: [{clientId}]");
 
@@ -587,14 +620,14 @@ namespace TPUM.Server.Presentation
                     if (sensorId == Guid.Empty)
                     {
                         Console.WriteLine($"-> Heat Sensor not added to Room [{addSensorRequest.RoomId}]");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateAddHeatSensorFailedClientResponse());
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateAddHeatSensorFailedClientResponse());
                         Console.WriteLine($"-> Heat Sensor not added to Room [{addSensorRequest.RoomId}] send to client: [{clientId}]");
                         return;
                     }
 
                     Console.WriteLine($"-> Heat Sensor added to Room [{addSensorRequest.RoomId}] with id [{sensorId}]");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateAddHeatSensorSuccessClientResponse(addSensorRequest.RoomId, sensorId));
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateAddHeatSensorSuccessClientResponse(addSensorRequest.RoomId, sensorId));
 
                     Console.WriteLine($"-> Add Heat Sensor [{sensorId}] to Room [{addSensorRequest.RoomId}] result send to client: [{clientId}]");
 
@@ -621,7 +654,7 @@ namespace TPUM.Server.Presentation
                             updateHeaterRequest.IsOn))
                     {
                         Console.WriteLine($"-> Heater [{updateHeaterRequest.HeaterId}] in Room [{updateHeaterRequest.RoomId}] not updated");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateUpdateHeaterClientResponse(
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateUpdateHeaterClientResponse(
                             updateHeaterRequest.RoomId, updateHeaterRequest.HeaterId, false));
                         Console.WriteLine(
                             $"-> Heater [{updateHeaterRequest.HeaterId}] in Room [{updateHeaterRequest.RoomId}]" +
@@ -631,7 +664,7 @@ namespace TPUM.Server.Presentation
 
                     Console.WriteLine($"-> Heater [{updateHeaterRequest.HeaterId}] in Room [{updateHeaterRequest.RoomId}] updated");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateUpdateHeaterClientResponse(
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateUpdateHeaterClientResponse(
                         updateHeaterRequest.RoomId, updateHeaterRequest.HeaterId, true));
 
                     Console.WriteLine($"-> Update Heater [{updateHeaterRequest.HeaterId}] in Room [{updateHeaterRequest.RoomId}] result " +
@@ -656,7 +689,7 @@ namespace TPUM.Server.Presentation
                     {
                         Console.WriteLine($"-> Heat Sensor [{updateSensorRequest.HeatSensorId}] in Room [{updateSensorRequest.RoomId}] " +
                                           $"not updated");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateUpdateHeatSensorClientResponse(
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateUpdateHeatSensorClientResponse(
                             updateSensorRequest.RoomId, updateSensorRequest.HeatSensorId, false));
                         Console.WriteLine($"-> Heat Sensor [{updateSensorRequest.HeatSensorId}] in Room [{updateSensorRequest.RoomId}] " +
                                           $"not updated send to client: [{clientId}]");
@@ -665,7 +698,7 @@ namespace TPUM.Server.Presentation
 
                     Console.WriteLine($"-> Heat Sensor [{updateSensorRequest.HeatSensorId}] in Room [{updateSensorRequest.RoomId}] updated");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateUpdateHeatSensorClientResponse(
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateUpdateHeatSensorClientResponse(
                         updateSensorRequest.RoomId, updateSensorRequest.HeatSensorId, true));
 
                     Console.WriteLine($"-> Update Heat Sensor [{updateSensorRequest.HeatSensorId}] in Room [{updateSensorRequest.RoomId}] result " +
@@ -691,14 +724,14 @@ namespace TPUM.Server.Presentation
                     if (!RemoveRoom(removeRoomRequest.RoomId))
                     {
                         Console.WriteLine($"-> Room [{removeRoomRequest.RoomId}] not removed");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateRemoveRoomClientResponse(removeRoomRequest.RoomId, false));
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveRoomClientResponse(removeRoomRequest.RoomId, false));
                         Console.WriteLine($"-> Room [{removeRoomRequest.RoomId}] not removed send to client: [{clientId}]");
                         return;
                     }
 
                     Console.WriteLine($"-> Room [{removeRoomRequest.RoomId}] removed");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateRemoveRoomClientResponse(removeRoomRequest.RoomId, true));
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveRoomClientResponse(removeRoomRequest.RoomId, true));
 
                     Console.WriteLine($"-> Remove Room [{removeRoomRequest.RoomId}] result send to client: [{clientId}]");
 
@@ -717,7 +750,7 @@ namespace TPUM.Server.Presentation
                     if (!RemoveHeater(removeHeaterRequest.RoomId, removeHeaterRequest.HeaterId))
                     {
                         Console.WriteLine($"-> Heater [{removeHeaterRequest.HeaterId}] from Room [{removeHeaterRequest.RoomId}] not removed");
-                        SendClientResponse(clientId, XmlResponseFactory.CreateRemoveHeaterClientResponse(
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveHeaterClientResponse(
                             removeHeaterRequest.RoomId, removeHeaterRequest.HeaterId, false));
                         Console.WriteLine($"-> Heater [{removeHeaterRequest.HeaterId}] from Room [{removeHeaterRequest.RoomId}] not removed " +
                                           $"send to client: [{clientId}]");
@@ -726,7 +759,7 @@ namespace TPUM.Server.Presentation
 
                     Console.WriteLine($"-> Heater [{removeHeaterRequest.HeaterId}] from Room [{removeHeaterRequest.RoomId}] removed");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateRemoveHeaterClientResponse(
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveHeaterClientResponse(
                         removeHeaterRequest.RoomId, removeHeaterRequest.HeaterId, true));
 
                     Console.WriteLine($"-> Remove Heater [{removeHeaterRequest.HeaterId}] from Room [{removeHeaterRequest.RoomId}] result " +
@@ -750,7 +783,7 @@ namespace TPUM.Server.Presentation
                         Console.WriteLine($"-> Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room " +
                                           $"[{removeSensorRequest.RoomId}] not removed");
 
-                        SendClientResponse(clientId, XmlResponseFactory.CreateRemoveHeatSensorClientResponse(
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveHeatSensorClientResponse(
                             removeSensorRequest.RoomId, removeSensorRequest.HeatSensorId, false));
 
                         Console.WriteLine($"-> Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room [{removeSensorRequest.RoomId}] " +
@@ -760,7 +793,7 @@ namespace TPUM.Server.Presentation
 
                     Console.WriteLine($"-> Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room [{removeSensorRequest.RoomId}] removed");
 
-                    SendClientResponse(clientId, XmlResponseFactory.CreateRemoveHeatSensorClientResponse(
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateRemoveHeatSensorClientResponse(
                         removeSensorRequest.RoomId, removeSensorRequest.HeatSensorId, true));
 
                     Console.WriteLine($"-> Remove Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room [{removeSensorRequest.RoomId}] result" +
@@ -770,6 +803,122 @@ namespace TPUM.Server.Presentation
 
                     Console.WriteLine($"-> Removed Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room [{removeSensorRequest.RoomId}] " +
                                       $"Broadcasted to clients");
+                }
+            }
+            // subscribe
+            else if (request.ContentType == RequestType.Subscribe)
+            {
+                var subscribeRequest = (SubscribeRequestContent)request.Content;
+                // room temperature
+                if (subscribeRequest.DataType == SubscribeRequestType.RoomTemperature)
+                {
+                    var roomTemperatureSubscribeRequest = (SubscribeRoomTemperatureRequestData)subscribeRequest.Data;
+
+                    Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] " +
+                                      $"Temperature Request from client: [{clientId}]");
+
+                    if (_rooms.All(room => room.Id != roomTemperatureSubscribeRequest.RoomId))
+                    {
+                        Console.WriteLine($"-> Failed to subscribe to Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
+                                          $"because room doesn't exist");
+
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateSubscribeRoomTemperatureClientResponse(
+                            roomTemperatureSubscribeRequest.RoomId, false));
+
+                        Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
+                                          $"result send to client: [{clientId}]");
+                        return;
+                    }
+
+                    if (!_roomTemperatureSubscribers.ContainsKey(roomTemperatureSubscribeRequest.RoomId))
+                    {
+                        _roomTemperatureSubscribers[roomTemperatureSubscribeRequest.RoomId] = [];
+                    }
+
+                    if (_roomTemperatureSubscribers[roomTemperatureSubscribeRequest.RoomId].Contains(clientId))
+                    {
+                        Console.WriteLine($"-> Failed to subscribe to Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
+                                          $"because client already subscribed");
+
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateSubscribeRoomTemperatureClientResponse(
+                            roomTemperatureSubscribeRequest.RoomId, false));
+
+                        Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
+                                          $"result send to client: [{clientId}]");
+                        return;
+                    }
+
+                    _roomTemperatureSubscribers[roomTemperatureSubscribeRequest.RoomId].Add(clientId);
+
+                    Console.WriteLine($"-> Successfully subscribed to Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature");
+
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateSubscribeRoomTemperatureClientResponse(
+                        roomTemperatureSubscribeRequest.RoomId, true));
+
+                    Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
+                                      $"result send to client: [{clientId}]");
+                }
+            }
+            // unsubscribe
+            else if (request.ContentType == RequestType.Unsubscribe)
+            {
+                var unsubscribeRequest = (UnsubscribeRequestContent)request.Content;
+                // room temperature
+                if (unsubscribeRequest.DataType == UnsubscribeRequestType.RoomTemperature)
+                {
+                    var roomTemperatureUnsubscribeRequest = (UnsubscribeRoomTemperatureRequestData)unsubscribeRequest.Data;
+
+                    Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] " +
+                                      $"Temperature Request from client: [{clientId}]");
+
+                    if (_rooms.All(room => room.Id != roomTemperatureUnsubscribeRequest.RoomId))
+                    {
+                        Console.WriteLine($"-> Failed to unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"because room doesn't exist");
+
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateUnsubscribeRoomTemperatureClientResponse(
+                            roomTemperatureUnsubscribeRequest.RoomId, false));
+
+                        Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"result send to client: [{clientId}]");
+                        return;
+                    }
+
+                    if (!_roomTemperatureSubscribers.ContainsKey(roomTemperatureUnsubscribeRequest.RoomId))
+                    {
+                        Console.WriteLine($"-> Failed to unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"because client wasn't subscribed");
+
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateUnsubscribeRoomTemperatureClientResponse(
+                            roomTemperatureUnsubscribeRequest.RoomId, false));
+
+                        Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"result send to client: [{clientId}]");
+                        return;
+                    }
+
+                    if (!_roomTemperatureSubscribers[roomTemperatureUnsubscribeRequest.RoomId].Contains(clientId))
+                    {
+                        Console.WriteLine($"-> Failed to unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"because client wasn't subscribed");
+
+                        SendClientResponse(clientId, XmlClientResponseFactory.CreateUnsubscribeRoomTemperatureClientResponse(
+                            roomTemperatureUnsubscribeRequest.RoomId, false));
+
+                        Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                          $"result send to client: [{clientId}]");
+                        return;
+                    }
+
+                    _roomTemperatureSubscribers[roomTemperatureUnsubscribeRequest.RoomId].Remove(clientId);
+
+                    Console.WriteLine($"-> Successfully unsubscribed From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature");
+
+                    SendClientResponse(clientId, XmlClientResponseFactory.CreateUnsubscribeRoomTemperatureClientResponse(
+                        roomTemperatureUnsubscribeRequest.RoomId, true));
+
+                    Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] Temperature " +
+                                      $"result send to client: [{clientId}]");
                 }
             }
         }

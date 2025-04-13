@@ -3,12 +3,15 @@ using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
 using TPUM.Server.Presentation.Events;
+using TPUM.XmlShared;
+using TPUM.XmlShared.Request;
 
 namespace TPUM.Server.Presentation
 {
     internal class WebSocketServer : IWebSocketServer
     {
         public event ClientRequestReceivedEventHandler? ClientRequestReceived;
+        public event ClientDisconnectedEventHandler? ClientDisconnected;
 
         private readonly HttpListener _httpListener = new();
         private readonly string _uriPrefix;
@@ -82,6 +85,7 @@ namespace TPUM.Server.Presentation
                     webSocket.Dispose();
                     Console.WriteLine($"-> Client [{clientId}] disconnected.");
                 }
+                OnClientDisconnected(clientId);
             }
         }
 
@@ -93,8 +97,32 @@ namespace TPUM.Server.Presentation
                 return;
             }
 
+            if (socket.State == WebSocketState.Open)
+            {
+                var data = Encoding.UTF8.GetBytes(message);
+                await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true,
+                    CancellationToken.None);
+            }
+        }
+
+        public async Task SendToClientsAsync(List<Guid> clientsIds, string message)
+        {
             var data = Encoding.UTF8.GetBytes(message);
-            await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, CancellationToken.None);
+
+            foreach (var clientId in clientsIds)
+            {
+                if (!_clients.TryGetValue(clientId, out var socket))
+                {
+                    Console.WriteLine($"-> Client [{clientId}] could not be found.");
+                    continue;
+                }
+
+                if (socket.State == WebSocketState.Open)
+                {
+                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true,
+                        CancellationToken.None);
+                }
+            }
         }
 
         public async Task BroadcastAsync(string message)
@@ -114,6 +142,11 @@ namespace TPUM.Server.Presentation
         private void OnClientRequestReceived(Guid clientId, Request request)
         {
             ClientRequestReceived?.Invoke(this, clientId, request);
+        }
+
+        private void OnClientDisconnected(Guid clientId)
+        {
+            ClientDisconnected?.Invoke(this, clientId);
         }
     }
 }

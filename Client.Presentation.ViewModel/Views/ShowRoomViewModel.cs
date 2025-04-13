@@ -53,20 +53,54 @@ namespace TPUM.Client.Presentation.ViewModel
             CurrentRoom.TemperatureChanged += GetTemperatureChange;
             CurrentRoom.EnableChanged += GetEnableChange;
             CurrentRoom.PositionChanged += GetPositionChange;
+            CurrentRoom.HeaterAdded += GetHeaterAdded;
+            CurrentRoom.HeaterRemoved += GetHeaterRemoved;
+            CurrentRoom.HeatSensorAdded += GetHeatSensorAdded;
+            CurrentRoom.HeatSensorRemoved += GetHeatSensorRemoved;
         }
 
         private void GetTemperatureChange(object? source, float lastTemperature, float newTemperature)
         {
+            OnPropertyChanged(nameof(Heaters));
+            OnPropertyChanged(nameof(HeatSensors));
             OnPropertyChanged(nameof(RoomTemp));
         }
 
         private void GetEnableChange(object? source, bool lastEnable, bool newEnable)
         {
+            OnPropertyChanged(nameof(Heaters));
+            OnPropertyChanged(nameof(HeatSensors));
             OnPropertyChanged(nameof(RoomTemp));
         }
 
         private void GetPositionChange(object? source, IPosition lastPosition, IPosition newPosition)
         {
+            OnPropertyChanged(nameof(Heaters));
+            OnPropertyChanged(nameof(HeatSensors));
+            OnPropertyChanged(nameof(RoomTemp));
+        }
+
+        private void GetHeaterAdded(object? source, IHeater heater)
+        {
+            OnPropertyChanged(nameof(Heaters));
+            OnPropertyChanged(nameof(RoomTemp));
+        }
+
+        private void GetHeaterRemoved(object? source, Guid heaterId)
+        {
+            OnPropertyChanged(nameof(Heaters));
+            OnPropertyChanged(nameof(RoomTemp));
+        }
+
+        private void GetHeatSensorAdded(object? source, IHeatSensor sensor)
+        {
+            OnPropertyChanged(nameof(HeatSensors));
+            OnPropertyChanged(nameof(RoomTemp));
+        }
+
+        private void GetHeatSensorRemoved(object? source, Guid sensorId)
+        {
+            OnPropertyChanged(nameof(HeatSensors));
             OnPropertyChanged(nameof(RoomTemp));
         }
 
@@ -83,6 +117,10 @@ namespace TPUM.Client.Presentation.ViewModel
                 CurrentRoom.TemperatureChanged -= GetTemperatureChange;
                 CurrentRoom.EnableChanged -= GetEnableChange;
                 CurrentRoom.PositionChanged -= GetPositionChange;
+                CurrentRoom.HeaterAdded -= GetHeaterAdded;
+                CurrentRoom.HeaterRemoved -= GetHeaterRemoved;
+                CurrentRoom.HeatSensorAdded -= GetHeatSensorAdded;
+                CurrentRoom.HeatSensorRemoved -= GetHeatSensorRemoved;
             }
             MainViewModel.Instance?.SetView((Type)parameter);
         }

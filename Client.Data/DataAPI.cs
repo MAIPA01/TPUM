@@ -1,4 +1,9 @@
 using TPUM.Client.Data.Events;
+using TPUM.XmlShared;
+using TPUM.XmlShared.Request;
+using TPUM.XmlShared.Response.Broadcast;
+using TPUM.XmlShared.Response.Client;
+using TPUM.XmlShared.Response.Subscribe;
 
 namespace TPUM.Client.Data
 {
@@ -57,6 +62,7 @@ namespace TPUM.Client.Data
             _client = new WebSocketClient();
             _client.ClientConnected += OnClientConnected;
             _client.ResponseReceived += HandleResponse;
+            _client.SubscribeReceived += HandleSubscribe;
             _client.BroadcastReceived += HandleBroadcast;
             _ = _client.ConnectAsync(serverUri);
         }
@@ -65,6 +71,20 @@ namespace TPUM.Client.Data
         {
             var xml = XmlSerializerHelper.Serialize(request);
             _ = _client.SendAsync(xml);
+        }
+
+        internal void SubscribeToRoomTemperature(Guid roomId)
+        {
+            if (!_connected) return;
+
+            SendRequest(XmlRequestFactory.CreateSubscribeRoomTemperatureRequest(roomId));
+        }
+
+        internal void UnsubscribeFromRoomTemperature(Guid roomId)
+        {
+            if (!_connected) return;
+
+            SendRequest(XmlRequestFactory.CreateUnsubscribeRoomTemperatureRequest(roomId));
         }
 
         internal void GetHeater(Guid roomId, Guid heaterId)
@@ -457,6 +477,27 @@ namespace TPUM.Client.Data
             }
         }
 
+        private void HandleSubscribe(object? source, SubscribeResponseContent subscribe)
+        {
+            if (!_connected) return;
+
+            lock (_roomsLock)
+            {
+                // room temperature
+                if (subscribe.DataType == SubscribeResponseType.RoomTemperature)
+                {
+                    var roomTemperatureSubscribe = (RoomTemperatureSubscribeData)subscribe.Data;
+
+                    var room = GetRoom(roomTemperatureSubscribe.RoomId);
+                    var sensor = room?.GetHeatSensor(roomTemperatureSubscribe.HeatSensorId);
+                    if (sensor == null) return;
+
+                    (sensor as HeatSensorData)!.UpdateDataFromServer(
+                        sensor.Position.X, sensor.Position.Y, roomTemperatureSubscribe.Temperature);
+                }
+            }
+        }
+
         private void HandleResponse(object? source, ClientResponseContent response)
         {
             if (!_connected) return;
@@ -511,7 +552,7 @@ namespace TPUM.Client.Data
                     // room
                     if (addResponse.DataType == AddClientType.Room)
                     {
-                        var addRoomResponse = (AddRoomClientData)addResponse.Data;
+                        var addRoomResponse = (AddRoomClientData)addResponse.Data!;
                         if (addResponse.Success)
                         {
                             // Successfully added room
@@ -524,7 +565,7 @@ namespace TPUM.Client.Data
                     // heater
                     else if (addResponse.DataType == AddClientType.Heater)
                     {
-                        var addHeaterResponse = (AddHeaterClientData)addResponse.Data;
+                        var addHeaterResponse = (AddHeaterClientData)addResponse.Data!;
                         if (addResponse.Success)
                         {
                             // Successfully added heater
@@ -537,7 +578,7 @@ namespace TPUM.Client.Data
                     // heatSensor
                     else if (addResponse.DataType == AddClientType.HeatSensor)
                     {
-                        var addHeatSensorResponse = (AddHeatSensorClientData)addResponse.Data;
+                        var addHeatSensorResponse = (AddHeatSensorClientData)addResponse.Data!;
                         if (addResponse.Success)
                         {
                             // Successfully added heat sensor
@@ -620,6 +661,44 @@ namespace TPUM.Client.Data
                         else
                         {
                             // heat sensor removal failed
+                        }
+                    }
+                }
+                // subscribe
+                else if (response.DataType == ClientResponseType.Subscribe)
+                {
+                    var subscribeResponse = (SubscribeClientResponseData)response.Data;
+                    // room temperature
+                    if (subscribeResponse.DataType == SubscribeClientType.RoomTemperature)
+                    {
+                        var roomTemperatureSubscribeResponse =
+                            (SubscribeRoomTemperatureClientData)subscribeResponse.Data;
+                        if (subscribeResponse.Success)
+                        {
+                            // Successfully subscribed
+                        }
+                        else
+                        {
+                            // Failed to subscribe
+                        }
+                    }
+                }
+                // unsubscribe
+                else if (response.DataType == ClientResponseType.Unsubscribe)
+                {
+                    var unsubscribeResponse = (UnsubscribeClientResponseData)response.Data;
+                    // room temperature
+                    if (unsubscribeResponse.DataType == UnsubscribeClientType.RoomTemperature)
+                    {
+                        var roomTemperatureUnsubscribeResponse =
+                            (UnsubscribeRoomTemperatureClientData)unsubscribeResponse.Data;
+                        if (unsubscribeResponse.Success)
+                        {
+                            // Successfully unsubscribed
+                        }
+                        else
+                        {
+                            // Failed to unsubscribe
                         }
                     }
                 }
@@ -711,6 +790,7 @@ namespace TPUM.Client.Data
         {
             _client.ClientConnected -= OnClientConnected;
             _client.ResponseReceived -= HandleResponse;
+            _client.SubscribeReceived -= HandleSubscribe;
             _client.BroadcastReceived -= HandleBroadcast;
             _ = _client.DisconnectAsync();
             _rooms.Clear();

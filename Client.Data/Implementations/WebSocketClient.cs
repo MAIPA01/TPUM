@@ -1,7 +1,11 @@
-﻿using System;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
 using TPUM.Client.Data.Events;
+using TPUM.XmlShared;
+using TPUM.XmlShared.Response;
+using TPUM.XmlShared.Response.Broadcast;
+using TPUM.XmlShared.Response.Client;
+using TPUM.XmlShared.Response.Subscribe;
 
 namespace TPUM.Client.Data
 {
@@ -13,6 +17,7 @@ namespace TPUM.Client.Data
 
         public event ClientConnectedEventHandler? ClientConnected;
         public event ResponseReceivedEventHandler? ResponseReceived;
+        public event SubscribeReceivedEventHandler? SubscribeReceived;
         public event BroadcastReceivedEventHandler? BroadcastReceived;
 
         public async Task ConnectAsync(string uri)
@@ -63,6 +68,9 @@ namespace TPUM.Client.Data
                 case ResponseType.Broadcast:
                     OnBroadcastReceived((BroadcastResponseContent)response.Content);
                     break;
+                case ResponseType.Subscribe:
+                    OnSubscribeReceived((SubscribeResponseContent)response.Content);
+                    break;
                 default:
                     return;
             }
@@ -91,6 +99,11 @@ namespace TPUM.Client.Data
         private void OnBroadcastReceived(BroadcastResponseContent broadcast)
         {
             BroadcastReceived?.Invoke(this, broadcast);
+        }
+
+        private void OnSubscribeReceived(SubscribeResponseContent subscribe)
+        {
+            SubscribeReceived?.Invoke(this, subscribe);
         }
 
         private void OnResponseReceived(ClientResponseContent response)
