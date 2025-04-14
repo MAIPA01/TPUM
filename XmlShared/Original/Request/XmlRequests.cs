@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Request
+namespace TPUM.XmlShared.Original.Request
 {
     #region GET_REQUEST
     public enum GetRequestType

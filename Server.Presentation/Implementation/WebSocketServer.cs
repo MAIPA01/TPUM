@@ -4,7 +4,7 @@ using System.Text;
 using System.Collections.Concurrent;
 using TPUM.Server.Presentation.Events;
 using TPUM.XmlShared;
-using TPUM.XmlShared.Request;
+using TPUM.XmlShared.Generated;
 
 namespace TPUM.Server.Presentation
 {

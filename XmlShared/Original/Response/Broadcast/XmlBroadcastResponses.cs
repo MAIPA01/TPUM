@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Response.Broadcast
+namespace TPUM.XmlShared.Original.Response.Broadcast
 {
 #nullable disable
     #region ADD_BROADCAST_RESPONSE

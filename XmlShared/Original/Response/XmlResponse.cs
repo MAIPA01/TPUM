@@ -1,9 +1,9 @@
 ﻿using System.Xml.Serialization;
-using TPUM.XmlShared.Response.Broadcast;
-using TPUM.XmlShared.Response.Client;
-using TPUM.XmlShared.Response.Subscribe;
+using TPUM.XmlShared.Original.Response.Broadcast;
+using TPUM.XmlShared.Original.Response.Client;
+using TPUM.XmlShared.Original.Response.Subscribe;
 
-namespace TPUM.XmlShared.Response
+namespace TPUM.XmlShared.Original.Response
 {
 #nullable disable
     public enum ResponseType

@@ -75,6 +75,6 @@ for %%f in (%OUTPUT_SCHEMA_DIR%\*.xsd) do (
 )
 
 rem stworzenie klas na podstawie schemy
-xsd !xsdFiles! /out:Generated /classes
+xsd !xsdFiles! /out:Generated /classes /namespace:TPUM.XmlShared.Generated
 
 endlocal

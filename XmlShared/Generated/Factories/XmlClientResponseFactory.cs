@@ -1,7 +1,4 @@
-﻿using TPUM.XmlShared.Original.Response.Client;
-using TPUM.XmlShared.Original.Dto;
-
-namespace TPUM.XmlShared.Original.Response.Factory
+﻿namespace TPUM.XmlShared.Generated.Factory
 {
     public static class XmlClientResponseFactory
     {
@@ -10,7 +7,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return XmlResponseFactory.CreateResponse(ResponseType.Client, new ClientResponseContent
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -20,20 +17,20 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return CreateClientResponse(ClientResponseType.Get, new GetClientResponseData
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
-        public static Response CreateGetAllClientResponse(List<RoomDataContract> roomsDto)
+        public static Response CreateGetAllClientResponse(IEnumerable<RoomDataContract> roomsDto)
         {
             return CreateGetClientResponse(GetClientType.All, new GetAllClientData
             {
-                Rooms = roomsDto
+                Rooms = [.. roomsDto]
             });
         }
 
         public static Response CreateGetRoomSuccessClientResponse(Guid roomId, string name, float height, float width,
-            List<HeaterDataContract> heaters, List<HeatSensorDataContract> sensors)
+            IEnumerable<HeaterDataContract> heaters, IEnumerable<HeatSensorDataContract> sensors)
         {
             return CreateGetClientResponse(GetClientType.Room, new GetRoomClientData
             {
@@ -43,8 +40,8 @@ namespace TPUM.XmlShared.Original.Response.Factory
                     Name = name,
                     Height = height,
                     Width = width,
-                    Heaters = heaters,
-                    HeatSensors = sensors
+                    Heaters = [.. heaters],
+                    HeatSensors = [.. sensors]
                 }
             });
         }
@@ -119,7 +116,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             {
                 DataType = type,
                 Success = true,
-                Data = data
+                Item = data
             });
         }
 
@@ -129,7 +126,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             {
                 DataType = type,
                 Success = false,
-                Data = null
+                Item = null
             });
         }
 
@@ -182,7 +179,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             {
                 DataType = type,
                 Success = success,
-                Data = data
+                Item = data
             });
         }
 
@@ -212,7 +209,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             {
                 DataType = type,
                 Success = success,
-                Data = data
+                Item = data
             });
         }
 
@@ -244,44 +241,32 @@ namespace TPUM.XmlShared.Original.Response.Factory
         #endregion REMOVE_CLIENT_RESPONSES
 
         #region SUBSCRIBE_CLIENT_RESPONSES
-        private static Response CreateSubscribeClientResponse(SubscribeClientType type, bool success, SubscribeClientData data)
+        public static Response CreateSubscribeRoomTemperatureClientResponse(Guid roomId, bool success)
         {
             return CreateClientResponse(ClientResponseType.Subscribe, new SubscribeClientResponseData
             {
-                DataType = type,
+                DataType = SubscribeClientType.RoomTemperature,
                 Success = success,
-                Data = data
-            });
-        }
-
-        public static Response CreateSubscribeRoomTemperatureClientResponse(Guid roomId, bool success)
-        {
-            return CreateSubscribeClientResponse(SubscribeClientType.RoomTemperature, success,
-                new SubscribeRoomTemperatureClientData
+                RoomTemperatureData = new SubscribeRoomTemperatureClientData
                 {
                     RoomId = roomId
-                });
+                }
+            });
         }
         #endregion
 
         #region UNSUBSCRIBE_CLIENT_RESPONSES
-        private static Response CreateUnsubscribeClientResponse(UnsubscribeClientType type, bool success, UnsubscribeClientData data)
+        public static Response CreateUnsubscribeRoomTemperatureClientResponse(Guid roomId, bool success)
         {
             return CreateClientResponse(ClientResponseType.Unsubscribe, new UnsubscribeClientResponseData
             {
-                DataType = type,
+                DataType = UnsubscribeClientType.RoomTemperature,
                 Success = success,
-                Data = data
-            });
-        }
-
-        public static Response CreateUnsubscribeRoomTemperatureClientResponse(Guid roomId, bool success)
-        {
-            return CreateUnsubscribeClientResponse(UnsubscribeClientType.RoomTemperature, success,
-                new UnsubscribeRoomTemperatureClientData
+                RoomTemperatureData = new UnsubscribeRoomTemperatureClientData
                 {
                     RoomId = roomId
-                });
+                }
+            });
         }
         #endregion
     }

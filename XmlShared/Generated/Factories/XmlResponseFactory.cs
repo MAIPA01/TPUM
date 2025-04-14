@@ -1,4 +1,4 @@
-﻿namespace TPUM.XmlShared.Original.Response.Factory
+﻿namespace TPUM.XmlShared.Generated.Factory
 {
     internal static class XmlResponseFactory
     {
@@ -7,7 +7,7 @@
             return new Response
             {
                 ContentType = type,
-                Content = content
+                Item = content
             };
         }
     }

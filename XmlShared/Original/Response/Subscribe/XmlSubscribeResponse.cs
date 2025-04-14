@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Response.Subscribe
+namespace TPUM.XmlShared.Original.Response.Subscribe
 {
 #nullable disable
     public enum SubscribeResponseType

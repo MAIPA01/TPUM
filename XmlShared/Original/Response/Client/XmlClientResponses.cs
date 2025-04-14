@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using TPUM.XmlShared.Dto;
+using TPUM.XmlShared.Original.Dto;
 
-namespace TPUM.XmlShared.Response.Client
+namespace TPUM.XmlShared.Original.Response.Client
 {
 #nullable disable
     #region GET_CLIENT_RESPONSE

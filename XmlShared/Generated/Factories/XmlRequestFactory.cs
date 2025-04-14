@@ -1,4 +1,4 @@
-﻿namespace TPUM.XmlShared.Original.Request.Factory
+﻿namespace TPUM.XmlShared.Generated.Factory
 {
     public static class XmlRequestFactory
     {
@@ -7,7 +7,7 @@
             return new Request
             {
                 ContentType = type,
-                Content = content
+                Item = content
             };
         }
 
@@ -17,7 +17,7 @@
             return CreateRequest(RequestType.Get, new GetRequestContent
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -59,7 +59,7 @@
             return CreateRequest(RequestType.Add, new AddRequestContent
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -101,7 +101,7 @@
             return CreateRequest(RequestType.Update, new UpdateRequestContent
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -136,7 +136,7 @@
             return CreateRequest(RequestType.Remove, new RemoveRequestContent
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -168,39 +168,29 @@
         #endregion REMOVE_REQUESTS
 
         #region SUBSCRIBE_REQUESTS
-        private static Request CreateSubscribeRequest(SubscribeRequestType type, SubscribeRequestData data)
+        public static Request CreateSubscribeRoomTemperatureRequest(Guid roomId)
         {
             return CreateRequest(RequestType.Subscribe, new SubscribeRequestContent
             {
-                DataType = type,
-                Data = data
-            });
-        }
-
-        public static Request CreateSubscribeRoomTemperatureRequest(Guid roomId)
-        {
-            return CreateSubscribeRequest(SubscribeRequestType.RoomTemperature, new SubscribeRoomTemperatureRequestData
-            {
-                RoomId = roomId
+                DataType = SubscribeRequestType.RoomTemperature,
+                RoomTemperatureData = new SubscribeRoomTemperatureRequestData
+                {
+                    RoomId = roomId
+                }
             });
         }
         #endregion SUBSCRIBE_REQUESTS
 
         #region UNSUBSCRIBE_REQUESTS
-        private static Request CreateUnsubscribeRequest(UnsubscribeRequestType type, UnsubscribeRequestData data)
+        public static Request CreateUnsubscribeRoomTemperatureRequest(Guid roomId)
         {
             return CreateRequest(RequestType.Unsubscribe, new UnsubscribeRequestContent
             {
-                DataType = type,
-                Data = data
-            });
-        }
-
-        public static Request CreateUnsubscribeRoomTemperatureRequest(Guid roomId)
-        {
-            return CreateUnsubscribeRequest(UnsubscribeRequestType.RoomTemperature, new UnsubscribeRoomTemperatureRequestData
-            {
-                RoomId = roomId
+                DataType = UnsubscribeRequestType.RoomTemperature,
+                RoomTemperatureData = new UnsubscribeRoomTemperatureRequestData
+                {
+                    RoomId = roomId
+                }
             });
         }
         #endregion UNSUBSCRIBE_REQUESTS

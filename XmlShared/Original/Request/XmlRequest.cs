@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Request
+namespace TPUM.XmlShared.Original.Request
 {
     public enum RequestType
     {

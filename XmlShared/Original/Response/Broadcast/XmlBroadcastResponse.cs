@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Response.Broadcast
+namespace TPUM.XmlShared.Original.Response.Broadcast
 {
 #nullable disable
     public enum BroadcastResponseType

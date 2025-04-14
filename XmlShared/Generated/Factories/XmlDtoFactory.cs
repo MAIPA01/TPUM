@@ -1,9 +1,9 @@
-﻿namespace TPUM.XmlShared.Original.Dto.Factory
+﻿namespace TPUM.XmlShared.Generated.Factory
 {
     public static class XmlDtoFactory
     {
-        public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height, List<HeaterDataContract> heaters,
-            List<HeatSensorDataContract> sensors)
+        public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height, 
+            IEnumerable<HeaterDataContract> heaters, IEnumerable<HeatSensorDataContract> sensors)
         {
             return new RoomDataContract
             {
@@ -11,8 +11,8 @@
                 Name = name,
                 Width = width,
                 Height = height,
-                Heaters = heaters,
-                HeatSensors = sensors
+                Heaters = [.. heaters],
+                HeatSensors = [.. sensors]
             };
         }
 

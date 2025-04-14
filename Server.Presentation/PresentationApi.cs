@@ -1,9 +1,7 @@
 ﻿using TPUM.Server.Logic;
 using TPUM.XmlShared;
-using TPUM.XmlShared.Request;
-using TPUM.XmlShared.Response.Broadcast;
-using TPUM.XmlShared.Response.Client;
-using TPUM.XmlShared.Response.Subscribe;
+using TPUM.XmlShared.Generated;
+using TPUM.XmlShared.Generated.Factory;
 
 namespace TPUM.Server.Presentation
 {
@@ -73,11 +71,11 @@ namespace TPUM.Server.Presentation
             switch (source)
             {
                 case IHeater heater:
-                    Console.WriteLine($"-> Position Changed in Heater [{heater.Id}]. Change Broadcasted to clients");
+                    Console.WriteLine($"-> Position Changed in Heater [{heater.Id}] in Room [{roomId}]. Change Broadcasted to clients");
                     SendHeaterUpdatedBroadcast(roomId, heater.Id);
                     break;
                 case IHeatSensor sensor:
-                    Console.WriteLine($"-> Position Changed in Heat Sensor [{sensor.Id}]. Change Broadcasted to clients");
+                    Console.WriteLine($"-> Position Changed in Heat Sensor [{sensor.Id}] in Room [{roomId}]. Change Broadcasted to clients");
                     SendHeatSensorUpdatedBroadcast(roomId, sensor.Id);
                     break;
             }
@@ -88,11 +86,11 @@ namespace TPUM.Server.Presentation
             switch (source)
             {
                 case IHeater heater:
-                    Console.WriteLine($"-> Temperature Changed in Heater [{heater.Id}]. Change Broadcasted to clients");
+                    Console.WriteLine($"-> Temperature Changed in Heater [{heater.Id}] in Room [{roomId}]. Change Broadcasted to clients");
                     SendHeaterUpdatedBroadcast(roomId, heater.Id);
                     break;
                 case IHeatSensor sensor:
-                    Console.WriteLine($"-> Temperature Changed in Heat Sensor [{sensor.Id}]. Change Broadcasted to subscribed clients");
+                    Console.WriteLine($"-> Temperature Changed in Heat Sensor [{sensor.Id}] in Room [{roomId}]. Change Broadcasted to subscribed clients");
                     SendHeatSensorUpdatedToSubscribers(roomId, sensor.Id);
                     break;
             }
@@ -103,7 +101,7 @@ namespace TPUM.Server.Presentation
             switch (source)
             {
                 case IHeater heater:
-                    Console.WriteLine($"-> Enable Changed in Heater [{heater.Id}]. Change Broadcasted to clients");
+                    Console.WriteLine($"-> Enable Changed in Heater [{heater.Id}] in Room [{roomId}]. Change Broadcasted to clients");
                     SendHeaterUpdatedBroadcast(roomId, heater.Id);
                     break;
             }
@@ -385,7 +383,7 @@ namespace TPUM.Server.Presentation
             // get
             if (request.ContentType == RequestType.Get)
             {
-                var getRequest = (GetRequestContent)request.Content;
+                var getRequest = (GetRequestContent)request.Item;
                 // all
                 if (getRequest.DataType == GetRequestType.All)
                 {
@@ -396,40 +394,37 @@ namespace TPUM.Server.Presentation
                     {
                         foreach (var room in _rooms)
                         {
-                            var roomData = new RoomDataContract
-                            {
-                                RoomId = room.Id,
-                                Name = room.Name,
-                                Height = room.Height,
-                                Width = room.Width
-                            };
-
+                            List<HeaterDataContract> heaters = [];
                             foreach (var heater in room.Heaters)
                             {
-                                var heaterData = new HeaterDataContract
-                                {
-                                    HeaterId = heater.Id,
-                                    IsOn = heater.IsOn,
-                                    Temperature = heater.Temperature,
-                                    X = heater.Position.X,
-                                    Y = heater.Position.Y
-                                };
-                                roomData.Heaters.Add(heaterData);
+                                heaters.Add(XmlDtoFactory.CreateHeaterDto(
+                                    heater.Id,
+                                    heater.Position.X,
+                                    heater.Position.Y,
+                                    heater.Temperature,
+                                    heater.IsOn)
+                                );
                             }
 
+                            List<HeatSensorDataContract> sensors = [];
                             foreach (var sensor in room.HeatSensors)
                             {
-                                var sensorData = new HeatSensorDataContract
-                                {
-                                    HeatSensorId = sensor.Id,
-                                    Temperature = sensor.Temperature,
-                                    X = sensor.Position.X,
-                                    Y = sensor.Position.Y
-                                };
-                                roomData.HeatSensors.Add(sensorData);
+                                sensors.Add(XmlDtoFactory.CreateHeatSensorDto(
+                                    sensor.Id,
+                                    sensor.Position.X,
+                                    sensor.Position.Y,
+                                    sensor.Temperature)
+                                );
                             }
 
-                            roomsDto.Add(roomData);
+                            roomsDto.Add(XmlDtoFactory.CreateRoomDto(
+                                room.Id,
+                                room.Name,
+                                room.Width,
+                                room.Height,
+                                heaters,
+                                sensors)
+                            );
                         }
                     }
 
@@ -440,7 +435,7 @@ namespace TPUM.Server.Presentation
                 // room
                 else if (getRequest.DataType == GetRequestType.Room)
                 {
-                    var getRoomRequest = (GetRoomRequestData)getRequest.Data!;
+                    var getRoomRequest = (GetRoomRequestData)getRequest.Item!;
 
                     Console.WriteLine($"-> Get Room [{getRoomRequest.RoomId}] Data Request from client: [{clientId}]");
 
@@ -493,7 +488,7 @@ namespace TPUM.Server.Presentation
                 // heater
                 else if (getRequest.DataType == GetRequestType.Heater)
                 {
-                    var getHeaterRequest = (GetHeaterRequestData)getRequest.Data!;
+                    var getHeaterRequest = (GetHeaterRequestData)getRequest.Item!;
 
                     Console.WriteLine($"-> Get Heater [{getHeaterRequest.HeaterId}] Data from Room [{getHeaterRequest.RoomId}] " +
                                       $"Request from client: [{clientId}]");
@@ -521,7 +516,7 @@ namespace TPUM.Server.Presentation
                 // heat sensor
                 else if (getRequest.DataType == GetRequestType.HeatSensor)
                 {
-                    var getSensorRequest = (GetHeatSensorRequestData)getRequest.Data!;
+                    var getSensorRequest = (GetHeatSensorRequestData)getRequest.Item!;
 
                     Console.WriteLine($"-> Get Heat Sensor [{getSensorRequest.HeatSensorId}] Data from Room [{getSensorRequest.RoomId}] " +
                                       $"Request from client: [{clientId}]");
@@ -552,13 +547,13 @@ namespace TPUM.Server.Presentation
             // add
             else if (request.ContentType == RequestType.Add)
             {
-                var addRequest = (AddRequestContent)request.Content;
+                var addRequest = (AddRequestContent)request.Item;
                 // room
                 if (addRequest.DataType == AddRequestType.Room)
                 {
-                    var addRoomRequest = (AddRoomRequestData)addRequest.Data;
+                    var addRoomRequest = (AddRoomRequestData)addRequest.Item;
 
-                    Console.WriteLine($"-> Add Room \"{addRoomRequest.Name}\" {addRoomRequest.Width} mX{addRoomRequest.Height} m " +
+                    Console.WriteLine($"-> Add Room \"{addRoomRequest.Name}\" {addRoomRequest.Width}m X {addRoomRequest.Height}m " +
                                       $"Request from client: [{clientId}]");
 
                     var roomId = AddRoom(addRoomRequest.Name, addRoomRequest.Width, addRoomRequest.Height);
@@ -583,7 +578,7 @@ namespace TPUM.Server.Presentation
                 // heater
                 else if (addRequest.DataType == AddRequestType.Heater)
                 {
-                    var addHeaterRequest = (AddHeaterRequestData)addRequest.Data;
+                    var addHeaterRequest = (AddHeaterRequestData)addRequest.Item;
 
                     Console.WriteLine($"-> Add Heater ({addHeaterRequest.X}, {addHeaterRequest.Y}) {addHeaterRequest.Temperature}\u00b0C " +
                                       $"to Room [{addHeaterRequest.RoomId}] Request from client: [{clientId}]");
@@ -606,12 +601,12 @@ namespace TPUM.Server.Presentation
 
                     SendHeaterAddedBroadcast(addHeaterRequest.RoomId, heaterId);
 
-                    Console.WriteLine($"-> Added Heater [{heaterId}] to Room [{addHeaterRequest.RoomId}] Broadcasted to clients\n");
+                    Console.WriteLine($"-> Added Heater [{heaterId}] to Room [{addHeaterRequest.RoomId}] Broadcasted to clients");
                 }
                 // heat sensor
                 else if (addRequest.DataType == AddRequestType.HeatSensor)
                 {
-                    var addSensorRequest = (AddHeatSensorRequestData)addRequest.Data;
+                    var addSensorRequest = (AddHeatSensorRequestData)addRequest.Item;
 
                     Console.WriteLine($"-> Add Heat Sensor ({addSensorRequest.X}, {addSensorRequest.Y}) to Room [{addSensorRequest.RoomId}] " +
                                       $"Request from client: [{clientId}]");
@@ -639,11 +634,11 @@ namespace TPUM.Server.Presentation
             // update
             else if (request.ContentType == RequestType.Update)
             {
-                var updateRequest = (UpdateRequestContent)request.Content;
+                var updateRequest = (UpdateRequestContent)request.Item;
                 // heater
                 if (updateRequest.DataType == UpdateRequestType.Heater)
                 {
-                    var updateHeaterRequest = (UpdateHeaterRequestData)updateRequest.Data;
+                    var updateHeaterRequest = (UpdateHeaterRequestData)updateRequest.Item;
 
                     Console.WriteLine($"-> Update Heater {updateHeaterRequest.HeaterId} ({updateHeaterRequest.X}, {updateHeaterRequest.Y})" +
                                       $" {updateHeaterRequest.Temperature}\u00b0C On:{updateHeaterRequest.IsOn} in Room " +
@@ -678,7 +673,7 @@ namespace TPUM.Server.Presentation
                 // heat sensor
                 else if (updateRequest.DataType == UpdateRequestType.HeatSensor)
                 {
-                    var updateSensorRequest = (UpdateHeatSensorRequestData)updateRequest.Data;
+                    var updateSensorRequest = (UpdateHeatSensorRequestData)updateRequest.Item;
 
                     Console.WriteLine($"-> Update Heat Sensor [{updateSensorRequest.HeatSensorId}]" +
                                       $" ({updateSensorRequest.X}, {updateSensorRequest.Y})" +
@@ -713,11 +708,11 @@ namespace TPUM.Server.Presentation
             // remove
             else if (request.ContentType == RequestType.Remove)
             {
-                var removeRequest = (RemoveRequestContent)request.Content;
+                var removeRequest = (RemoveRequestContent)request.Item;
                 // room
                 if (removeRequest.DataType == RemoveRequestType.Room)
                 {
-                    var removeRoomRequest = (RemoveRoomRequestData)removeRequest.Data;
+                    var removeRoomRequest = (RemoveRoomRequestData)removeRequest.Item;
 
                     Console.WriteLine($"-> Remove Room [{removeRoomRequest.RoomId}] Request from client: [{clientId}]");
 
@@ -742,7 +737,7 @@ namespace TPUM.Server.Presentation
                 // heater
                 else if (removeRequest.DataType == RemoveRequestType.Heater)
                 {
-                    var removeHeaterRequest = (RemoveHeaterRequestData)removeRequest.Data;
+                    var removeHeaterRequest = (RemoveHeaterRequestData)removeRequest.Item;
 
                     Console.WriteLine($"-> Remove Heater [{removeHeaterRequest.HeaterId}] from Room [{removeHeaterRequest.RoomId}] " +
                                       $"Request from client: [{clientId}]");
@@ -773,7 +768,7 @@ namespace TPUM.Server.Presentation
                 // heat sensor
                 else if (removeRequest.DataType == RemoveRequestType.HeatSensor)
                 {
-                    var removeSensorRequest = (RemoveHeatSensorRequestData)removeRequest.Data;
+                    var removeSensorRequest = (RemoveHeatSensorRequestData)removeRequest.Item;
 
                     Console.WriteLine($"-> Remove Heat Sensor [{removeSensorRequest.HeatSensorId}] from Room [{removeSensorRequest.RoomId}] " +
                                       $"Request from client: [{clientId}]");
@@ -808,11 +803,11 @@ namespace TPUM.Server.Presentation
             // subscribe
             else if (request.ContentType == RequestType.Subscribe)
             {
-                var subscribeRequest = (SubscribeRequestContent)request.Content;
+                var subscribeRequest = (SubscribeRequestContent)request.Item;
                 // room temperature
                 if (subscribeRequest.DataType == SubscribeRequestType.RoomTemperature)
                 {
-                    var roomTemperatureSubscribeRequest = (SubscribeRoomTemperatureRequestData)subscribeRequest.Data;
+                    var roomTemperatureSubscribeRequest = (SubscribeRoomTemperatureRequestData)subscribeRequest.RoomTemperatureData;
 
                     Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] " +
                                       $"Temperature Request from client: [{clientId}]");
@@ -862,11 +857,11 @@ namespace TPUM.Server.Presentation
             // unsubscribe
             else if (request.ContentType == RequestType.Unsubscribe)
             {
-                var unsubscribeRequest = (UnsubscribeRequestContent)request.Content;
+                var unsubscribeRequest = (UnsubscribeRequestContent)request.Item;
                 // room temperature
                 if (unsubscribeRequest.DataType == UnsubscribeRequestType.RoomTemperature)
                 {
-                    var roomTemperatureUnsubscribeRequest = (UnsubscribeRoomTemperatureRequestData)unsubscribeRequest.Data;
+                    var roomTemperatureUnsubscribeRequest = (UnsubscribeRoomTemperatureRequestData)unsubscribeRequest.RoomTemperatureData;
 
                     Console.WriteLine($"-> Unsubscribe From Room [{roomTemperatureUnsubscribeRequest.RoomId}] " +
                                       $"Temperature Request from client: [{clientId}]");

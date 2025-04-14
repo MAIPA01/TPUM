@@ -1,4 +1,6 @@
-﻿namespace TPUM.XmlShared.Response.Subscribe
+﻿using TPUM.XmlShared.Original.Response.Subscribe;
+
+namespace TPUM.XmlShared.Original.Response.Factory
 {
     public static class XmlSubscribeResponseFactory
     {

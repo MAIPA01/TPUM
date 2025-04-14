@@ -1,9 +1,7 @@
 using TPUM.Client.Data.Events;
 using TPUM.XmlShared;
-using TPUM.XmlShared.Request;
-using TPUM.XmlShared.Response.Broadcast;
-using TPUM.XmlShared.Response.Client;
-using TPUM.XmlShared.Response.Subscribe;
+using TPUM.XmlShared.Generated;
+using TPUM.XmlShared.Generated.Factory;
 
 namespace TPUM.Client.Data
 {
@@ -205,7 +203,7 @@ namespace TPUM.Client.Data
             SendRequest(XmlRequestFactory.CreateGetAllDataRequest());
         }
 
-        private void DoGetAllData(List<RoomDataContract> rooms)
+        private void DoGetAllData(IEnumerable<RoomDataContract> rooms)
         {
             lock (_roomsLock)
             {
@@ -486,7 +484,7 @@ namespace TPUM.Client.Data
                 // room temperature
                 if (subscribe.DataType == SubscribeResponseType.RoomTemperature)
                 {
-                    var roomTemperatureSubscribe = (RoomTemperatureSubscribeData)subscribe.Data;
+                    var roomTemperatureSubscribe = (RoomTemperatureSubscribeData)subscribe.RoomTemperatureData;
 
                     var room = GetRoom(roomTemperatureSubscribe.RoomId);
                     var sensor = room?.GetHeatSensor(roomTemperatureSubscribe.HeatSensorId);
@@ -507,17 +505,17 @@ namespace TPUM.Client.Data
                 // get
                 if (response.DataType == ClientResponseType.Get)
                 {
-                    var getResponse = (GetClientResponseData)response.Data;
+                    var getResponse = (GetClientResponseData)response.Item;
                     // all
                     if (getResponse.DataType == GetClientType.All)
                     {
-                        DoGetAllData(((GetAllClientData)getResponse.Data).Rooms);
+                        DoGetAllData(((GetAllClientData)getResponse.Item).Rooms);
                     }
                     // room
                     else if (getResponse.DataType == GetClientType.Room)
                     {
-                        var getRoomResponse = (GetRoomClientData)getResponse.Data;
-                        if (getRoomResponse.Success) DoGetRoom(getRoomResponse.RoomId, getRoomResponse.Result!);
+                        var getRoomResponse = (GetRoomClientData)getResponse.Item;
+                        if (getRoomResponse.Result != null) DoGetRoom(getRoomResponse.RoomId, getRoomResponse.Result);
                         else
                         {
                             // Room not found
@@ -526,8 +524,9 @@ namespace TPUM.Client.Data
                     // heater
                     else if (getResponse.DataType == GetClientType.Heater)
                     {
-                        var getHeaterResponse = (GetHeaterClientData)getResponse.Data;
-                        if (getHeaterResponse.Success) DoGetHeater(getHeaterResponse.RoomId, getHeaterResponse.HeaterId, getHeaterResponse.Result!);
+                        var getHeaterResponse = (GetHeaterClientData)getResponse.Item;
+                        if (getHeaterResponse.Result != null) DoGetHeater(getHeaterResponse.RoomId, 
+                            getHeaterResponse.HeaterId, getHeaterResponse.Result);
                         else
                         {
                             // Heater not found
@@ -536,9 +535,9 @@ namespace TPUM.Client.Data
                     // heatSensor
                     else if (getResponse.DataType == GetClientType.HeatSensor)
                     {
-                        var getHeatSensorResponse = (GetHeatSensorClientData)getResponse.Data;
-                        if (getHeatSensorResponse.Success) DoGetHeatSensor(getHeatSensorResponse.RoomId, getHeatSensorResponse.HeatSensorId,
-                            getHeatSensorResponse.Result!);
+                        var getHeatSensorResponse = (GetHeatSensorClientData)getResponse.Item;
+                        if (getHeatSensorResponse.Result != null) DoGetHeatSensor(getHeatSensorResponse.RoomId, getHeatSensorResponse.HeatSensorId,
+                            getHeatSensorResponse.Result);
                         else
                         {
                             // Heat Sensor not found
@@ -548,11 +547,11 @@ namespace TPUM.Client.Data
                 // add
                 else if (response.DataType == ClientResponseType.Add)
                 {
-                    var addResponse = (AddClientResponseData)response.Data;
+                    var addResponse = (AddClientResponseData)response.Item;
                     // room
                     if (addResponse.DataType == AddClientType.Room)
                     {
-                        var addRoomResponse = (AddRoomClientData)addResponse.Data!;
+                        var addRoomResponse = (AddRoomClientData)addResponse.Item!;
                         if (addResponse.Success)
                         {
                             // Successfully added room
@@ -565,7 +564,7 @@ namespace TPUM.Client.Data
                     // heater
                     else if (addResponse.DataType == AddClientType.Heater)
                     {
-                        var addHeaterResponse = (AddHeaterClientData)addResponse.Data!;
+                        var addHeaterResponse = (AddHeaterClientData)addResponse.Item!;
                         if (addResponse.Success)
                         {
                             // Successfully added heater
@@ -578,7 +577,7 @@ namespace TPUM.Client.Data
                     // heatSensor
                     else if (addResponse.DataType == AddClientType.HeatSensor)
                     {
-                        var addHeatSensorResponse = (AddHeatSensorClientData)addResponse.Data!;
+                        var addHeatSensorResponse = (AddHeatSensorClientData)addResponse.Item!;
                         if (addResponse.Success)
                         {
                             // Successfully added heat sensor
@@ -592,11 +591,11 @@ namespace TPUM.Client.Data
                 // update
                 else if (response.DataType == ClientResponseType.Update)
                 {
-                    var updateResponse = (UpdateClientResponseData)response.Data;
+                    var updateResponse = (UpdateClientResponseData)response.Item;
                     // heater
                     if (updateResponse.DataType == UpdateClientType.Heater)
                     {
-                        var updateHeaterResponse = (UpdateHeaterClientData)updateResponse.Data;
+                        var updateHeaterResponse = (UpdateHeaterClientData)updateResponse.Item;
                         if (updateResponse.Success)
                         {
                             // Successfully updated heater
@@ -609,7 +608,7 @@ namespace TPUM.Client.Data
                     // heatSensor
                     else if (updateResponse.DataType == UpdateClientType.HeatSensor)
                     {
-                        var updateHeatSensorResponse = (UpdateHeatSensorClientData)updateResponse.Data;
+                        var updateHeatSensorResponse = (UpdateHeatSensorClientData)updateResponse.Item;
                         if (updateResponse.Success)
                         {
                             // Successfully updated heat sensor
@@ -623,11 +622,11 @@ namespace TPUM.Client.Data
                 // remove
                 else if (response.DataType == ClientResponseType.Remove)
                 {
-                    var removeResponse = (RemoveClientResponseData)response.Data;
+                    var removeResponse = (RemoveClientResponseData)response.Item;
                     // room
                     if (removeResponse.DataType == RemoveClientType.Room)
                     {
-                        var removeRoomResponse = (RemoveRoomClientData)removeResponse.Data;
+                        var removeRoomResponse = (RemoveRoomClientData)removeResponse.Item;
                         if (removeResponse.Success)
                         {
                             // Successfully removed room
@@ -640,7 +639,7 @@ namespace TPUM.Client.Data
                     // heater
                     else if (removeResponse.DataType == RemoveClientType.Heater)
                     {
-                        var removeHeaterResponse = (RemoveHeaterClientData)removeResponse.Data;
+                        var removeHeaterResponse = (RemoveHeaterClientData)removeResponse.Item;
                         if (removeResponse.Success)
                         {
                             // Successfully removed heater
@@ -653,7 +652,7 @@ namespace TPUM.Client.Data
                     // heatSensor
                     else if (removeResponse.DataType == RemoveClientType.HeatSensor)
                     {
-                        var removeHeatSensorResponse = (RemoveHeatSensorClientData)removeResponse.Data;
+                        var removeHeatSensorResponse = (RemoveHeatSensorClientData)removeResponse.Item;
                         if (removeResponse.Success)
                         {
                             // Successfully removed heat sensor
@@ -667,12 +666,12 @@ namespace TPUM.Client.Data
                 // subscribe
                 else if (response.DataType == ClientResponseType.Subscribe)
                 {
-                    var subscribeResponse = (SubscribeClientResponseData)response.Data;
+                    var subscribeResponse = (SubscribeClientResponseData)response.Item;
                     // room temperature
                     if (subscribeResponse.DataType == SubscribeClientType.RoomTemperature)
                     {
                         var roomTemperatureSubscribeResponse =
-                            (SubscribeRoomTemperatureClientData)subscribeResponse.Data;
+                            (SubscribeRoomTemperatureClientData)subscribeResponse.RoomTemperatureData;
                         if (subscribeResponse.Success)
                         {
                             // Successfully subscribed
@@ -686,12 +685,12 @@ namespace TPUM.Client.Data
                 // unsubscribe
                 else if (response.DataType == ClientResponseType.Unsubscribe)
                 {
-                    var unsubscribeResponse = (UnsubscribeClientResponseData)response.Data;
+                    var unsubscribeResponse = (UnsubscribeClientResponseData)response.Item;
                     // room temperature
                     if (unsubscribeResponse.DataType == UnsubscribeClientType.RoomTemperature)
                     {
                         var roomTemperatureUnsubscribeResponse =
-                            (UnsubscribeRoomTemperatureClientData)unsubscribeResponse.Data;
+                            (UnsubscribeRoomTemperatureClientData)unsubscribeResponse.RoomTemperatureData;
                         if (unsubscribeResponse.Success)
                         {
                             // Successfully unsubscribed
@@ -714,56 +713,56 @@ namespace TPUM.Client.Data
                 // add
                 if (broadcast.BroadcastType == BroadcastResponseType.Add)
                 {
-                    var addBroadcast = (AddBroadcastResponse)broadcast.Broadcast;
+                    var addBroadcast = (AddBroadcastResponse)broadcast.Item;
                     // room
                     if (addBroadcast.DataType == AddBroadcastType.Room)
                     {
-                        DoAddRoom((AddRoomBroadcastData)addBroadcast.Data);
+                        DoAddRoom((AddRoomBroadcastData)addBroadcast.Item);
                     }
                     // heater
                     else if (addBroadcast.DataType == AddBroadcastType.Heater)
                     {
-                        DoAddHeater((AddHeaterBroadcastData)addBroadcast.Data);
+                        DoAddHeater((AddHeaterBroadcastData)addBroadcast.Item);
                     }
                     // heat sensor
                     else if (addBroadcast.DataType == AddBroadcastType.HeatSensor)
                     {
-                        DoAddHeatSensor((AddHeatSensorBroadcastData)addBroadcast.Data);
+                        DoAddHeatSensor((AddHeatSensorBroadcastData)addBroadcast.Item);
                     }
                 }
                 // update
                 else if (broadcast.BroadcastType == BroadcastResponseType.Update)
                 {
-                    var updateBroadcast = (UpdateBroadcastResponse)broadcast.Broadcast;
+                    var updateBroadcast = (UpdateBroadcastResponse)broadcast.Item;
                     // heater
                     if (updateBroadcast.DataType == UpdateBroadcastType.Heater)
                     {
-                        DoUpdateHeater((UpdateHeaterBroadcastData)updateBroadcast.Data);
+                        DoUpdateHeater((UpdateHeaterBroadcastData)updateBroadcast.Item);
                     }
                     // heat sensor
                     else if (updateBroadcast.DataType == UpdateBroadcastType.HeatSensor)
                     {
-                        DoUpdateHeatSensor((UpdateHeatSensorBroadcastData)updateBroadcast.Data);
+                        DoUpdateHeatSensor((UpdateHeatSensorBroadcastData)updateBroadcast.Item);
                     }
                 }
                 // remove
                 else if (broadcast.BroadcastType == BroadcastResponseType.Remove)
                 {
-                    var removeBroadcast = (RemoveBroadcastResponse)broadcast.Broadcast;
+                    var removeBroadcast = (RemoveBroadcastResponse)broadcast.Item;
                     // room
                     if (removeBroadcast.DataType == RemoveBroadcastType.Room)
                     {
-                        DoRemoveRoom((RemoveRoomBroadcastData)removeBroadcast.Data);
+                        DoRemoveRoom((RemoveRoomBroadcastData)removeBroadcast.Item);
                     }
                     // heater
                     else if (removeBroadcast.DataType == RemoveBroadcastType.Heater)
                     {
-                        DoRemoveHeater((RemoveHeaterBroadcastData)removeBroadcast.Data);
+                        DoRemoveHeater((RemoveHeaterBroadcastData)removeBroadcast.Item);
                     }
                     // heat sensor
                     else if (removeBroadcast.DataType == RemoveBroadcastType.HeatSensor)
                     {
-                        DoRemoveHeatSensor((RemoveHeatSensorBroadcastData)removeBroadcast.Data);
+                        DoRemoveHeatSensor((RemoveHeatSensorBroadcastData)removeBroadcast.Item);
                     }
                 }
             }

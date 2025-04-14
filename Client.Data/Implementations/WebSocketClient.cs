@@ -2,23 +2,20 @@
 using System.Text;
 using TPUM.Client.Data.Events;
 using TPUM.XmlShared;
-using TPUM.XmlShared.Response;
-using TPUM.XmlShared.Response.Broadcast;
-using TPUM.XmlShared.Response.Client;
-using TPUM.XmlShared.Response.Subscribe;
+using TPUM.XmlShared.Generated;
 
 namespace TPUM.Client.Data
 {
     internal class WebSocketClient : IWebSocketClient
     {
-        private readonly ClientWebSocket _client = new();
-        private readonly CancellationTokenSource _cts = new();
-        private const int ReconnectIntervalInSeconds = 5;
-
         public event ClientConnectedEventHandler? ClientConnected;
         public event ResponseReceivedEventHandler? ResponseReceived;
         public event SubscribeReceivedEventHandler? SubscribeReceived;
         public event BroadcastReceivedEventHandler? BroadcastReceived;
+
+        private readonly ClientWebSocket _client = new();
+        private readonly CancellationTokenSource _cts = new();
+        private const int ReconnectIntervalInSeconds = 5;
 
         public async Task ConnectAsync(string uri)
         {
@@ -63,13 +60,13 @@ namespace TPUM.Client.Data
             switch (response.ContentType)
             {
                 case ResponseType.Client:
-                    OnResponseReceived((ClientResponseContent)response.Content);
+                    OnResponseReceived((ClientResponseContent)response.Item);
                     break;
                 case ResponseType.Broadcast:
-                    OnBroadcastReceived((BroadcastResponseContent)response.Content);
+                    OnBroadcastReceived((BroadcastResponseContent)response.Item);
                     break;
                 case ResponseType.Subscribe:
-                    OnSubscribeReceived((SubscribeResponseContent)response.Content);
+                    OnSubscribeReceived((SubscribeResponseContent)response.Item);
                     break;
                 default:
                     return;

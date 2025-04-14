@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Dto
+namespace TPUM.XmlShared.Original.Dto
 {
 #nullable disable
     public class HeaterDataContract

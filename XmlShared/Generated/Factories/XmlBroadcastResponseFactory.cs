@@ -1,6 +1,4 @@
-﻿using TPUM.XmlShared.Original.Response.Broadcast;
-
-namespace TPUM.XmlShared.Original.Response.Factory
+﻿namespace TPUM.XmlShared.Generated.Factory
 {
     public static class XmlBroadcastResponseFactory
     {
@@ -9,7 +7,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return XmlResponseFactory.CreateResponse(ResponseType.Broadcast, new BroadcastResponseContent
             {
                 BroadcastType = type,
-                Broadcast = data
+                Item = data
             });
         }
 
@@ -19,7 +17,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return CreateBroadcastResponse(BroadcastResponseType.Add, new AddBroadcastResponse
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -65,7 +63,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return CreateBroadcastResponse(BroadcastResponseType.Update, new UpdateBroadcastResponse
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 
@@ -102,7 +100,7 @@ namespace TPUM.XmlShared.Original.Response.Factory
             return CreateBroadcastResponse(BroadcastResponseType.Remove, new RemoveBroadcastResponse
             {
                 DataType = type,
-                Data = data
+                Item = data
             });
         }
 

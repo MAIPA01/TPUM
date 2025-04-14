@@ -1,4 +1,4 @@
-﻿using TPUM.XmlShared.Request;
+﻿using TPUM.XmlShared.Generated;
 
 namespace TPUM.Server.Presentation.Events
 {

@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace TPUM.XmlShared.Response.Client
+namespace TPUM.XmlShared.Original.Response.Client
 {
 #nullable disable
     public enum ClientResponseType
