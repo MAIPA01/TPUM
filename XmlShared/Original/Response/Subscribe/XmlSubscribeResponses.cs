@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TPUM.XmlShared.Original.Response.Subscribe
+﻿namespace TPUM.XmlShared.Original.Response.Subscribe
 {
     public class RoomTemperatureSubscribeData : SubscribeResponseData
     {

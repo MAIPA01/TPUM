@@ -16,7 +16,7 @@ namespace TPUM.Client.Logic.Tests
         private readonly IRoomData _data;
 
         private readonly object _roomLock = new();
-        
+
         public Guid Id => _data.Id;
         public string Name => _data.Name;
         public float Width => _data.Width;

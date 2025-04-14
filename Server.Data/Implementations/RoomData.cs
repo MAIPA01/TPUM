@@ -17,7 +17,7 @@ namespace TPUM.Server.Data
 
         private readonly List<HeaterData> _heaters = [];
         public IReadOnlyCollection<IHeaterData> Heaters
-        { 
+        {
             get
             {
                 lock (_roomLock)

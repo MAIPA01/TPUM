@@ -1,6 +1,6 @@
-﻿using TPUM.Client.Presentation.ViewModel.Events;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using TPUM.Client.Presentation.ViewModel.Events;
 
 namespace TPUM.Client.Presentation.ViewModel
 {

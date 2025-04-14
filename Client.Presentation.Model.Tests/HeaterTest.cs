@@ -1,6 +1,4 @@
-﻿using TPUM.Client.Logic;
-
-namespace TPUM.Client.Presentation.Model.Tests
+﻿namespace TPUM.Client.Presentation.Model.Tests
 {
     [TestClass]
     public sealed class HeaterTest

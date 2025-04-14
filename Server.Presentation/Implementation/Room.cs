@@ -72,7 +72,7 @@ namespace TPUM.Server.Presentation
 
         private void GetEnableChanged(Guid roomId, object? source, bool lastEnable, bool newEnable)
         {
-            EnableChanged?.Invoke(Id,source, lastEnable, newEnable);
+            EnableChanged?.Invoke(Id, source, lastEnable, newEnable);
         }
 
         private void SubscribeToHeater(Heater heater)

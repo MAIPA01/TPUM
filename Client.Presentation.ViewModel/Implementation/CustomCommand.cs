@@ -4,7 +4,7 @@
     {
         public event EventHandler? CanExecuteChanged;
 
-        public CustomCommand(Action<object?> execute) : this(execute, _ => true) {}
+        public CustomCommand(Action<object?> execute) : this(execute, _ => true) { }
 
         public bool CanExecute(object? parameter)
         {

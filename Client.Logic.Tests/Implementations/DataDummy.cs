@@ -47,12 +47,12 @@ namespace TPUM.Client.Logic.Tests
         internal readonly TestPositionData _position = new TestPositionData();
         public IPositionData Position => _position;
         public float Temperature { get; } = 0f;
-        
+
         public void SetPosition(float x, float y)
         {
             throw new NotImplementedException();
         }
-        
+
         public void Dispose()
         {
             GC.SuppressFinalize(this);
@@ -82,12 +82,12 @@ namespace TPUM.Client.Logic.Tests
 
         public void AddHeater(float x, float y, float temperature)
         {
-            _heaters.Add(new TestHeaterData() {_position = { X = x, Y = y }, Temperature = temperature});
+            _heaters.Add(new TestHeaterData() { _position = { X = x, Y = y }, Temperature = temperature });
         }
 
         public void AddHeatSensor(float x, float y)
         {
-            _heatSensors.Add(new TestHeatSensorData() {_position = { X = x, Y = y }});
+            _heatSensors.Add(new TestHeatSensorData() { _position = { X = x, Y = y } });
         }
 
         public bool ContainsHeater(Guid id)

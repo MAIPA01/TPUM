@@ -1,7 +1,7 @@
-﻿using TPUM.Client.Presentation.ViewModel.Events;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using TPUM.Client.Presentation.Model;
+using TPUM.Client.Presentation.ViewModel.Events;
 
 namespace TPUM.Client.Presentation.ViewModel
 {

@@ -17,7 +17,7 @@ namespace TPUM.Client.Data
         private readonly PositionData _position;
         public IPositionData Position
         {
-            get 
+            get
             {
                 lock (_heatSensorLock)
                 {

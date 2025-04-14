@@ -1,7 +1,7 @@
-﻿using System.Net.WebSockets;
+﻿using System.Collections.Concurrent;
 using System.Net;
+using System.Net.WebSockets;
 using System.Text;
-using System.Collections.Concurrent;
 using TPUM.Server.Presentation.Events;
 using TPUM.XmlShared;
 using TPUM.XmlShared.Generated;
@@ -133,7 +133,7 @@ namespace TPUM.Server.Presentation
             {
                 if (socket.State == WebSocketState.Open)
                 {
-                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, 
+                    await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true,
                         CancellationToken.None);
                 }
             }

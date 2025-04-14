@@ -1,9 +1,9 @@
-﻿using TPUM.Client.Presentation.ViewModel.Events;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using TPUM.Client.Presentation.Model;
+using TPUM.Client.Presentation.ViewModel.Events;
 
 namespace TPUM.Client.Presentation.ViewModel
 {
@@ -87,7 +87,7 @@ namespace TPUM.Client.Presentation.ViewModel
         private void GetTemperatureChanged(object? source, float lastTemperature, float newTemperature)
         {
             TemperatureChanged?.Invoke(this, lastTemperature, newTemperature);
-            
+
             UpdateAvgTemperature();
             OnPropertyChange(nameof(Heaters));
             OnPropertyChange(nameof(HeatSensors));

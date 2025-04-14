@@ -3,7 +3,7 @@ using TPUM.Client.Logic.Events;
 
 namespace TPUM.Client.Logic
 {
-    public abstract class LogicApiBase : INotifyClientConnected, INotifyRoomAdded, INotifyRoomRemoved, IDisposable  
+    public abstract class LogicApiBase : INotifyClientConnected, INotifyRoomAdded, INotifyRoomRemoved, IDisposable
     {
         public abstract IReadOnlyCollection<IRoomLogic> Rooms { get; }
 

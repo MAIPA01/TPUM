@@ -1,6 +1,4 @@
-﻿using TPUM.Server.Logic.Events;
-
-namespace TPUM.Server.Logic
+﻿namespace TPUM.Server.Logic
 {
     public interface IPositionLogic : IDisposable
     {

@@ -211,7 +211,7 @@ namespace TPUM.Client.Data
                 foreach (var roomData in rooms)
                 {
                     var room = new RoomData(
-                        this, 
+                        this,
                         roomData.RoomId,
                         roomData.Name,
                         roomData.Width,
@@ -240,7 +240,7 @@ namespace TPUM.Client.Data
                             this,
                             roomData.RoomId,
                             sensorData.HeatSensorId,
-                            new PositionData(sensorData.X, sensorData.Y), 
+                            new PositionData(sensorData.X, sensorData.Y),
                             sensorData.Temperature
                         );
                         room.OnHeatSensorAdded(sensor);
@@ -259,7 +259,7 @@ namespace TPUM.Client.Data
                     GetRoom(roomId);
                     return;
                 }
-                
+
                 // Wywo³uje siê tylko gdy nie ma lokalnej kopi
                 var heater = new HeaterData(
                     this,
@@ -525,7 +525,7 @@ namespace TPUM.Client.Data
                     else if (getResponse.DataType == GetClientType.Heater)
                     {
                         var getHeaterResponse = (GetHeaterClientData)getResponse.Item;
-                        if (getHeaterResponse.Result != null) DoGetHeater(getHeaterResponse.RoomId, 
+                        if (getHeaterResponse.Result != null) DoGetHeater(getHeaterResponse.RoomId,
                             getHeaterResponse.HeaterId, getHeaterResponse.Result);
                         else
                         {

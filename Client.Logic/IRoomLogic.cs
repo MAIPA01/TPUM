@@ -2,7 +2,7 @@
 
 namespace TPUM.Client.Logic
 {
-    public interface IRoomLogic : INotifyHeaterAdded, INotifyHeaterRemoved, INotifyHeatSensorAdded, INotifyHeatSensorRemoved, 
+    public interface IRoomLogic : INotifyHeaterAdded, INotifyHeaterRemoved, INotifyHeatSensorAdded, INotifyHeatSensorRemoved,
         INotifyPositionChanged, INotifyTemperatureChanged, INotifyEnableChanged, IDisposable
     {
         Guid Id { get; }

@@ -100,9 +100,9 @@ namespace TPUM.Server.Logic
                 if (onHeaters.Count != 0)
                 {
                     heatersTemp += (from heater in onHeaters
-                        let dist = IPositionLogic.Distance(position, heater.Position)
-                        select MathF.Min(heater.Temperature,
-                            heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist))).Sum();
+                                    let dist = IPositionLogic.Distance(position, heater.Position)
+                                    select MathF.Min(heater.Temperature,
+                                        heater.Temperature * MathF.Exp(-TemperatureDecayFactor * dist))).Sum();
                     heatersTemp = MathF.Min(heatersTemp, onHeaters.Max(heater => heater.Temperature));
                 }
 
@@ -237,7 +237,8 @@ namespace TPUM.Server.Logic
 
         public bool ContainsHeatSensor(Guid sensorId)
         {
-            lock (_roomLock) {
+            lock (_roomLock)
+            {
                 return _heatSensors.Any(sensor => sensor.Id == sensorId);
             }
         }
@@ -321,7 +322,7 @@ namespace TPUM.Server.Logic
                 {
                     foreach (var heater in onHeaters)
                     {
-                        _roomTemperature += (heater.Temperature * TemperatureDecayFactor * deltaTime) / 
+                        _roomTemperature += (heater.Temperature * TemperatureDecayFactor * deltaTime) /
                                             (Width * Height * RoomCeilingToFloorDistance);
                     }
                     _roomTemperature = MathF.Min(_roomTemperature, onHeaters.Max(heater => heater.Temperature));

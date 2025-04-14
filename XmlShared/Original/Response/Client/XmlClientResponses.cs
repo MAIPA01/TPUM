@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using TPUM.XmlShared.Original.Dto;
 
 namespace TPUM.XmlShared.Original.Response.Client

@@ -2,7 +2,7 @@
 {
     public static class XmlDtoFactory
     {
-        public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height, 
+        public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height,
             IEnumerable<HeaterDataContract> heaters, IEnumerable<HeatSensorDataContract> sensors)
         {
             return new RoomDataContract

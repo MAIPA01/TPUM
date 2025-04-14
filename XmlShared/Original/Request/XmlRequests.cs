@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace TPUM.XmlShared.Original.Request
 {
@@ -194,7 +192,7 @@ namespace TPUM.XmlShared.Original.Request
     }
 
     [XmlInclude(typeof(SubscribeRoomTemperatureRequestData))]
-    public abstract class SubscribeRequestData {}
+    public abstract class SubscribeRequestData { }
 
     public class SubscribeRoomTemperatureRequestData : SubscribeRequestData
     {

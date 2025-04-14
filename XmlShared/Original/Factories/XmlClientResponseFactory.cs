@@ -1,5 +1,5 @@
-﻿using TPUM.XmlShared.Original.Response.Client;
-using TPUM.XmlShared.Original.Dto;
+﻿using TPUM.XmlShared.Original.Dto;
+using TPUM.XmlShared.Original.Response.Client;
 
 namespace TPUM.XmlShared.Original.Response.Factory
 {

@@ -263,7 +263,7 @@ namespace TPUM.Server.Presentation
             {
                 var heater = GetHeater(roomId, heaterId);
                 if (heater == null) return;
-                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeaterBroadcastResponse(roomId, heaterId, heater.Position.X, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeaterBroadcastResponse(roomId, heaterId, heater.Position.X,
                     heater.Position.Y, heater.Temperature));
             }
         }
@@ -274,7 +274,7 @@ namespace TPUM.Server.Presentation
             {
                 var heater = GetHeater(roomId, heaterId);
                 if (heater == null) return;
-                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeaterBroadcastResponse(roomId, heaterId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeaterBroadcastResponse(roomId, heaterId,
                     heater.Position.X, heater.Position.Y, heater.Temperature, heater.IsOn));
             }
         }
@@ -337,7 +337,7 @@ namespace TPUM.Server.Presentation
             {
                 var sensor = GetHeatSensor(roomId, sensorId);
                 if (sensor == null) return;
-                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeatSensorBroadcastResponse(roomId, sensorId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateAddHeatSensorBroadcastResponse(roomId, sensorId,
                     sensor.Position.X, sensor.Position.Y, sensor.Temperature));
             }
         }
@@ -348,7 +348,7 @@ namespace TPUM.Server.Presentation
             {
                 var sensor = GetHeatSensor(roomId, sensorId);
                 if (sensor == null) return;
-                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeatSensorBroadcastResponse(roomId, sensorId, 
+                SendBroadcastResponse(XmlBroadcastResponseFactory.CreateUpdateHeatSensorBroadcastResponse(roomId, sensorId,
                     sensor.Position.X, sensor.Position.Y, sensor.Temperature));
             }
         }
@@ -359,7 +359,7 @@ namespace TPUM.Server.Presentation
             {
                 var sensor = GetHeatSensor(roomId, sensorId);
                 if (sensor == null) return;
-                SendToClientsResponse(_roomTemperatureSubscribers[roomId], 
+                SendToClientsResponse(_roomTemperatureSubscribers[roomId],
                     XmlSubscribeResponseFactory.CreateRoomTemperatureSubscribeResponse(roomId, sensorId, sensor.Temperature));
             }
         }
@@ -388,7 +388,7 @@ namespace TPUM.Server.Presentation
                 if (getRequest.DataType == GetRequestType.All)
                 {
                     Console.WriteLine($"-> Get All Data Request from client: [{clientId}]");
-                    
+
                     List<RoomDataContract> roomsDto = [];
                     lock (_roomsLock)
                     {
@@ -447,7 +447,7 @@ namespace TPUM.Server.Presentation
                         Console.WriteLine($"-> Room [{getRoomRequest.RoomId}] Not Found sent to client: [{clientId}]");
                         return;
                     }
-                    
+
                     Console.WriteLine($"-> Room {getRoomRequest.RoomId} founded");
 
                     List<HeaterDataContract> heatersDto = [];
@@ -477,7 +477,7 @@ namespace TPUM.Server.Presentation
                         heatSensorsDto.Add(data);
                     }
 
-                    SendClientResponse(clientId, 
+                    SendClientResponse(clientId,
                         XmlClientResponseFactory.CreateGetRoomSuccessClientResponse(
                             room.Id, room.Name, room.Height, room.Width, heatersDto, heatSensorsDto
                             )
