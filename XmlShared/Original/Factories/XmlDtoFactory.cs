@@ -1,6 +1,6 @@
 ﻿namespace TPUM.XmlShared.Original.Dto.Factory
 {
-    public static class XmlDtoFactory
+    internal static class XmlDtoFactory
     {
         public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height, List<HeaterDataContract> heaters,
             List<HeatSensorDataContract> sensors)

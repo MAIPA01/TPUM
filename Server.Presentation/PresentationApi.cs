@@ -1,7 +1,7 @@
 ﻿using TPUM.Server.Logic;
 using TPUM.XmlShared;
 using TPUM.XmlShared.Generated;
-using TPUM.XmlShared.Generated.Factory;
+using TPUM.Server.Presentation.Factory;
 
 namespace TPUM.Server.Presentation
 {

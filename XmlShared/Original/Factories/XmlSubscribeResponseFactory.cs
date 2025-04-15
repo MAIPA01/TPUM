@@ -2,7 +2,7 @@
 
 namespace TPUM.XmlShared.Original.Response.Factory
 {
-    public static class XmlSubscribeResponseFactory
+    internal static class XmlSubscribeResponseFactory
     {
         private static Response CreateSubscribeResponse(SubscribeResponseType type, SubscribeResponseData data)
         {

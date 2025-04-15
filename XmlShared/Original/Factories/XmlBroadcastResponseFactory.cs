@@ -2,7 +2,7 @@
 
 namespace TPUM.XmlShared.Original.Response.Factory
 {
-    public static class XmlBroadcastResponseFactory
+    internal static class XmlBroadcastResponseFactory
     {
         private static Response CreateBroadcastResponse(BroadcastResponseType type, BroadcastResponseData data)
         {

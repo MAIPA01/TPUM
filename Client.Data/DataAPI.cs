@@ -1,7 +1,7 @@
 using TPUM.Client.Data.Events;
 using TPUM.XmlShared;
 using TPUM.XmlShared.Generated;
-using TPUM.XmlShared.Generated.Factory;
+using TPUM.Client.Data.Factory;
 
 namespace TPUM.Client.Data
 {

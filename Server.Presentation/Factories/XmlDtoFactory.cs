@@ -1,12 +1,14 @@
-﻿namespace TPUM.XmlShared.Generated.Factory
+﻿using TPUM.XmlShared.Generated;
+
+namespace TPUM.Server.Presentation.Factory
 {
-    public static class XmlDtoFactory
+    internal static class XmlDtoFactory
     {
         public static RoomDataContract CreateRoomDto(Guid roomId, string name, float width, float height,
             IEnumerable<HeaterDataContract> heaters, IEnumerable<HeatSensorDataContract> sensors)
         {
             return new RoomDataContract
-            {
+            {   
                 RoomId = roomId,
                 Name = name,
                 Width = width,

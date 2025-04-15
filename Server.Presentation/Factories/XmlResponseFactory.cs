@@ -1,4 +1,6 @@
-﻿namespace TPUM.XmlShared.Generated.Factory
+﻿using TPUM.XmlShared.Generated;
+
+namespace TPUM.Server.Presentation.Factory
 {
     internal static class XmlResponseFactory
     {

@@ -3,7 +3,7 @@ using TPUM.XmlShared.Original.Response.Client;
 
 namespace TPUM.XmlShared.Original.Response.Factory
 {
-    public static class XmlClientResponseFactory
+    internal static class XmlClientResponseFactory
     {
         private static Response CreateClientResponse(ClientResponseType type, ClientResponseData data)
         {

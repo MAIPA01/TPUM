@@ -1,6 +1,8 @@
-﻿namespace TPUM.XmlShared.Generated.Factory
+﻿using TPUM.XmlShared.Generated;
+
+namespace TPUM.Server.Presentation.Factory
 {
-    public static class XmlSubscribeResponseFactory
+    internal static class XmlSubscribeResponseFactory
     {
         public static Response CreateRoomTemperatureSubscribeResponse(Guid roomId, Guid sensorId, float temperature)
         {

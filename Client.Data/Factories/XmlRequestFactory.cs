@@ -1,6 +1,8 @@
-﻿namespace TPUM.XmlShared.Generated.Factory
+﻿using TPUM.XmlShared.Generated;
+
+namespace TPUM.Client.Data.Factory
 {
-    public static class XmlRequestFactory
+    internal static class XmlRequestFactory
     {
         private static Request CreateRequest(RequestType type, RequestContent content)
         {
