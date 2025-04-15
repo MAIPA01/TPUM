@@ -136,6 +136,7 @@ namespace TPUM.Server.Presentation
             lock (_roomsLock)
             {
                 _rooms.Add(room);
+                _roomTemperatureSubscribers.Add(room.Id, []);
             }
             return room.Id;
         }
@@ -823,11 +824,6 @@ namespace TPUM.Server.Presentation
                         Console.WriteLine($"-> Subscribe To Room [{roomTemperatureSubscribeRequest.RoomId}] Temperature " +
                                           $"result send to client: [{clientId}]");
                         return;
-                    }
-
-                    if (!_roomTemperatureSubscribers.ContainsKey(roomTemperatureSubscribeRequest.RoomId))
-                    {
-                        _roomTemperatureSubscribers[roomTemperatureSubscribeRequest.RoomId] = [];
                     }
 
                     if (_roomTemperatureSubscribers[roomTemperatureSubscribeRequest.RoomId].Contains(clientId))
