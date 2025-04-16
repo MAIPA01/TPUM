@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
     <None Include="Schema\*.xsd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    -->
     <Folder Include="Schema\" />
   </ItemGroup>
 

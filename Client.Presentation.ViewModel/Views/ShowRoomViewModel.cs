@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection.Metadata;
 using System.Windows;
 
 namespace TPUM.Client.Presentation.ViewModel
@@ -31,6 +32,10 @@ namespace TPUM.Client.Presentation.ViewModel
         public ReadOnlyObservableCollection<IHeatSensor> HeatSensors =>
             CurrentRoom != null ? CurrentRoom.HeatSensors : new ReadOnlyObservableCollection<IHeatSensor>([]);
 
+        private Type? _backToView = null;
+
+        public ICommand InitCommand { get; }
+
         public ICommand BackCommand { get; }
         public ICommand MoveHeaterCommand { get; }
         public ICommand RemoveHeaterCommand { get; }
@@ -41,6 +46,7 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public ShowRoomViewModel()
         {
+            InitCommand = new CustomCommand(Init);
             BackCommand = new CustomCommand(Back);
             MoveHeaterCommand = new CustomCommand(NotImplemented);
             RemoveHeaterCommand = new CustomCommand(RemoveHeater);
@@ -48,6 +54,8 @@ namespace TPUM.Client.Presentation.ViewModel
             MoveHeatSensorCommand = new CustomCommand(NotImplemented);
             RemoveHeatSensorCommand = new CustomCommand(RemoveHeatSensor);
             AddHeatSensorCommand = new CustomCommand(AddHeatSensor);
+
+            ViewModelApiBase.GetApi().RoomRemoved += GetRoomRemoved;
 
             if (CurrentRoom == null) return;
             CurrentRoom.TemperatureChanged += GetTemperatureChange;
@@ -80,6 +88,25 @@ namespace TPUM.Client.Presentation.ViewModel
             OnPropertyChanged(nameof(RoomTemp));
         }
 
+        private void GetRoomRemoved(object? source, Guid roomId)
+        {
+            if (roomId != CurrentRoom?.Id) return;
+
+            if (CurrentRoom != null)
+            {
+                CurrentRoom.TemperatureChanged -= GetTemperatureChange;
+                CurrentRoom.EnableChanged -= GetEnableChange;
+                CurrentRoom.PositionChanged -= GetPositionChange;
+                CurrentRoom.HeaterAdded -= GetHeaterAdded;
+                CurrentRoom.HeaterRemoved -= GetHeaterRemoved;
+                CurrentRoom.HeatSensorAdded -= GetHeatSensorAdded;
+                CurrentRoom.HeatSensorRemoved -= GetHeatSensorRemoved;
+            }
+
+            if (_backToView == null) return;
+            MainViewModel.Instance?.SetView(_backToView);
+        }
+
         private void GetHeaterAdded(object? source, IHeater heater)
         {
             OnPropertyChanged(nameof(Heaters));
@@ -107,6 +134,13 @@ namespace TPUM.Client.Presentation.ViewModel
         private static void NotImplemented(object? parameter)
         {
             MessageBox.Show("Not Implemented");
+        }
+
+        private void Init(object? parameter)
+        {
+            if (parameter == null) return;
+
+            _backToView = (Type)parameter;
         }
 
         private void Back(object? parameter)

@@ -81,7 +81,10 @@ namespace TPUM.Client.Presentation.ViewModel
             lock (_roomsLock)
             {
                 var room = new Room(roomModel);
-                Application.Current.Dispatcher.Invoke(() => _rooms.Add(room));
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _rooms.Add(room);
+                });
                 RoomAdded?.Invoke(this, room);
             }
         }
@@ -92,7 +95,10 @@ namespace TPUM.Client.Presentation.ViewModel
             {
                 if (_rooms.Any(room => room.Id == roomId))
                 {
-                    Application.Current.Dispatcher.Invoke(() => _rooms.Remove(_rooms.First(room => room.Id == roomId)));
+                    Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        _rooms.Remove(_rooms.First(room => room.Id == roomId));
+                    });
                 }
                 RoomRemoved?.Invoke(this, roomId);
             }

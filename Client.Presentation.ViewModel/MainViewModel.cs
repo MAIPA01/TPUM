@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace TPUM.Client.Presentation.ViewModel
 {
@@ -52,7 +53,18 @@ namespace TPUM.Client.Presentation.ViewModel
 
         public void SetView(Type viewType)
         {
-            _currentView = Activator.CreateInstance(viewType);
+            try
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _currentView = Activator.CreateInstance(viewType);
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
             OnPropertyChanged(nameof(CurrentView));
         }
 
